@@ -16,7 +16,7 @@ html, :host {
   -moz-tab-size: 4;
   -o-tab-size: 4;
   tab-size: 4;
-  font-family: ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  font-family: var(--font-sans);
   font-feature-settings: normal;
   font-variation-settings: normal;
   -webkit-tap-highlight-color: transparent;
@@ -53,7 +53,7 @@ b, strong {
 }
 
 code, kbd, samp, pre {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  font-family: var(--font-mono);
   font-feature-settings: normal;
   font-variation-settings: normal;
   font-size: 1em;
@@ -2542,11 +2542,11 @@ img, video {
 }
 
 .font-mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  font-family: var(--font-mono);
 }
 
 .font-sans {
-  font-family: ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  font-family: var(--font-sans);
 }
 
 .text-3xl {
@@ -3364,7 +3364,7 @@ img, video {
   --nextui-danger-foreground: 0 0% 100%;
   --nextui-danger: 339.2 90.36% 51.18%;
   --nextui-divider-weight: 1px;
-  --nextui-disabled-opacity: .3;
+  --nextui-disabled-opacity: .5;
   --nextui-font-size-tiny: .75rem;
   --nextui-font-size-small: .875rem;
   --nextui-font-size-medium: 1rem;
@@ -3373,9 +3373,9 @@ img, video {
   --nextui-line-height-small: 1.25rem;
   --nextui-line-height-medium: 1.5rem;
   --nextui-line-height-large: 1.75rem;
-  --nextui-radius-small: 4px;
-  --nextui-radius-medium: 6px;
-  --nextui-radius-large: 8px;
+  --nextui-radius-small: 8px;
+  --nextui-radius-medium: 12px;
+  --nextui-radius-large: 14px;
   --nextui-border-width-small: 1px;
   --nextui-border-width-medium: 2px;
   --nextui-border-width-large: 3px;
@@ -3484,7 +3484,7 @@ img, video {
   --nextui-danger-foreground: 0 0% 100%;
   --nextui-danger: 339.2 90.36% 51.18%;
   --nextui-divider-weight: 1px;
-  --nextui-disabled-opacity: .3;
+  --nextui-disabled-opacity: .5;
   --nextui-font-size-tiny: .75rem;
   --nextui-font-size-small: .875rem;
   --nextui-font-size-medium: 1rem;
@@ -3493,9 +3493,9 @@ img, video {
   --nextui-line-height-small: 1.25rem;
   --nextui-line-height-medium: 1.5rem;
   --nextui-line-height-large: 1.75rem;
-  --nextui-radius-small: 4px;
-  --nextui-radius-medium: 6px;
-  --nextui-radius-large: 8px;
+  --nextui-radius-small: 8px;
+  --nextui-radius-medium: 12px;
+  --nextui-radius-large: 14px;
   --nextui-border-width-small: 1px;
   --nextui-border-width-medium: 2px;
   --nextui-border-width-large: 3px;
@@ -7863,6 +7863,10 @@ img, video {
 }
 
 @media (width >= 768px) {
+  .md\:flex {
+    display: flex;
+  }
+
   .md\:w-1\/2 {
     width: 50%;
   }

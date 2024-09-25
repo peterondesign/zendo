@@ -16,7 +16,7 @@ html, :host {
   -moz-tab-size: 4;
   -o-tab-size: 4;
   tab-size: 4;
-  font-family: ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  font-family: var(--font-sans);
   font-feature-settings: normal;
   font-variation-settings: normal;
   -webkit-tap-highlight-color: transparent;
@@ -53,7 +53,7 @@ b, strong {
 }
 
 code, kbd, samp, pre {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  font-family: var(--font-mono);
   font-feature-settings: normal;
   font-variation-settings: normal;
   font-size: 1em;
@@ -684,20 +684,12 @@ img, video {
   margin-top: .25rem;
 }
 
-.mt-16 {
-  margin-top: 4rem;
-}
-
 .mt-2 {
   margin-top: .5rem;
 }
 
 .mt-4 {
   margin-top: 1rem;
-}
-
-.mt-6 {
-  margin-top: 1.5rem;
 }
 
 .mt-8 {
@@ -807,10 +799,6 @@ img, video {
   height: 10rem;
 }
 
-.h-48 {
-  height: 12rem;
-}
-
 .h-5 {
   height: 1.25rem;
 }
@@ -829,10 +817,6 @@ img, video {
 
 .h-9 {
   height: 2.25rem;
-}
-
-.h-96 {
-  height: 24rem;
 }
 
 .h-\[--visual-viewport-height\] {
@@ -1464,10 +1448,6 @@ img, video {
   appearance: none;
 }
 
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
 .grid-cols-4 {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -1560,10 +1540,6 @@ img, video {
   gap: 1rem;
 }
 
-.gap-8 {
-  gap: 2rem;
-}
-
 .gap-x-0 {
   -moz-column-gap: 0px;
   column-gap: 0;
@@ -1606,12 +1582,6 @@ img, video {
   --tw-space-x-reverse: 0;
   margin-right: calc(.125rem * var(--tw-space-x-reverse));
   margin-left: calc(.125rem * calc(1 - var(--tw-space-x-reverse)));
-}
-
-.space-x-4 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-x-reverse: 0;
-  margin-right: calc(1rem * var(--tw-space-x-reverse));
-  margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
 .self-center {
@@ -1730,10 +1700,6 @@ img, video {
 
 .rounded-small {
   border-radius: var(--nextui-radius-small);
-}
-
-.rounded-xl {
-  border-radius: .75rem;
 }
 
 .\!rounded-e-none {
@@ -2542,11 +2508,11 @@ img, video {
 }
 
 .font-mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  font-family: var(--font-mono);
 }
 
 .font-sans {
-  font-family: ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  font-family: var(--font-sans);
 }
 
 .text-3xl {
@@ -2557,11 +2523,6 @@ img, video {
 .text-4xl {
   font-size: 2.25rem;
   line-height: 2.5rem;
-}
-
-.text-5xl {
-  font-size: 3rem;
-  line-height: 1;
 }
 
 .text-\[0\.55rem\] {
@@ -3364,7 +3325,7 @@ img, video {
   --nextui-danger-foreground: 0 0% 100%;
   --nextui-danger: 339.2 90.36% 51.18%;
   --nextui-divider-weight: 1px;
-  --nextui-disabled-opacity: .3;
+  --nextui-disabled-opacity: .5;
   --nextui-font-size-tiny: .75rem;
   --nextui-font-size-small: .875rem;
   --nextui-font-size-medium: 1rem;
@@ -3373,9 +3334,9 @@ img, video {
   --nextui-line-height-small: 1.25rem;
   --nextui-line-height-medium: 1.5rem;
   --nextui-line-height-large: 1.75rem;
-  --nextui-radius-small: 4px;
-  --nextui-radius-medium: 6px;
-  --nextui-radius-large: 8px;
+  --nextui-radius-small: 8px;
+  --nextui-radius-medium: 12px;
+  --nextui-radius-large: 14px;
   --nextui-border-width-small: 1px;
   --nextui-border-width-medium: 2px;
   --nextui-border-width-large: 3px;
@@ -3484,7 +3445,7 @@ img, video {
   --nextui-danger-foreground: 0 0% 100%;
   --nextui-danger: 339.2 90.36% 51.18%;
   --nextui-divider-weight: 1px;
-  --nextui-disabled-opacity: .3;
+  --nextui-disabled-opacity: .5;
   --nextui-font-size-tiny: .75rem;
   --nextui-font-size-small: .875rem;
   --nextui-font-size-medium: 1rem;
@@ -3493,9 +3454,9 @@ img, video {
   --nextui-line-height-small: 1.25rem;
   --nextui-line-height-medium: 1.5rem;
   --nextui-line-height-large: 1.75rem;
-  --nextui-radius-small: 4px;
-  --nextui-radius-medium: 6px;
-  --nextui-radius-large: 8px;
+  --nextui-radius-small: 8px;
+  --nextui-radius-medium: 12px;
+  --nextui-radius-large: 14px;
   --nextui-border-width-small: 1px;
   --nextui-border-width-medium: 2px;
   --nextui-border-width-large: 3px;
@@ -7863,26 +7824,17 @@ img, video {
 }
 
 @media (width >= 768px) {
+  .md\:flex {
+    display: flex;
+  }
+
   .md\:w-1\/2 {
     width: 50%;
-  }
-
-  .md\:grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .md\:gap-16 {
-    gap: 4rem;
   }
 
   .md\:py-10 {
     padding-top: 2.5rem;
     padding-bottom: 2.5rem;
-  }
-
-  .md\:py-4 {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
   }
 }
 

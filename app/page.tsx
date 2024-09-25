@@ -4,7 +4,7 @@ import { Link } from "@nextui-org/link";
 import { Button } from "@nextui-org/react";
 import { Card } from "@nextui-org/react";
 import { useTheme } from "next-themes";
-
+import '../styles/globals.css'
 
 export default function Home() {
   const { theme, setTheme } = useTheme();

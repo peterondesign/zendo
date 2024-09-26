@@ -12,8 +12,8 @@ export default function Home() {
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-4">
       {/* Hero Section */}
-      <div className="grid grid-cols-2 gap-8 md:gap-16 max-w-4xl">
-        <div className="inline-block max-w-xl">
+      <div className="gap-8 md:gap-16 max-w-4xl flex flex-col md:flex-row">
+        <div className="inline-block md:max-w-xs max-w-xl">
           <h1 className="text-5xl	div-4xl font-bold">
             Block distractions,{" "}            <span className="div-violet-600">while you focus on one task</span>
           </h1>          <p className="mt-4 div-lg div-gray-600">
@@ -22,9 +22,10 @@ export default function Home() {
           <div className="mt-6 space-x-4">
             <Button
               color="primary"
-              href="#"
+              target="_blank"
+              href="https://buy.stripe.com/6oE4iHeaX4P85hK4gl"
             >
-              Start for free
+              Get lifetime deal for $20
             </Button>
             <Link
               className=""
@@ -42,8 +43,7 @@ export default function Home() {
             />
           </div>
         </div>
-      </div>
-      {/* Feature Sections */}
+      </div>      {/* Feature Sections */}
       <div className="grid gap-8 md:grid-cols-2 md:gap-16 mt-16 max-w-4xl">
         <div className="flex flex-col gap-4">
           <h2 className="div-2xl font-bold">Block distractions</h2>
@@ -52,7 +52,7 @@ export default function Home() {
           </p>
         </div>
         <div className="flex items-center justify-center">
-          <img src="/features/task-breakdown.png" alt="Task breakdown" className="h-48 w-auto" />
+          <img src={theme === "dark" ? "/features/ZendoBlockDistractionsDark.svg" : "/features/ZendoBlockDistractions.svg"} alt="Block Distractions" className="h-64 w-auto" />
         </div>
 
         <div className="flex flex-col gap-4">
@@ -62,20 +62,20 @@ export default function Home() {
           </p>
         </div>
         <div className="flex items-center justify-center">
-          <img src="/features/task-breakdown.png" alt="Task breakdown" className="h-48 w-auto" />
+          <img src={theme === "dark" ? "/features/ZendoTaskBreakdownDark.svg" : "/features/ZendoTaskBreakdown.svg"} alt="Task breakdown" className="h-64 w-auto" />
         </div>
 
         <div className="flex flex-col gap-4">
           <h2 className="div-2xl font-bold">Seamless syncing</h2>
           <p className="div-lg">
-         Sync your work across all devices for a smooth, uninterrupted workflow.
+            Sync your work across all devices for a smooth, uninterrupted workflow.
           </p>
         </div>
         <div className="flex items-center justify-center">
-          <img src="/features/sync.png" alt="Syncing" className="h-48 w-auto" />
+          <img src={theme === "dark" ? "/features/ZendoSeamlessSyncingDark.svg" : "/features/ZendoSeamlessSyncing.svg"} alt="Syncing" className="h-64 w-auto" />
         </div>
 
-        <div className="flex flex-col gap-4">
+        {/* <div className="flex flex-col gap-4">
           <h2 className="div-2xl font-bold">Daily streaks for consistent progress</h2>
           <p className="div-lg">
             Stay on track with streak tracking that motivate you to maintain consistent progress and build productive habits.
@@ -83,8 +83,30 @@ export default function Home() {
         </div>
         <div className="flex items-center justify-center">
           <img src="/features/check-ins.png" alt="Check-ins" className="h-48 w-auto" />
+        </div> */}
+
+      </div>
+
+      {/* Lifetime Prelaunch Deal */}
+      <div className="mt-16 div-center" id="lifetime-deal">
+        <h2 className="div-3xl text-center font-bold">Lifetime Prelaunch Deal</h2>
+        <p className="mt-4 text-center text-lg">
+          Get Zendo for a one-time payment of <span className="font-bold">$20</span> and enjoy all the features forever!
+
+          Pricing will be $4/month after launch.
+        </p>
+        <div className="mt-8 w-full text-center">
+          <Button
+            className="mx-auto text-center mt-4"
+            color="primary"
+            target="_blank"
+            href="https://buy.stripe.com/6oE4iHeaX4P85hK4gl"
+          >
+            Get lifetime deal for $20 now
+          </Button>
         </div>
       </div>
+
 
       {/* Call to Action */}
       <div className="mt-16 div-center" id="video">
@@ -111,9 +133,10 @@ export default function Home() {
         <Button
           className="mx-auto text-center mt-4"
           color="primary"
-          href="#"
+          target="_blank"
+          href="https://buy.stripe.com/6oE4iHeaX4P85hK4gl"
         >
-          Start for free
+          Get lifetime deal for $20 now
         </Button>
       </div>
     </section>

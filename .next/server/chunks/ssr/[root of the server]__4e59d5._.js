@@ -57,36 +57,24 @@ const siteConfig = {
     ],
     navMenuItems: [
         {
-            label: "Profile",
-            href: "/profile"
+            label: "Home",
+            href: "/"
         },
         {
-            label: "Dashboard",
-            href: "/dashboard"
+            label: "Demo",
+            href: "/demo"
         },
         {
-            label: "Projects",
-            href: "/projects"
+            label: "Feedback",
+            href: "https://tally.so/r/3EDr7L"
         },
         {
-            label: "Team",
-            href: "/team"
+            label: "Pricing",
+            href: "/#lifetime-deal"
         },
         {
-            label: "Calendar",
-            href: "/calendar"
-        },
-        {
-            label: "Settings",
-            href: "/settings"
-        },
-        {
-            label: "Help & Feedback",
-            href: "/help-feedback"
-        },
-        {
-            label: "Logout",
-            href: "/logout"
+            label: "Blog",
+            href: "/blog"
         }
     ],
     links: {
@@ -686,8 +674,8 @@ const Navbar = ()=>{
                     className: "mx-4 mt-2 flex flex-col gap-2",
                     children: __TURBOPACK__imported__module__$5b$project$5d2f$config$2f$site$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["siteConfig"].navMenuItems.map((item, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$navbar$2f$dist$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["NavbarMenuItem"], {
                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$link$2f$dist$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["Link"], {
-                                color: index === 2 ? "primary" : index === __TURBOPACK__imported__module__$5b$project$5d2f$config$2f$site$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["siteConfig"].navMenuItems.length - 1 ? "danger" : "foreground",
-                                href: "#",
+                                color: "foreground",
+                                href: item.href,
                                 size: "lg",
                                 children: item.label
                             }, void 0, false, {

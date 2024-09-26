@@ -20,13 +20,17 @@ export default function Home() {
             Block distracting apps, focus on your to-do list and get more things done with our dopamine detox features.
           </p>
           <div className="mt-6 space-x-4">
-            <Button
-              color="primary"
-              target="_blank"
+            <Link
               href="https://buy.stripe.com/6oE4iHeaX4P85hK4gl"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              Get lifetime deal for $20
-            </Button>
+              <Button
+                color="primary"
+              >
+                Get lifetime deal for $20
+              </Button>
+            </Link>
             <Link
               className=""
               href="#video"
@@ -120,14 +124,20 @@ export default function Home() {
           Pricing will be $4/month after launch.
         </p>
         <div className="mt-8 w-full text-center">
-          <Button
-            className="mx-auto text-center mt-4"
-            color="primary"
-            target="_blank"
-            href="https://buy.stripe.com/6oE4iHeaX4P85hK4gl"
-          >
-            Get lifetime deal for $20 now
-          </Button>
+          <Link
+              href="https://buy.stripe.com/6oE4iHeaX4P85hK4gl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button
+                color="primary"
+                className="mx-auto text-center mt-4"
+                target="_blank"
+                href="https://buy.stripe.com/6oE4iHeaX4P85hK4gl"    
+              >
+                Get lifetime deal for $20
+              </Button>
+            </Link>
         </div>
       </div>
 

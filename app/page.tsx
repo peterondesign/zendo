@@ -43,7 +43,29 @@ export default function Home() {
             />
           </div>
         </div>
-      </div>      {/* Feature Sections */}
+      </div>    
+      
+      {/* Call to Action */}
+      <div className="mt-16 div-center" id="video">
+        <h2 className="div-3xl text-center font-bold">Watch Zendo in action</h2>
+        <div className="mt-8 w-full">
+          <iframe
+            width="100%"
+            height="480"
+            src="https://www.youtube.com/embed/TpLKhDURaho"
+            title="Zendo - Focus Mode"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
+        <div className="mt-4">
+          Have a feature idea? <Link target="_blank" href="https://tally.so/r/3EDr7L">Share it</Link> and help improve the app.
+        </div>
+      </div>
+      
+      
+        {/* Feature Sections */}
       <div className="grid gap-8 md:grid-cols-2 md:gap-16 mt-16 max-w-4xl">
         <div className="flex flex-col gap-4">
           <h2 className="div-2xl font-bold">Block distractions</h2>
@@ -108,27 +130,10 @@ export default function Home() {
       </div>
 
 
-      {/* Call to Action */}
-      <div className="mt-16 div-center" id="video">
-        <h2 className="div-3xl text-center font-bold">Watch Zendo in action</h2>
-        <div className="mt-8 w-full">
-          <iframe
-            width="100%"
-            height="480"
-            src="https://www.youtube.com/embed/TpLKhDURaho"
-            title="Zendo - Focus Mode"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        </div>
-        <div className="mt-4">
-          Have a feature idea? <Link target="_blank" href="https://tally.so/r/3EDr7L">Share it</Link> and help improve the app.
-        </div>
-      </div>
+      
 
       {/* Final Call to Action */}
-      <div className="mt-16 div-center text-center">
+      {/* <div className="mt-16 div-center text-center">
         <h3 className="div-2xl font-bold">Stay on track, eliminate distractions</h3>
         <Button
           className="mx-auto text-center mt-4"
@@ -138,7 +143,7 @@ export default function Home() {
         >
           Get lifetime deal for $20 now
         </Button>
-      </div>
+      </div> */}
     </section>
   );
 }

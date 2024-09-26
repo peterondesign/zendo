@@ -31,12 +31,20 @@ __turbopack_esm__({
     "siteConfig": ()=>siteConfig
 });
 const siteConfig = {
-    name: "Next.js + NextUI",
-    description: "Make beautiful websites regardless of your design experience.",
+    name: "Zendo",
+    description: "Block distracting apps. Focus on one task",
     navItems: [
         {
             label: "Home",
             href: "/"
+        },
+        {
+            label: "Demo",
+            href: "/demo"
+        },
+        {
+            label: "Feedback",
+            href: "https://tally.so/r/3EDr7L"
         },
         {
             label: "Pricing",
@@ -85,7 +93,7 @@ const siteConfig = {
         github: "https://github.com/nextui-org/nextui",
         twitter: "https://twitter.com/getnextui",
         docs: "https://nextui.org",
-        discord: "https://discord.gg/9b6yyZKmH4",
+        discord: "https://discord.gg/cHDBkZFjxM",
         sponsor: "https://patreon.com/jrgarciadev"
     }
 };
@@ -1006,15 +1014,30 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$primitives$2e$
 ;
 function BlogPage() {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-            className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$primitives$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["title"])(),
-            children: "Blog"
-        }, void 0, false, {
-            fileName: "[project]/app/blog/page.tsx",
-            lineNumber: 6,
-            columnNumber: 7
-        }, this)
-    }, void 0, false, {
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$primitives$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["title"])(),
+                children: "Blog"
+            }, void 0, false, {
+                fileName: "[project]/app/blog/page.tsx",
+                lineNumber: 6,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("br", {}, void 0, false, {
+                fileName: "[project]/app/blog/page.tsx",
+                lineNumber: 7,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                className: "mt-10",
+                children: " No posts yet"
+            }, void 0, false, {
+                fileName: "[project]/app/blog/page.tsx",
+                lineNumber: 8,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
         fileName: "[project]/app/blog/page.tsx",
         lineNumber: 5,
         columnNumber: 5

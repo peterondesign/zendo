@@ -13,6 +13,11 @@ export const siteConfig = {
       href: "/demo",
     },
     {
+      label: "Feedback",
+      href: "https://tally.so/r/3EDr7L",
+    },
+    
+    {
       label: "Pricing",
       href: "/#lifetime-deal",
     },

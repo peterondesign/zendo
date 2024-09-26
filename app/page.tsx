@@ -50,16 +50,18 @@ export default function Home() {
         <h2 className="div-3xl text-center font-bold">Watch Zendo in action</h2>
         <div className="mt-8 w-full">
           <iframe
-            width="100%"
-            height="480"
-            src="https://www.youtube.com/embed/TpLKhDURaho"
+            width="560" height="315"
+            src="https://www.youtube.com/embed/jt4Xcy2s-YU?si=RESmKmVT1bys9oie"
             title="Zendo - Focus Mode"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           ></iframe>
+
+          {/* <iframe width="560" height="315" src="https://www.youtube.com/embed/jt4Xcy2s-YU?si=RESmKmVT1bys9oie" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> */}
+
         </div>
-        <div className="mt-4">
+        <div className="mt-4 text-center">
           Have a feature idea? <Link target="_blank" href="https://tally.so/r/3EDr7L">Share it</Link> and help improve the app.
         </div>
       </div>

@@ -62,7 +62,7 @@ export const siteConfig = {
   ],
   links: {
     github: "https://github.com/nextui-org/nextui",
-    twitter: "https://twitter.com/getnextui",
+    twitter: "https://twitter.com/ptndesign",
     docs: "https://nextui.org",
     discord: "https://discord.gg/cHDBkZFjxM",
     sponsor: "https://patreon.com/jrgarciadev",

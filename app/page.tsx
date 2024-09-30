@@ -1,161 +1,276 @@
 "use client";
 
-import { Link } from "@nextui-org/link";
-import { Button } from "@nextui-org/react";
-import { Card } from "@nextui-org/react";
-import { useTheme } from "next-themes";
-import '../styles/globals.css'
+import React, { useEffect, useState } from 'react';
+import { Button } from '@nextui-org/button';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
+import { Input } from '@nextui-org/input';
+import { Card, CardHeader } from '@nextui-org/card';
+import { Trash2, GripVertical, MoreVertical } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 
-export default function Home() {
-  const { theme, setTheme } = useTheme();
+type Task = {
+  id: number;
+  text: string;
+  completed: boolean;
+};
+
+
+type QuadrantType = 'do' | 'decide' | 'delegate' | 'delete' | 'unsorted';
+
+const quadrants: Record<QuadrantType, string> = {
+  do: 'Do (Urgent & Important)',
+  decide: 'Decide (Not Urgent & Important)',
+  delegate: 'Delegate (Urgent & Not Important)',
+  delete: 'Delete (Not Urgent & Not Important)',
+  unsorted: 'Unsorted Tasks',
+};
+
+const SNLMatrix: React.FC = () => {
+  const [tasks, setTasks] = useState<Record<QuadrantType, Task[]>>({
+    do: [],
+    decide: [],
+    delegate: [],
+    delete: [],
+    unsorted: [],
+  });
+  const [newTask, setNewTask] = useState('');
+  const [selectedQuadrant, setSelectedQuadrant] = useState<QuadrantType>('unsorted');
+  const [kanbanView, setKanbanView] = useState(false);
+
+  const addTask = () => {
+    if (newTask.trim()) {
+      setTasks((prev) => ({
+        ...prev,
+        [selectedQuadrant]: [
+          ...prev[selectedQuadrant],
+          { id: Date.now(), text: newTask.trim(), completed: false },
+        ],
+      }));
+      setNewTask('');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      addTask();
+    }
+  };
+
+  const toggleTask = (quadrant: QuadrantType, taskId: number) => {
+    setTasks((prev) => ({
+      ...prev,
+      [quadrant]: prev[quadrant].map((task) =>
+        task.id === taskId ? { ...task, completed: !task.completed } : task
+      ),
+    }));
+  };
+
+  const deleteTask = (quadrant: QuadrantType, taskId: number) => {
+    setTasks((prev) => ({
+      ...prev,
+      [quadrant]: prev[quadrant].filter((task) => task.id !== taskId),
+    }));
+  };
+
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination } = result;
+
+    if (!destination) {
+      return;
+    }
+
+    const sourceQuadrant = source.droppableId as QuadrantType;
+    const destinationQuadrant = destination.droppableId as QuadrantType;
+
+    const newTasks = { ...tasks };
+    const [movedTask] = newTasks[sourceQuadrant].splice(source.index, 1);
+    newTasks[destinationQuadrant].splice(destination.index, 0, movedTask);
+
+    setTasks(newTasks);
+  };
+
+  const moveTaskToQuadrant = (sourceQuadrant: QuadrantType, taskId: number, targetQuadrant: QuadrantType) => {
+    const sourceTasks = Array.from(tasks[sourceQuadrant]);
+    const taskIndex = sourceTasks.findIndex(task => task.id === taskId);
+    if (taskIndex === -1) return;
+
+    const [task] = sourceTasks.splice(taskIndex, 1);
+    const updatedTargetTasks = [...tasks[targetQuadrant], task];
+
+    setTasks((prev) => ({
+      ...prev,
+      [sourceQuadrant]: sourceTasks,
+      [targetQuadrant]: updatedTargetTasks,
+    }));
+  };
+
+  const renderTask = (quadrant: QuadrantType, task: Task, index: number) => (
+    <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
+      {(provided, snapshot) => (
+        <li
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          className={`flex items-center justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-blue-100' : 'hsl(0, 0%, 90%)'
+            }`}
+        >
+          <div className="flex items-center flex-grow">
+            <span {...provided.dragHandleProps} className="mr-2 cursor-move">
+              <GripVertical size={16} />
+            </span>
+            <input
+              type="checkbox"
+              checked={task.completed}
+              onChange={() => toggleTask(quadrant, task.id)}
+              className="mr-2"
+            />
+            <span
+              className={`cursor-pointer ${task.completed ? 'line-through' : ''}`}
+              onClick={() => toggleTask(quadrant, task.id)}
+            >
+              {task.text}
+            </span>
+          </div>
+          <div className="flex items-center">
+            <Dropdown>
+              <DropdownTrigger>
+                <Button size="sm" variant="light">
+                  <MoreVertical size={16} />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu>
+                {Object.keys(quadrants)
+                  .filter((q) => q !== quadrant)
+                  .map((targetQuadrant) => (
+                    <DropdownItem
+                      key={targetQuadrant}
+                      onClick={() =>
+                        moveTaskToQuadrant(quadrant, task.id, targetQuadrant as QuadrantType)
+                      }
+                    >
+                      Move to {quadrants[targetQuadrant as QuadrantType]}
+                    </DropdownItem>
+                  ))}
+              </DropdownMenu>
+            </Dropdown>
+            <Button
+              size="sm"
+              variant="light"
+              onClick={() => deleteTask(quadrant, task.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </li>
+      )}
+    </Draggable>
+  );
+
+  const renderQuadrant = (quadrant: QuadrantType) => (
+    <Droppable droppableId={quadrant} key={quadrant}>
+      {(provided, snapshot) => (
+        <Card
+          ref={provided.innerRef}
+          {...provided.droppableProps}
+          className={`p-4 ${snapshot.isDraggingOver ? 'bg-gray-100' : ''} ${kanbanView ? 'min-w-[250px]' : ''
+            }`}
+        >
+          <CardHeader>
+            <div>{quadrants[quadrant]}</div>
+          </CardHeader>
+          <div className="flex flex-col items-center justify-center">
+            {tasks[quadrant].length > 0 ? (
+              <ul className="w-full">
+                {tasks[quadrant].map((task, index) => renderTask(quadrant, task, index))}
+              </ul>
+            ) : (
+              <div className="text-center text-gray-500">No tasks added yet</div>
+            )}
+            {provided.placeholder}
+          </div>
+        </Card>
+      )}
+    </Droppable>
+  );
+
+   // Load tasks from local storage on component mount
+useEffect(() => {
+  const storedTasks = localStorage.getItem('tasks');
+  if (storedTasks) {
+    setTasks(JSON.parse(storedTasks));   
+
+  }
+}, []);
+
+// Save tasks to local storage on state change
+useEffect(() => {
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}, [tasks]);
+
+// Reset button to clear local storage and reset tasks
+const resetTasks = () => {
+  localStorage.removeItem('tasks');
+  setTasks({
+    do: [],
+    decide: [],
+    delegate: [],
+    delete: [],
+    unsorted: [],
+  });
+};
+
 
   return (
-    <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-4">
-      {/* Hero Section */}
-      <div className="gap-8 md:gap-16 max-w-4xl flex flex-col md:flex-row">
-        <div className="inline-block md:max-w-xs max-w-xl">
-          <h1 className="text-5xl	div-4xl font-bold">
-            Block distractions,{" "}            <span className="div-violet-600">while you focus on one task</span>
-          </h1>          <p className="mt-4 div-lg div-gray-600">
-            Block distracting apps, focus on your to-do list and get more things done with our dopamine detox features.
-          </p>
-          <div className="mt-6 space-x-4">
-            <Link
-              href="https://buy.stripe.com/6oE4iHeaX4P85hK4gl"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button
-                color="primary"
-              >
-                Get lifetime deal for $20
-              </Button>
-            </Link>
-            <Link
-              className=""
-              href="#video"
-            >
-              Watch video
-            </Link>          </div>
-        </div>
-        <div className="flex items-center justify-center">
-          <div className="p-4 rounded-xl">
-            <img
-              src={theme === "dark" ? "ZendoHeroImage-Dark.svg" : "ZendoHeroImage.svg"}
-              alt="Hero image"
-              className="h-96 w-auto"
-            />
-          </div>
-        </div>
-      </div>    
-      
-      {/* Call to Action */}
-      <div className="mt-16 div-center" id="video">
-        <h2 className="div-3xl text-center font-bold">Watch Zendo in action</h2>
-        <div className="mt-8 w-full">
-          <iframe
-            width="560" height="315"
-            src="https://www.youtube.com/embed/jt4Xcy2s-YU?si=RESmKmVT1bys9oie"
-            title="Zendo - Focus Mode"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Eisenhower Matrix Task Management</h1>
 
-          {/* <iframe width="560" height="315" src="https://www.youtube.com/embed/jt4Xcy2s-YU?si=RESmKmVT1bys9oie" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> */}
-
-        </div>
-        <div className="mt-4 text-center">
-          Have a feature idea? <Link target="_blank" href="https://tally.so/r/3EDr7L">Share it</Link> and help improve the app.
-        </div>
-      </div>
-      
-      
-        {/* Feature Sections */}
-      <div className="grid gap-8 md:grid-cols-2 md:gap-16 mt-16 max-w-4xl">
-        <div className="flex flex-col gap-4">
-          <h2 className="div-2xl font-bold">Block distractions</h2>
-          <p className="div-lg">
-            Use Focus Mode to block distracting apps, ensuring you stay locked in on what matters most.
-          </p>
-        </div>
-        <div className="flex items-center justify-center">
-          <img src={theme === "dark" ? "/features/ZendoBlockDistractionsDark.svg" : "/features/ZendoBlockDistractions.svg"} alt="Block Distractions" className="h-64 w-auto" />
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <h2 className="div-2xl font-bold">Break down tasks</h2>
-          <p className="div-lg">
-            Tackle projects step-by-step with task breakdowns that simplify anything you're working on.
-          </p>
-        </div>
-        <div className="flex items-center justify-center">
-          <img src={theme === "dark" ? "/features/ZendoTaskBreakdownDark.svg" : "/features/ZendoTaskBreakdown.svg"} alt="Task breakdown" className="h-64 w-auto" />
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <h2 className="div-2xl font-bold">Seamless syncing</h2>
-          <p className="div-lg">
-            Sync your work across all devices for a smooth, uninterrupted workflow.
-          </p>
-        </div>
-        <div className="flex items-center justify-center">
-          <img src={theme === "dark" ? "/features/ZendoSeamlessSyncingDark.svg" : "/features/ZendoSeamlessSyncing.svg"} alt="Syncing" className="h-64 w-auto" />
-        </div>
-
-        {/* <div className="flex flex-col gap-4">
-          <h2 className="div-2xl font-bold">Daily streaks for consistent progress</h2>
-          <p className="div-lg">
-            Stay on track with streak tracking that motivate you to maintain consistent progress and build productive habits.
-          </p>
-        </div>
-        <div className="flex items-center justify-center">
-          <img src="/features/check-ins.png" alt="Check-ins" className="h-48 w-auto" />
-        </div> */}
-
-      </div>
-
-      {/* Lifetime Prelaunch Deal */}
-      <div className="mt-16 div-center" id="lifetime-deal">
-        <h2 className="div-3xl text-center font-bold">Lifetime Prelaunch Deal</h2>
-        <p className="mt-4 text-center text-lg">
-          Get Zendo for a one-time payment of <span className="font-bold">$20</span> and enjoy all the features forever!
-
-          Pricing will be $4/month after launch.
-        </p>
-        <div className="mt-8 w-full text-center">
-          <Link
-              href="https://buy.stripe.com/6oE4iHeaX4P85hK4gl"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button
-                color="primary"
-                className="mx-auto text-center mt-4"
-                target="_blank"
-                href="https://buy.stripe.com/6oE4iHeaX4P85hK4gl"    
-              >
-                Get lifetime deal for $20
-              </Button>
-            </Link>
-        </div>
-      </div>
-
-
-      
-
-      {/* Final Call to Action */}
-      {/* <div className="mt-16 div-center text-center">
-        <h3 className="div-2xl font-bold">Stay on track, eliminate distractions</h3>
-        <Button
-          className="mx-auto text-center mt-4"
-          color="primary"
-          target="_blank"
-          href="https://buy.stripe.com/6oE4iHeaX4P85hK4gl"
-        >
-          Get lifetime deal for $20 now
+      <div className="flex justify-end mb-4 gap-2">
+        <Button onClick={() => setKanbanView(!kanbanView)}>
+          {kanbanView ? 'Matrix View' : 'Kanban View'}
         </Button>
-      </div> */}
-    </section>
+        <Button onClick={resetTasks}>
+          Reset All Changes
+        </Button>
+      </div>
+
+      <DragDropContext onDragEnd={onDragEnd}>
+        {kanbanView ? (
+          <div className="flex overflow-x-auto space-x-4 mb-4">
+            {(Object.keys(quadrants) as QuadrantType[]).map(renderQuadrant)}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              {(['do', 'decide', 'delegate', 'delete'] as QuadrantType[]).map(renderQuadrant)}
+            </div>
+            {renderQuadrant('unsorted')}
+          </>
+        )}
+      </DragDropContext>
+
+      <div className="flex space-x-2 mt-4">
+        <Input
+          type="text"
+          value={newTask}
+          onChange={(e) => setNewTask(e.target.value)}
+          placeholder="Add a new task"
+          className="flex-grow"
+          onKeyDown={handleKeyDown}
+        />
+        <select
+          value={selectedQuadrant}
+          onChange={(e) => setSelectedQuadrant(e.target.value as QuadrantType)}
+          className="border rounded p-2"
+        >
+          {Object.entries(quadrants).map(([key, value]) => (
+            <option key={key} value={key}>
+              {value}
+            </option>
+          ))}
+        </select>
+        <Button onClick={addTask}>Add Task</Button>
+      </div>
+    </div>
   );
-}
+};
+
+export default SNLMatrix;

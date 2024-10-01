@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Button } from '@nextui-org/button';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import { Input } from '@nextui-org/input';
@@ -14,7 +14,6 @@ type Task = {
   completed: boolean;
 };
 
-
 type QuadrantType = 'do' | 'decide' | 'delegate' | 'delete' | 'unsorted';
 
 const quadrants: Record<QuadrantType, string> = {
@@ -25,27 +24,53 @@ const quadrants: Record<QuadrantType, string> = {
   unsorted: 'Unsorted Tasks',
 };
 
-const SNLMatrix: React.FC = () => {
-  const [tasks, setTasks] = useState<Record<QuadrantType, Task[]>>({
+// Function to load tasks from localStorage during initial state setup
+const initialTasks = () => {
+  const storedTasks = localStorage.getItem('eisenhowerMatrixTasks');
+  return storedTasks ? JSON.parse(storedTasks) : {
     do: [],
     decide: [],
     delegate: [],
     delete: [],
     unsorted: [],
-  });
+  };
+};
+
+const EisenhowerMatrix: React.FC = () => {
+  const [tasks, setTasks] = useState<Record<QuadrantType, Task[]>>(initialTasks);
   const [newTask, setNewTask] = useState('');
   const [selectedQuadrant, setSelectedQuadrant] = useState<QuadrantType>('unsorted');
   const [kanbanView, setKanbanView] = useState(false);
 
+  // Save tasks to local storage on state change
+  useEffect(() => {
+    console.log('After setting tasks:', tasks);
+    if (tasks) {
+      localStorage.setItem('eisenhowerMatrixTasks', JSON.stringify(tasks));
+    }
+  }, [tasks]);
+
+  // Save view preference to local storage
+  useEffect(() => {
+    localStorage.setItem('eisenhowerMatrixView', JSON.stringify(kanbanView));
+  }, [kanbanView]);
+
   const addTask = () => {
     if (newTask.trim()) {
-      setTasks((prev) => ({
-        ...prev,
-        [selectedQuadrant]: [
-          ...prev[selectedQuadrant],
-          { id: Date.now(), text: newTask.trim(), completed: false },
-        ],
-      }));
+      setTasks((prev) => {
+        const updatedTasks = {
+          ...prev,
+          [selectedQuadrant]: [
+            ...prev[selectedQuadrant],
+            { id: Date.now(), text: newTask.trim(), completed: false },
+          ],
+        };
+
+        console.log('Updated Tasks:', updatedTasks);
+
+        return updatedTasks;
+      });
+
       setNewTask('');
     }
   };
@@ -192,32 +217,17 @@ const SNLMatrix: React.FC = () => {
     </Droppable>
   );
 
-   // Load tasks from local storage on component mount
-useEffect(() => {
-  const storedTasks = localStorage.getItem('tasks');
-  if (storedTasks) {
-    setTasks(JSON.parse(storedTasks));   
-
-  }
-}, []);
-
-// Save tasks to local storage on state change
-useEffect(() => {
-  localStorage.setItem('tasks', JSON.stringify(tasks));
-}, [tasks]);
-
-// Reset button to clear local storage and reset tasks
-const resetTasks = () => {
-  localStorage.removeItem('tasks');
-  setTasks({
-    do: [],
-    decide: [],
-    delegate: [],
-    delete: [],
-    unsorted: [],
-  });
-};
-
+  // Reset button to clear local storage and reset tasks
+  const resetTasks = () => {
+    localStorage.removeItem('eisenhowerMatrixTasks');
+    setTasks({
+      do: [],
+      decide: [],
+      delegate: [],
+      delete: [],
+      unsorted: [],
+    });
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -273,4 +283,4 @@ const resetTasks = () => {
   );
 };
 
-export default SNLMatrix;
+export default EisenhowerMatrix;

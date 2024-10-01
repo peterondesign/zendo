@@ -32,7 +32,7 @@ const quadrants: Record<QuadrantType, string> = {
 };
 
 const initialTasks = () => {
-  const storedTasks = localStorage.getItem('eisenhowerMatrixTasks');
+  const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
   return storedTasks
     ? JSON.parse(storedTasks)
     : {
@@ -52,7 +52,7 @@ const EisenhowerMatrix: React.FC = () => {
   const [expandedTaskIds, setExpandedTaskIds] = useState<number[]>([]);
 
   useEffect(() => {
-    localStorage.setItem('eisenhowerMatrixTasks', JSON.stringify(tasks));
+    window.localStorage.setItem('eisenhowerMatrixTasks', JSON.stringify(tasks));
   }, [tasks]);
 
   const toggleTaskExpansion = (taskId: number) => {

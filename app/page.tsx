@@ -45,12 +45,27 @@ const initialTasks = () => {
 };
 
 const EisenhowerMatrix: React.FC = () => {
-  const [tasks, setTasks] = useState<Record<QuadrantType, Task[]>>(initialTasks);
+  const [tasks, setTasks] = useState<Record<QuadrantType, Task[]>>({
+    do: [],
+    decide: [],
+    delegate: [],
+    delete: [],
+    unsorted: [],
+  });
   const [newTask, setNewTask] = useState('');
   const [selectedQuadrant, setSelectedQuadrant] = useState<QuadrantType>('unsorted');
   const [newSubtask, setNewSubtask] = useState('');
   const [expandedTaskIds, setExpandedTaskIds] = useState<number[]>([]);
 
+  // This useEffect runs after the component mounts and ensures that localStorage is accessible
+  useEffect(() => {
+    const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
+    if (storedTasks) {
+      setTasks(JSON.parse(storedTasks));
+    }
+  }, []); // Empty dependency array ensures this only runs once after mounting
+
+  // Update localStorage whenever tasks are changed
   useEffect(() => {
     window.localStorage.setItem('eisenhowerMatrixTasks', JSON.stringify(tasks));
   }, [tasks]);

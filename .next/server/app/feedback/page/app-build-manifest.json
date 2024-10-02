@@ -1,6 +1,6 @@
 {
   "pages": {
-    "/pricing/page": [
+    "/feedback/page": [
       "static/chunks/[root of the server]__e2ab11._.css",
       "static/chunks/node_modules_tailwind-merge_dist_lib_40ffc2._.js",
       "static/chunks/node_modules_@react-aria_1f6adb._.js",
@@ -20,8 +20,8 @@
       "static/chunks/node_modules_next_dist_091837._.js",
       "static/chunks/ed0b0_@swc_helpers_cjs_d9e50e._.js",
       "static/chunks/[turbopack]_dev_client_hmr-client_ts_aba4f1._.js",
-      "static/chunks/node_modules_next_dist_esm_build_templates_app-page_801f35.js",
-      "static/chunks/node_modules_next_dist_esm_build_templates_app-page_681231.js"
+      "static/chunks/node_modules_next_dist_esm_build_templates_app-page_874aa5.js",
+      "static/chunks/node_modules_next_dist_esm_build_templates_app-page_c560f3.js"
     ]
   }
 }

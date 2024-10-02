@@ -38,17 +38,17 @@ const siteConfig = {
             label: "Home",
             href: "/"
         },
-        {
-            label: "Demo",
-            href: "/demo"
-        },
+        // {
+        //   label: "Demo",
+        //   href: "/demo",
+        // },
         {
             label: "Feedback",
-            href: "https://tally.so/r/3EDr7L"
+            href: "/feedback"
         },
         {
             label: "Pricing",
-            href: "/#lifetime-deal"
+            href: "/pricing"
         },
         {
             label: "Blog",
@@ -66,11 +66,11 @@ const siteConfig = {
         },
         {
             label: "Feedback",
-            href: "https://tally.so/r/3EDr7L"
+            href: "/feedback"
         },
         {
             label: "Pricing",
-            href: "/#lifetime-deal"
+            href: "/pricing"
         },
         {
             label: "Blog",
@@ -528,6 +528,7 @@ const Navbar = ()=>{
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$navbar$2f$dist$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["Navbar"], {
         maxWidth: "xl",
         position: "sticky",
+        className: "bg-gradient-radial-gray bg-gradient-noise",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$navbar$2f$dist$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["NavbarContent"], {
                 className: "basis-1/5 sm:basis-full",
@@ -772,7 +773,7 @@ function RootLayout({ children }) {
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("body", {
-                className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$clsx$2f$dist$2f$clsx$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"])("min-h-screen bg-background font-sans antialiased", __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$inter_b35c0a41$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$export__default__as__fontSans$3e$__["fontSans"].variable),
+                className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$clsx$2f$dist$2f$clsx$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"])("bg-gradient-radial-gray bg-gradient-noise bg-background font-sans antialiased", __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$inter_b35c0a41$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$export__default__as__fontSans$3e$__["fontSans"].variable),
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("script", {
                         dangerouslySetInnerHTML: {
@@ -797,7 +798,7 @@ function RootLayout({ children }) {
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
-                                    className: "container mx-auto max-w-7xl pt-16 px-6 flex-grow",
+                                    className: "container mx-auto max-w-7xl pt-4 px-6 flex-grow",
                                     children: children
                                 }, void 0, false, {
                                     fileName: "[project]/app/layout.tsx",

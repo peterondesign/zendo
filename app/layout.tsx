@@ -41,7 +41,7 @@ export default function RootLayout({
       <Analytics />
       <body
         className={clsx(
-          "min-h-screen bg-gradient-radial-gray bg-gradient-noise bg-background font-sans antialiased",
+          "bg-gradient-radial-gray bg-gradient-noise bg-background font-sans antialiased",
           fontSans.variable,
         )}
       >

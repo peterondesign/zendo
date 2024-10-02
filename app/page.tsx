@@ -513,9 +513,9 @@ const EisenhowerMatrix: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="p-4">
-        <h1 className="text-2xl font-bold mb-4">Eisenhower Matrix</h1>
+    <div className="flex flex-col">
+      <div className="text-center p-4">
+        <h1 className="tracking-tight inline font-semibold text-[2.3rem] lg:text-5xl leading-9 ">Eisenhower Matrix</h1>
       </div>
       {/* <div className='px-4 pb-8'>
         <GanttChart/>

@@ -14,12 +14,12 @@ export const siteConfig = {
     // },
     {
       label: "Feedback",
-      href: "https://tally.so/r/3EDr7L",
+      href: "/feedback",
     },
     
     {
       label: "Pricing",
-      href: "/#lifetime-deal",
+      href: "/pricing",
     },
     {
       label: "Blog",
@@ -37,12 +37,12 @@ export const siteConfig = {
     },
     {
       label: "Feedback",
-      href: "https://tally.so/r/3EDr7L",
+      href: "/feedback",
     },
     
     {
       label: "Pricing",
-      href: "/#lifetime-deal",
+      href: "/pricing",
     },
     {
       label: "Blog",

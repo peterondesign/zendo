@@ -8,10 +8,10 @@ export const siteConfig = {
       label: "Home",
       href: "/",
     },
-    {
-      label: "Demo",
-      href: "/demo",
-    },
+    // {
+    //   label: "Demo",
+    //   href: "/demo",
+    // },
     {
       label: "Feedback",
       href: "https://tally.so/r/3EDr7L",

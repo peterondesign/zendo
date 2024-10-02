@@ -7,6 +7,8 @@ import { Card, CardHeader } from '@nextui-org/card';
 import { Trash2, GripVertical, Plus, MoreVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Popover, PopoverTrigger, PopoverContent, Dropdown, DropdownTrigger, DropdownSection, DropdownMenu, DropdownItem } from "@nextui-org/react";
+import EmptyState from './emptystate.png';
+import GanttChart from '@/components/ganttchart';
 
 type Task = {
   id: number;
@@ -56,6 +58,10 @@ const EisenhowerMatrix: React.FC = () => {
   const [selectedQuadrant, setSelectedQuadrant] = useState<QuadrantType>('unsorted');
   const [newSubtask, setNewSubtask] = useState('');
   const [expandedTaskIds, setExpandedTaskIds] = useState<number[]>([]);
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
+  const [editingSubtaskId, setEditingSubtaskId] = useState<number | null>(null);
+  const [editedTaskText, setEditedTaskText] = useState('');
+  const [editedSubtaskText, setEditedSubtaskText] = useState('');
 
   // This useEffect runs after the component mounts and ensures that localStorage is accessible
   useEffect(() => {
@@ -158,6 +164,43 @@ const EisenhowerMatrix: React.FC = () => {
     }));
   };
 
+  const startEditingTask = (taskId: number, taskText: string) => {
+    setEditingTaskId(taskId);
+    setEditedTaskText(taskText);
+  };
+
+  const startEditingSubtask = (subtaskId: number, subtaskText: string) => {
+    setEditingSubtaskId(subtaskId);
+    setEditedSubtaskText(subtaskText);
+  };
+
+  const saveEditedTask = (quadrant: QuadrantType, taskId: number) => {
+    setTasks((prev) => ({
+      ...prev,
+      [quadrant]: prev[quadrant].map((task) =>
+        task.id === taskId ? { ...task, text: editedTaskText } : task
+      ),
+    }));
+    setEditingTaskId(null);
+  };
+
+  const saveEditedSubtask = (quadrant: QuadrantType, taskId: number, subtaskId: number) => {
+    setTasks((prev) => ({
+      ...prev,
+      [quadrant]: prev[quadrant].map((task) =>
+        task.id === taskId
+          ? {
+            ...task,
+            subtasks: task.subtasks.map((subtask) =>
+              subtask.id === subtaskId ? { ...subtask, text: editedSubtaskText } : subtask
+            ),
+          }
+          : task
+      ),
+    }));
+    setEditingSubtaskId(null);
+  };
+
   const moveTaskToQuadrant = (sourceQuadrant: QuadrantType, taskId: number, targetQuadrant: QuadrantType) => {
     const sourceTasks = Array.from(tasks[sourceQuadrant]);
     const taskIndex = sourceTasks.findIndex((task) => task.id === taskId);
@@ -177,61 +220,88 @@ const EisenhowerMatrix: React.FC = () => {
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
 
-    // No destination means the task wasn't moved
+    // If there's no destination (i.e., task was dropped outside a valid area), do nothing
     if (!destination) return;
 
     const sourceQuadrant = source.droppableId as QuadrantType;
     const destinationQuadrant = destination.droppableId as QuadrantType;
 
-    // Check if the task is moved within the same quadrant
+    // If the task is dropped in the same quadrant
     if (sourceQuadrant === destinationQuadrant) {
       const reorderedTasks = Array.from(tasks[sourceQuadrant]);
-      const [removed] = reorderedTasks.splice(source.index, 1);
-      reorderedTasks.splice(destination.index, 0, removed);
+      const [movedTask] = reorderedTasks.splice(source.index, 1);  // Remove the task from the source index
+      reorderedTasks.splice(destination.index, 0, movedTask);      // Insert it at the new index
 
       setTasks((prev) => ({
         ...prev,
-        [sourceQuadrant]: reorderedTasks,
+        [sourceQuadrant]: reorderedTasks,  // Update the state with the reordered tasks
       }));
     } else {
-      // Moving task to a different quadrant
+      // Move task from one quadrant to another (already supported in the previous code)
       const sourceTasks = Array.from(tasks[sourceQuadrant]);
-      const [movedTask] = sourceTasks.splice(source.index, 1);
+      const [movedTask] = sourceTasks.splice(source.index, 1);  // Remove from source
+      const updatedTask = { ...movedTask, quadrant: destinationQuadrant };  // Update the task's quadrant
       const destinationTasks = Array.from(tasks[destinationQuadrant]);
 
-      // Insert task into the new position in the destination quadrant
-      destinationTasks.splice(destination.index, 0, movedTask);
+      destinationTasks.splice(destination.index, 0, updatedTask);  // Insert in the destination quadrant
 
       setTasks((prev) => ({
         ...prev,
-        [sourceQuadrant]: sourceTasks,   // Update source quadrant tasks
-        [destinationQuadrant]: destinationTasks, // Update destination quadrant tasks
+        [sourceQuadrant]: sourceTasks,         // Update the source quadrant
+        [destinationQuadrant]: destinationTasks,  // Update the destination quadrant
       }));
     }
   };
 
 
+
   const renderSubtasks = (quadrant: QuadrantType, task: Task) => (
-    <ul className="pl-6 mt-2">
+    <ul className="pl-6 mt-2 w-full">
       {task.subtasks.map((subtask) => (
-        <li key={subtask.id} className="flex items-center mb-2">
-          <input
-            type="checkbox"
-            checked={subtask.completed}
-            onChange={() => toggleSubtaskCompletion(quadrant, task.id, subtask.id)}
-            className="mr-2"
-          />
-          <span className={subtask.completed ? 'line-through' : ''}>{subtask.text}</span>
-          <Button size="sm" variant="light" onClick={() => deleteSubtask(quadrant, task.id, subtask.id)}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
+        <li key={subtask.id} className="flex items-center justify-between">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              checked={subtask.completed}
+              onChange={() => toggleSubtaskCompletion(quadrant, task.id, subtask.id)}
+              className="mr-2"
+            />
+            {editingSubtaskId === subtask.id ? (
+              <Input
+                value={editedSubtaskText}
+                onChange={(e) => setEditedSubtaskText(e.target.value)}
+                onBlur={() => saveEditedSubtask(quadrant, task.id, subtask.id)}
+                onKeyDown={(e) => e.key === 'Enter' && saveEditedSubtask(quadrant, task.id, subtask.id)}
+                autoFocus
+              />
+            ) : (
+              <span className={subtask.completed ? 'line-through' : ''}>{subtask.text}</span>
+            )}
+          </div>
+          <div className="flex justify-end">
+            <Dropdown>
+              <DropdownTrigger>
+                <Button size="sm" variant="light">
+                  <MoreVertical size={16} className="h-4 w-4" />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu>
+                <DropdownItem onClick={() => startEditingSubtask(subtask.id, subtask.text)}>
+                  Edit
+                </DropdownItem>
+                <DropdownItem onClick={() => deleteSubtask(quadrant, task.id, subtask.id)} className="text-red-500">
+                  Delete
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
         </li>
       ))}
       <div className="mt-2 flex items-center">
         <Input
           value={newSubtask}
           onChange={(e) => setNewSubtask(e.target.value)}
-          placeholder="Add new subtask"
+          placeholder="New subtask"
           onKeyDown={(e) => e.key === 'Enter' && addSubtask(quadrant, task.id)}
         />
         <Button onClick={() => addSubtask(quadrant, task.id)} className="ml-2">
@@ -251,7 +321,6 @@ const EisenhowerMatrix: React.FC = () => {
 
 
   const renderTask = (quadrant: QuadrantType, task: Task, index: number) => (
-
     <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
       {(provided, snapshot) => (
         <li
@@ -271,12 +340,22 @@ const EisenhowerMatrix: React.FC = () => {
                 onChange={() => toggleTaskCompletion(quadrant, task.id)}
                 className="mr-2"
               />
-              <span
-                className={`cursor-pointer ${task.completed ? 'line-through' : ''}`}
-                onClick={() => toggleTaskExpansion(task.id)}
-              >
-                {task.text}
-              </span>
+              {editingTaskId === task.id ? (
+                <Input
+                  value={editedTaskText}
+                  onChange={(e) => setEditedTaskText(e.target.value)}
+                  onBlur={() => saveEditedTask(quadrant, task.id)}
+                  onKeyDown={(e) => e.key === 'Enter' && saveEditedTask(quadrant, task.id)}
+                  autoFocus
+                />
+              ) : (
+                <span
+                  className={`cursor-pointer ${task.completed ? 'line-through' : ''}`}
+                  onClick={() => toggleTaskExpansion(task.id)}
+                >
+                  {task.text}
+                </span>
+              )}
             </div>
             <div className="flex items-center">
               <Button
@@ -297,6 +376,9 @@ const EisenhowerMatrix: React.FC = () => {
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu>
+                  <DropdownItem onClick={() => startEditingTask(task.id, task.text)}>
+                    Edit
+                  </DropdownItem>
                   <DropdownSection title="Move">
                     {Object.keys(quadrants)
                       .filter((q) => q !== quadrant)
@@ -340,10 +422,14 @@ const EisenhowerMatrix: React.FC = () => {
 
   const renderQuadrant = (quadrant: QuadrantType) => (
     <Droppable droppableId={quadrant} key={quadrant}>
-      {(provided) => (
-        <Card ref={provided.innerRef} {...provided.droppableProps} className="p-4 mb-4">
+      {(provided, snapshot) => (
+        <Card 
+          ref={provided.innerRef} 
+          {...provided.droppableProps} 
+          className={`p-4 mb-4 ${snapshot.isDraggingOver ? 'bg-gray-100' : ''}`}
+        >
           <CardHeader className="flex justify-between items-center">
-            <div>{quadrants[quadrant]}</div>
+            <div className="text-default-500 text-sm">{quadrants[quadrant]}</div>
             <Popover placement="bottom">
               <PopoverTrigger>
                 <Button size="sm" isIconOnly variant="light">
@@ -365,12 +451,22 @@ const EisenhowerMatrix: React.FC = () => {
               </PopoverContent>
             </Popover>
           </CardHeader>
-          <ul>{tasks[quadrant].map((task, index) => renderTask(quadrant, task, index))}</ul>
+          {tasks[quadrant].length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center text-default-500">
+              <img src="/emptystate.png" className="w-10 h-10 mt-2 mx-auto" alt="No tasks" />
+              <p className='mt-2 text-default-400 text-sm'>No tasks added yet</p>
+            </div>
+          ) : (
+            <ul className='text-default-90 text-xl'>
+              {tasks[quadrant].map((task, index) => renderTask(quadrant, task, index))}
+            </ul>
+          )}
           {provided.placeholder}
         </Card>
       )}
     </Droppable>
   );
+
 
   // Function to call the LocalAI service for task breakdown using /v1/chat/completions
   const fetchTaskBreakdown = async (taskText: string) => {
@@ -419,10 +515,13 @@ const EisenhowerMatrix: React.FC = () => {
   return (
     <div className="flex flex-col h-screen">
       <div className="p-4">
-        <h1 className="text-2xl font-bold mb-4">Eisenhower Matrix Task Management</h1>
+        <h1 className="text-2xl font-bold mb-4">Eisenhower Matrix</h1>
       </div>
+      {/* <div className='px-4 pb-8'>
+        <GanttChart/>
+      </div> */}
       <div className="flex-grow overflow-auto p-4">
-        <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onDragEnd={onDragEnd}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {(['do', 'decide', 'delegate', 'delete', 'unsorted'] as QuadrantType[]).map(renderQuadrant)}
           </div>

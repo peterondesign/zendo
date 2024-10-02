@@ -1,3 +1,40 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.hour-view-container {
+    display: flex;
+    overflow-x: scroll;
+    white-space: nowrap;
+    padding: 10px;
+  }
+  
+  .hour-box {
+    display: inline-block;
+    width: 100px;
+    border: 1px solid #ddd;
+    text-align: center;
+    padding: 10px;
+    background-color: #f5f5f5;
+    margin-right: 8px;
+  }
+  
+  .task-slot {
+    height: 40px;
+    margin-top: 10px;
+  }
+  
+  .task-focus {
+    background-color: #7fbcff;
+    height: 100%;
+    text-align: center;
+  }
+  
+  .empty-slot {
+    background-color: #ddd;
+    height: 100%;
+  }
+  
+  .bg-gradient-radial-gray.bg-gradient-noise {
+    background: url(/noise.png) repeat, radial-gradient(circle at 20% 40%, #00000012, #1c1c1c18, #4b4b4b05);
+}

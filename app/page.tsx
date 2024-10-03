@@ -481,7 +481,8 @@ const EisenhowerMatrix: React.FC = () => {
         <Card
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={`p-4 mb-4 ${snapshot.isDraggingOver ? 'bg-gray-900' : 'bg-white'}`}
+          className={`p-4 mb-4 ${snapshot.isDraggingOver ? 'bg-white' : 'bg-gray-900'}`}
+
         >
           <CardHeader className="flex justify-between items-center">
             <div className="text-default-500 text-sm">{quadrants[quadrant]}</div>

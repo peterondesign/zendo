@@ -8,6 +8,8 @@ import { Trash2, GripVertical, Plus, MoreVertical, ChevronDown, ChevronUp } from
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Popover, PopoverTrigger, PopoverContent, Dropdown, DropdownTrigger, DropdownSection, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import GanttChart from '@/components/ganttchart';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+
 
 import { Spinner } from '@nextui-org/react';
 
@@ -17,6 +19,11 @@ type Task = {
   completed: boolean;
   subtasks: SubTask[];
 };
+
+interface Props {
+  quadrant: QuadrantType;
+}
+
 
 type SubTask = {
   id: number;
@@ -64,6 +71,14 @@ const EisenhowerMatrix: React.FC = () => {
   const [editedTaskText, setEditedTaskText] = useState('');
   const [editedSubtaskText, setEditedSubtaskText] = useState('');
   const [loadingAI, setLoadingAI] = useState(false); // Track AI loading state
+
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false); // Task modal state
+  const [isSubtaskModalOpen, setIsSubtaskModalOpen] = useState(false); // Subtask modal state
+  const [taskToEdit, setTaskToEdit] = useState<{ task: Task; quadrant: QuadrantType } | null>(null);
+  const [subtaskToEdit, setSubtaskToEdit] = useState<SubTask | null>(null); // Subtask being edited
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [editingType, setEditingType] = useState<'task' | 'subtask' | null>(null);
 
 
   // This useEffect runs after the component mounts and ensures that localStorage is accessible
@@ -178,14 +193,21 @@ const EisenhowerMatrix: React.FC = () => {
   };
 
   const saveEditedTask = (quadrant: QuadrantType, taskId: number) => {
-    setTasks((prev) => ({
-      ...prev,
-      [quadrant]: prev[quadrant].map((task) =>
-        task.id === taskId ? { ...task, text: editedTaskText } : task
-      ),
-    }));
-    setEditingTaskId(null);
+    // Ensure taskToEdit is not null before trying to access its properties
+    if (taskToEdit) {
+      setTasks((prev) => ({
+        ...prev,
+        [quadrant]: prev[quadrant].map((task) =>
+          task.id === taskId ? { ...task, text: taskToEdit.task.text } : task
+        ),
+      }));
+      setTaskToEdit(null); // Clear the task to edit
+      onClose(); // Close the modal
+    } else {
+      console.error('taskToEdit is null');
+    }
   };
+
 
   const saveEditedSubtask = (quadrant: QuadrantType, taskId: number, subtaskId: number) => {
     setTasks((prev) => ({
@@ -263,8 +285,9 @@ const EisenhowerMatrix: React.FC = () => {
       {task.subtasks.map((subtask) => (
         <li key={subtask.id} className="flex items-center justify-between">
           <div className="flex items-center">
-            <input
+            <Input
               type="checkbox"
+              title="Toggle subtask completion"
               checked={subtask.completed}
               onChange={() => toggleSubtaskCompletion(quadrant, task.id, subtask.id)}
               className="mr-2"
@@ -290,9 +313,18 @@ const EisenhowerMatrix: React.FC = () => {
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
-                <DropdownItem onClick={() => startEditingSubtask(subtask.id, subtask.text)}>
-                  Edit
+
+                <DropdownItem
+                  onClick={() => {
+                    setSubtaskToEdit(subtask); // Set the subtask to be edited
+                    setEditingType('subtask'); // Indicate we are editing a subtask
+                    setIsTaskModalOpen(true); // Open the modal for editing
+                  }}
+                >
+                  Edit Subtask
                 </DropdownItem>
+
+
                 <DropdownItem onClick={() => deleteSubtask(quadrant, task.id, subtask.id)} className="text-red-500">
                   Delete
                 </DropdownItem>
@@ -344,6 +376,7 @@ const EisenhowerMatrix: React.FC = () => {
                 checked={task.completed}
                 onChange={() => toggleTaskCompletion(quadrant, task.id)}
                 className="mr-2"
+                title="Toggle task completion"
               />
               {editingTaskId === task.id ? (
                 <Input
@@ -355,8 +388,12 @@ const EisenhowerMatrix: React.FC = () => {
                 />
               ) : (
                 <span
-                  className={`cursor-pointer ${task.completed ? 'line-through' : ''}`}
-                  onClick={() => toggleTaskExpansion(task.id)}
+                  id={`task-text-${task.id}`}  // Add a unique ID to the span
+                  className={`w-full cursor-pointer ${task.completed ? 'line-through' : ''}`}
+                  onClick={() => {
+                    toggleTaskExpansion(task.id);
+                    startEditingTask(task.id, task.text); // Ensure this triggers editing
+                  }}
                 >
                   {task.text}
                 </span>
@@ -381,9 +418,15 @@ const EisenhowerMatrix: React.FC = () => {
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu>
-                  <DropdownItem onClick={() => startEditingTask(task.id, task.text)}>
-                    Edit
+                  <DropdownItem
+                    onClick={() => {
+                      setTaskToEdit({ task, quadrant }); // Store both task and quadrant
+                      onOpen(); // Open the modal for task renaming
+                    }}
+                  >
+                    Edit Task
                   </DropdownItem>
+
                   <DropdownSection title="AI Tools">
                     <DropdownItem
                       onClick={() => {
@@ -438,7 +481,7 @@ const EisenhowerMatrix: React.FC = () => {
         <Card
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={`p-4 mb-4 ${snapshot.isDraggingOver ? 'bg-gray-100' : ''}`}
+          className={`p-4 mb-4 ${snapshot.isDraggingOver ? 'bg-gray-900' : 'bg-white'}`}
         >
           <CardHeader className="flex justify-between items-center">
             <div className="text-default-500 text-sm">{quadrants[quadrant]}</div>
@@ -574,6 +617,37 @@ const EisenhowerMatrix: React.FC = () => {
       <div className="text-center p-4">
         <h1 className="tracking-tight inline font-semibold text-[2.3rem] lg:text-5xl leading-9 ">Eisenhower Matrix</h1>
       </div>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalContent>
+          <ModalHeader>Edit Task</ModalHeader>
+          <ModalBody>
+            <Input
+              value={taskToEdit?.task.text || ''} // Access the text of the task
+              onChange={(e) => setTaskToEdit({
+                ...taskToEdit!,
+                task: { ...taskToEdit!.task, text: e.target.value }  // Update the text of the task
+              })}
+              fullWidth
+              placeholder="Enter new task name"
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick={() => {
+              // Ensure taskToEdit is valid before trying to save
+              if (taskToEdit) {
+                saveEditedTask(taskToEdit.quadrant, taskToEdit.task.id); // Save the task with the new name
+              } else {
+                console.error('No task selected for editing');
+              }
+            }}>
+              Save
+            </Button>
+
+
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
       {/* <div className='px-4 pb-8'>
         <GanttChart/>
       </div> */}

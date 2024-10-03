@@ -272,10 +272,11 @@ const EisenhowerMatrix: React.FC = () => {
             {editingSubtaskId === subtask.id ? (
               <Input
                 value={editedSubtaskText}
-                onChange={(e) => setEditedSubtaskText(e.target.value)}
+                onChange={(e) => setEditedSubtaskText(e.target.value.slice(0, 100))}
                 onBlur={() => saveEditedSubtask(quadrant, task.id, subtask.id)}
                 onKeyDown={(e) => e.key === 'Enter' && saveEditedSubtask(quadrant, task.id, subtask.id)}
                 autoFocus
+                maxLength={100}
               />
             ) : (
               <span className={subtask.completed ? 'line-through' : ''}>{subtask.text}</span>
@@ -303,9 +304,10 @@ const EisenhowerMatrix: React.FC = () => {
       <div className="mt-2 flex items-center">
         <Input
           value={newSubtask}
-          onChange={(e) => setNewSubtask(e.target.value)}
+          onChange={(e) => setNewSubtask(e.target.value.slice(0, 100))}
           placeholder="New subtask"
           onKeyDown={(e) => e.key === 'Enter' && addSubtask(quadrant, task.id)}
+          maxLength={100}
         />
         <Button onClick={() => addSubtask(quadrant, task.id)} className="ml-2">
           <Plus size={16} />
@@ -384,9 +386,18 @@ const EisenhowerMatrix: React.FC = () => {
                   </DropdownItem>
                   <DropdownSection title="AI Tools">
                     <DropdownItem
-                      onClick={() => handleBreakdownTaskWithAI(quadrant, task.id, task.text)}
+                      onClick={() => {
+                        if (loadingAI) return;
+                        setLoadingAI(true);
+                        setTimeout(() => setLoadingAI(false), 10000);
+                        handleBreakdownTaskWithAI(quadrant, task.id, task.text);
+                      }}
                     >
-                      Breakdown with AI
+                      {loadingAI ? (
+                        <Spinner size="sm" />
+                      ) : (
+                        <>Breakdown with AI</>
+                      )}
                     </DropdownItem>
                   </DropdownSection>
                   <DropdownSection title="Move">
@@ -442,7 +453,7 @@ const EisenhowerMatrix: React.FC = () => {
                   <Input
                     placeholder="New task"
                     value={newTask}
-                    onChange={(e) => setNewTask(e.target.value)}
+                    onChange={(e) => setNewTask(e.target.value.slice(0, 100))}
                     onKeyDown={(e) => e.key === 'Enter' && addTask(quadrant)}
                   />
                   <Button onClick={() => addTask(quadrant)} className="mt-2">
@@ -501,7 +512,7 @@ const EisenhowerMatrix: React.FC = () => {
     const apiUrl = "https://api-inference.huggingface.co/models/mistralai/Mistral-Small-Instruct-2409";
 
     const prompt = "Only respond with a numbered list of tasks and nothing else. Break down the following task into 3 to 8 subtasks, it must not be a repeat of the main task, each subtask must be a single line and less than 12 words. The subtasks should be manageable for an 18-year-old with focus issues and  ADHD and can be completed within 24 hours:"
-  
+
     try {
       const response = await fetch(apiUrl, {
         method: "POST",
@@ -513,23 +524,23 @@ const EisenhowerMatrix: React.FC = () => {
           inputs: `${prompt}: ${taskText}`,
         }),
       });
-  
+
       if (!response.ok) {
         console.error("Error fetching from Hugging Face:", response.statusText);
         setLoadingAI(false);
         return;
       }
-  
+
       const data = await response.json(); // Parse the JSON response
       const generatedText = data[0]?.generated_text || "";
-  
+
       // Split the generated text into lines, remove numbering, asterisks, and filter out empty lines
       const subtasks = generatedText
         .split("\n")
         .map((line: string) => line.replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim()) // Remove numbering and asterisks
         .filter((subtask: string) => subtask.length > 0 && !subtask.includes(prompt)) // Remove empty lines and the prompt
         .slice(1); // Remove the empty line at the beginning
-  
+
       if (subtasks.length > 0) {
         setTasks((prev) => ({
           ...prev,
@@ -546,18 +557,18 @@ const EisenhowerMatrix: React.FC = () => {
               : task
           ),
         }));
-  
+
         // Automatically expand the task to show generated subtasks
         setExpandedTaskIds((prev) => [...prev, taskId]);
       }
-  
+
       setLoadingAI(false); // Hide spinner
     } catch (error) {
       console.error("Error calling Hugging Face API:", error);
       setLoadingAI(false); // Hide spinner
     }
   };
-  
+
   return (
     <div className="flex flex-col">
       <div className="text-center p-4">
@@ -567,7 +578,7 @@ const EisenhowerMatrix: React.FC = () => {
         <GanttChart/>
       </div> */}
       {loadingAI && (
-        <div className="flex justify-center items-center">
+        <div className="z-10 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <Spinner size="lg" />
         </div>
       )}

@@ -9,6 +9,8 @@ import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautif
 import { Popover, PopoverTrigger, PopoverContent, Dropdown, DropdownTrigger, DropdownSection, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import GanttChart from '@/components/ganttchart';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { useTheme } from "next-themes";
+
 
 
 import { Spinner } from '@nextui-org/react';
@@ -80,6 +82,7 @@ const EisenhowerMatrix: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [editingType, setEditingType] = useState<'task' | 'subtask' | null>(null);
 
+  const { theme, setTheme } = useTheme();
 
   // This useEffect runs after the component mounts and ensures that localStorage is accessible
   useEffect(() => {
@@ -481,8 +484,7 @@ const EisenhowerMatrix: React.FC = () => {
         <Card
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={`p-4 mb-4 ${snapshot.isDraggingOver ? 'bg-white' : 'bg-gray-900'}`}
-
+          className={`p-4 mb-4 ${theme === "light" ? (snapshot.isDraggingOver ? 'bg-white' : 'bg-zinc-100') : (snapshot.isDraggingOver ? 'bg-zinc-700' : 'bg-zinc-900')}`}
         >
           <CardHeader className="flex justify-between items-center">
             <div className="text-default-500 text-sm">{quadrants[quadrant]}</div>

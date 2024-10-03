@@ -9,6 +9,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautif
 import { Popover, PopoverTrigger, PopoverContent, Dropdown, DropdownTrigger, DropdownSection, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import GanttChart from '@/components/ganttchart';
 
+import { Spinner } from '@nextui-org/react';
 
 type Task = {
   id: number;
@@ -62,6 +63,8 @@ const EisenhowerMatrix: React.FC = () => {
   const [editingSubtaskId, setEditingSubtaskId] = useState<number | null>(null);
   const [editedTaskText, setEditedTaskText] = useState('');
   const [editedSubtaskText, setEditedSubtaskText] = useState('');
+  const [loadingAI, setLoadingAI] = useState(false); // Track AI loading state
+
 
   // This useEffect runs after the component mounts and ensures that localStorage is accessible
   useEffect(() => {
@@ -326,7 +329,7 @@ const EisenhowerMatrix: React.FC = () => {
         <li
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`flex flex-col items-start justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-gray-700' : 'hover:bg-default-600'
+          className={`flex flex-col items-start justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-gray-700' : 'hover:bg-default-100'
             }`}
         >
           <div className="flex items-center justify-between w-full">
@@ -379,6 +382,13 @@ const EisenhowerMatrix: React.FC = () => {
                   <DropdownItem onClick={() => startEditingTask(task.id, task.text)}>
                     Edit
                   </DropdownItem>
+                  <DropdownSection title="AI Tools">
+                    <DropdownItem
+                      onClick={() => handleBreakdownTaskWithAI(quadrant, task.id, task.text)}
+                    >
+                      Breakdown with AI
+                    </DropdownItem>
+                  </DropdownSection>
                   <DropdownSection title="Move">
                     {Object.keys(quadrants)
                       .filter((q) => q !== quadrant)
@@ -392,16 +402,7 @@ const EisenhowerMatrix: React.FC = () => {
                       ))}
                   </DropdownSection>
 
-                  {/* <DropdownSection title="AI Breakdown">
-                    <DropdownItem
-                      onClick={() => handleBreakdownTask(quadrant, task.id, task.text)}
-                    >
-                      Breakdown with AI
-                    </DropdownItem>
-                  </DropdownSection> */}
-
                   <DropdownSection title="Danger zone">
-
                     <DropdownItem
                       onClick={() => deleteTask(quadrant, task.id)}
                       className="text-red-500"
@@ -409,7 +410,6 @@ const EisenhowerMatrix: React.FC = () => {
                       Delete
                     </DropdownItem>
                   </DropdownSection>
-
                 </DropdownMenu>
               </Dropdown>
             </div>
@@ -420,12 +420,13 @@ const EisenhowerMatrix: React.FC = () => {
     </Draggable>
   );
 
+
   const renderQuadrant = (quadrant: QuadrantType) => (
     <Droppable droppableId={quadrant} key={quadrant}>
       {(provided, snapshot) => (
-        <Card 
-          ref={provided.innerRef} 
-          {...provided.droppableProps} 
+        <Card
+          ref={provided.innerRef}
+          {...provided.droppableProps}
           className={`p-4 mb-4 ${snapshot.isDraggingOver ? 'bg-gray-100' : ''}`}
         >
           <CardHeader className="flex justify-between items-center">
@@ -457,7 +458,7 @@ const EisenhowerMatrix: React.FC = () => {
               <p className='mt-2 text-default-400 text-sm'>No tasks added yet</p>
             </div>
           ) : (
-            <ul className='text-default-90 text-xl'>
+            <ul className='text-default-90 text-lg'>
               {tasks[quadrant].map((task, index) => renderTask(quadrant, task, index))}
             </ul>
           )}
@@ -493,25 +494,70 @@ const EisenhowerMatrix: React.FC = () => {
   };
 
   // Function to handle task breakdown with AI and update the task with subtasks
-  const handleBreakdownTask = async (quadrant: QuadrantType, taskId: number, taskText: string) => {
-    const subtasks = await fetchTaskBreakdown(taskText);
-    setTasks((prev) => ({
-      ...prev,
-      [quadrant]: prev[quadrant].map((task) =>
-        task.id === taskId
-          ? {
-            ...task,
-            subtasks: subtasks.map((subtaskText: string, index: number) => ({
-              id: Date.now() + index,
-              text: subtaskText.trim(),
-              completed: false,
-            })),
-          }
-          : task
-      ),
-    }));
-  };
 
+
+  const handleBreakdownTaskWithAI = async (quadrant: QuadrantType, taskId: number, taskText: string) => {
+    setLoadingAI(true); // Show spinner
+    const apiUrl = "https://api-inference.huggingface.co/models/mistralai/Mistral-Small-Instruct-2409";
+
+    const prompt = "Only respond with a numbered list of tasks and nothing else. Break down the following task into 3 to 8 subtasks, it must not be a repeat of the main task, each subtask must be a single line and less than 12 words. The subtasks should be manageable for an 18-year-old with focus issues and  ADHD and can be completed within 24 hours:"
+  
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer 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`, // Add your Hugging Face API key here
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: `${prompt}: ${taskText}`,
+        }),
+      });
+  
+      if (!response.ok) {
+        console.error("Error fetching from Hugging Face:", response.statusText);
+        setLoadingAI(false);
+        return;
+      }
+  
+      const data = await response.json(); // Parse the JSON response
+      const generatedText = data[0]?.generated_text || "";
+  
+      // Split the generated text into lines, remove numbering, asterisks, and filter out empty lines
+      const subtasks = generatedText
+        .split("\n")
+        .map((line: string) => line.replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim()) // Remove numbering and asterisks
+        .filter((subtask: string) => subtask.length > 0 && !subtask.includes(prompt)) // Remove empty lines and the prompt
+        .slice(1); // Remove the empty line at the beginning
+  
+      if (subtasks.length > 0) {
+        setTasks((prev) => ({
+          ...prev,
+          [quadrant]: prev[quadrant].map((task) =>
+            task.id === taskId
+              ? {
+                ...task,
+                subtasks: subtasks.map((subtaskText: string, index: number) => ({
+                  id: Date.now() + index,
+                  text: subtaskText,
+                  completed: false,
+                })),
+              }
+              : task
+          ),
+        }));
+  
+        // Automatically expand the task to show generated subtasks
+        setExpandedTaskIds((prev) => [...prev, taskId]);
+      }
+  
+      setLoadingAI(false); // Hide spinner
+    } catch (error) {
+      console.error("Error calling Hugging Face API:", error);
+      setLoadingAI(false); // Hide spinner
+    }
+  };
+  
   return (
     <div className="flex flex-col">
       <div className="text-center p-4">
@@ -520,8 +566,13 @@ const EisenhowerMatrix: React.FC = () => {
       {/* <div className='px-4 pb-8'>
         <GanttChart/>
       </div> */}
+      {loadingAI && (
+        <div className="flex justify-center items-center">
+          <Spinner size="lg" />
+        </div>
+      )}
       <div className="flex-grow overflow-auto p-4">
-      <DragDropContext onDragEnd={onDragEnd}>
+        <DragDropContext onDragEnd={onDragEnd}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {(['do', 'decide', 'delegate', 'delete', 'unsorted'] as QuadrantType[]).map(renderQuadrant)}
           </div>

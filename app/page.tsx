@@ -7,8 +7,8 @@ import { Card, CardHeader } from '@nextui-org/card';
 import { Trash2, GripVertical, Plus, MoreVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Popover, PopoverTrigger, PopoverContent, Dropdown, DropdownTrigger, DropdownSection, DropdownMenu, DropdownItem } from "@nextui-org/react";
-import EmptyState from './emptystate.png';
 import GanttChart from '@/components/ganttchart';
+
 
 type Task = {
   id: number;
@@ -326,7 +326,7 @@ const EisenhowerMatrix: React.FC = () => {
         <li
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`flex flex-col items-start justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-gray-700' : 'hover:bg-default-100'
+          className={`flex flex-col items-start justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-gray-700' : 'hover:bg-default-600'
             }`}
         >
           <div className="flex items-center justify-between w-full">

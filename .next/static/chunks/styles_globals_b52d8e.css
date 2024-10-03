@@ -892,11 +892,6 @@ img, video {
   height: 100vh;
 }
 
-.h-max {
-  height: -moz-max-content;
-  height: max-content;
-}
-
 .max-h-64 {
   max-height: 16rem;
 }
@@ -959,6 +954,10 @@ img, video {
 
 .min-h-screen {
   min-height: 100vh;
+}
+
+.min-h-dvh {
+  min-height: 100dvh;
 }
 
 .\!w-full {
@@ -4874,6 +4873,16 @@ img, video {
 .hover\:bg-warning-100:hover {
   --tw-bg-opacity: 1;
   background-color: hsl(var(--nextui-warning-100) / var(--nextui-warning-100-opacity, var(--tw-bg-opacity)));
+}
+
+.hover\:bg-default-400:hover {
+  --tw-bg-opacity: 1;
+  background-color: hsl(var(--nextui-default-400) / var(--nextui-default-400-opacity, var(--tw-bg-opacity)));
+}
+
+.hover\:bg-default-600:hover {
+  --tw-bg-opacity: 1;
+  background-color: hsl(var(--nextui-default-600) / var(--nextui-default-600-opacity, var(--tw-bg-opacity)));
 }
 
 .hover\:underline:hover {

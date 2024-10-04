@@ -485,7 +485,7 @@ const EisenhowerMatrix: React.FC = () => {
         <Card
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={`p-4 mb-4 ${theme === "light" ? (snapshot.isDraggingOver ? 'bg-white' : 'bg-background') : (snapshot.isDraggingOver ? 'bg-zinc-700' : 'bg-background')}`}
+          className={`p-4 mb-4 ${theme === "light" ? (snapshot.isDraggingOver ? 'bg-white' : 'bg-zinc-900') : (snapshot.isDraggingOver ? 'bg-zinc-700' : 'bg-zinc-900')}`}
         >          <CardHeader className="flex justify-between items-center">
             <div className="text-default-500 text-sm">{quadrants[quadrant]}</div>
             <Popover placement="bottom">
@@ -642,9 +642,6 @@ const EisenhowerMatrix: React.FC = () => {
             {(['do', 'decide', 'delegate', 'delete', 'unsorted'] as QuadrantType[]).map(renderQuadrant)}
           </div>
         </DragDropContext>
-        <div className="mx-auto justify-center text-center p-4">
-          <a href="https://dang.ai/" target="_blank" ><img src="https://cdn.prod.website-files.com/63d8afd87da01fb58ea3fbcb/6487e2868c6c8f93b4828827_dang-badge.png" alt="Dang.ai" style={{ width: '150px', height: '54px' }} /></a>
-        </div>
       </div>
     </div>
   );

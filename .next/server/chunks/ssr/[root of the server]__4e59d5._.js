@@ -62,7 +62,7 @@ const siteConfig = {
         },
         {
             label: "Demo",
-            href: "/demo"
+            href: "/"
         },
         {
             label: "Feedback",

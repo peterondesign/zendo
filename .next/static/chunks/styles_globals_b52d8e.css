@@ -2332,6 +2332,11 @@ img, video {
   background-color: rgb(244 244 245 / var(--tw-bg-opacity));
 }
 
+.bg-zinc-800 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(39 39 42 / var(--tw-bg-opacity));
+}
+
 .bg-opacity-50 {
   --tw-bg-opacity: .5;
 }

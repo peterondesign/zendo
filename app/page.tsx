@@ -6,7 +6,7 @@ import { Input } from '@nextui-org/input';
 import { Card, CardHeader } from '@nextui-org/card';
 import { Trash2, GripVertical, Plus, MoreVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { Popover, PopoverTrigger, PopoverContent, Dropdown, DropdownTrigger, DropdownSection, DropdownMenu, DropdownItem } from "@nextui-org/react";
+import { Popover, PopoverTrigger, PopoverContent, Dropdown, DropdownTrigger, DropdownSection, DropdownMenu, DropdownItem, Link } from "@nextui-org/react";
 import GanttChart from '@/components/ganttchart';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { useTheme } from "next-themes";
@@ -594,7 +594,8 @@ const EisenhowerMatrix: React.FC = () => {
   return (
     <div className="flex flex-col">
       <div className="text-center p-4">
-        <h1 className="tracking-tight inline font-semibold text-[2.3rem] lg:text-5xl leading-9 ">Eisenhower Matrix</h1>
+        <h1 className="tracking-tight inline font-semibold text-[2.3rem] lg:text-xl leading-9 ">Prioritise your tasks with the Eisenhower Matrix, and break them down</h1>
+        <p className='text-default-500 text-sm'>No account needed, free forever (more features included with <Link href="/pricing"><a className="text-cyan-600 underline">lifetime deal</a></Link>)</p>
       </div>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalContent>

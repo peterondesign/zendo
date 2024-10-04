@@ -1213,6 +1213,19 @@ img, video {
   max-width: 20rem;
 }
 
+.max-w-1 {
+  max-width: .25rem;
+}
+
+.max-w-1\.5 {
+  max-width: .375rem;
+}
+
+.max-w-max {
+  max-width: -moz-max-content;
+  max-width: max-content;
+}
+
 .flex-1 {
   flex: 1;
 }

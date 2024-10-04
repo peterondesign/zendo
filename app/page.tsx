@@ -286,14 +286,14 @@ const EisenhowerMatrix: React.FC = () => {
   const renderSubtasks = (quadrant: QuadrantType, task: Task) => (
     <ul className="pl-6 mt-2 w-full">
       {task.subtasks.map((subtask) => (
-        <li key={subtask.id} className="flex items-center justify-between">
+        <li key={subtask.id} className="text-lg flex items-center justify-between">
           <div className="flex items-center">
             <Input
               type="checkbox"
               title="Toggle subtask completion"
               checked={subtask.completed}
               onChange={() => toggleSubtaskCompletion(quadrant, task.id, subtask.id)}
-              className="mr-2"
+              className="max-w-max mr-2"
             />
             {editingSubtaskId === subtask.id ? (
               <Input
@@ -303,9 +303,10 @@ const EisenhowerMatrix: React.FC = () => {
                 onKeyDown={(e) => e.key === 'Enter' && saveEditedSubtask(quadrant, task.id, subtask.id)}
                 autoFocus
                 maxLength={100}
+                className='w-full'
               />
             ) : (
-              <span className={subtask.completed ? 'line-through' : ''}>{subtask.text}</span>
+              <span className="w-full" style={subtask.completed ? { textDecoration: 'line-through' } : undefined}>{subtask.text}</span>
             )}
           </div>
           <div className="flex justify-end">
@@ -484,9 +485,8 @@ const EisenhowerMatrix: React.FC = () => {
         <Card
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={`p-4 mb-4 ${theme === "light" ? (snapshot.isDraggingOver ? 'bg-white' : 'bg-zinc-100') : (snapshot.isDraggingOver ? 'bg-zinc-700' : 'bg-zinc-900')}`}
-        >
-          <CardHeader className="flex justify-between items-center">
+          className={`p-4 mb-4 ${theme === "light" ? (snapshot.isDraggingOver ? 'bg-white' : 'bg-background') : (snapshot.isDraggingOver ? 'bg-zinc-700' : 'bg-background')}`}
+        >          <CardHeader className="flex justify-between items-center">
             <div className="text-default-500 text-sm">{quadrants[quadrant]}</div>
             <Popover placement="bottom">
               <PopoverTrigger>
@@ -526,30 +526,6 @@ const EisenhowerMatrix: React.FC = () => {
   );
 
 
-  // Function to call the LocalAI service for task breakdown using /v1/chat/completions
-  const fetchTaskBreakdown = async (taskText: string) => {
-    const apiUrl = "https://localai.io/v1/chat/completions"; // Replace with the actual LocalAI API endpoint
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo", // Use appropriate model name based on LocalAI API
-        messages: [
-          {
-            role: "user",
-            content: `Please break down the following task into subtasks: ${taskText}`,
-          },
-        ],
-        max_tokens: 100,
-      }),
-    });
-
-    const data = await response.json();
-    return data.choices[0].message.content.split('\n').filter((subtask: string) => subtask.trim());
-  };
-
   // Function to handle task breakdown with AI and update the task with subtasks
 
 
@@ -557,7 +533,7 @@ const EisenhowerMatrix: React.FC = () => {
     setLoadingAI(true); // Show spinner
     const apiUrl = "https://api-inference.huggingface.co/models/mistralai/Mistral-Small-Instruct-2409";
 
-    const prompt = "Only respond with a numbered list of tasks and nothing else. Break down the following task into 3 to 8 subtasks, it must not be a repeat of the main task, each subtask must be a single line and less than 12 words. The subtasks should be manageable for an 18-year-old with focus issues and  ADHD and can be completed within 24 hours:"
+    const prompt = "Only respond with a numbered list of tasks and nothing else. Break down the following task into minimum of 4 to maximum of 8 subtasks, it must not be a repeat of the main task, each subtask must be a single line and less than 12 words. The subtasks should be manageable for an 18-year-old with focus issues and  ADHD and can be completed within 24 hours:"
 
     try {
       const response = await fetch(apiUrl, {

@@ -12,12 +12,15 @@ import { Analytics } from "@vercel/analytics/react"
 
 import * as Cronitor from '@cronitorio/cronitor-rum';
 
-
 // Load the Cronitor tracker once in your app
-Cronitor.load("e81fde5710b90e1b42b794a33a0a2ad0", {
-  debug: false,  // <-- You can enable this to see logs in the console
-  trackMode: 'history', // <-- You can change this to 'off' to track events manually
-});
+export function loadCronitor() {
+  if (typeof window !== "undefined") {
+    Cronitor.load("e81fde5710b90e1b42b794a33a0a2ad0", {
+      debug: false,  // <-- You can enable this to see logs in the console
+      trackMode: 'history', // <-- You can change this to 'off' to track events manually
+    });
+  }
+}
 
 export const metadata: Metadata = {
   title: {

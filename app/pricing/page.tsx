@@ -26,15 +26,17 @@ export default function PricingPage() {
     // </div>
     <>
       <h1 className={title()}>Pricing</h1>
-      <div className="mt-10 flex flex-col md:flex-row justify-center items-top gap-6">
+      <div className="mt-10 flex flex-col md:flex-row justify-center items-stretch gap-6">
 
         {/* Free Pricing Card */}
-        <Card className="p-4 w-full md:w-80 shadow-lg" style={{ height: "100%" }}>
+        <Card className="p-2 w-full md:w-80 shadow-lg h-full">
           <CardHeader className="text-center text-lg font-semibold">Free (without creating an account)
           </CardHeader>
           <CardBody>
             <ul className="list-disc ml-6 mb-4">
               <li>Prioritize tasks</li>
+              <li>Ads</li> 	
+              <li>Limited tasks (20 max)</li> 	
               <li>Break tasks down into substasks</li>
               <li>Break tasks down with AI</li>
               <li>Access without creating an account</li>
@@ -50,17 +52,17 @@ export default function PricingPage() {
         </Card>
 
         {/* Lifetime User Pricing Card */}
-        <Card className="p-8 w-full md:w-80 shadow-lg border-primary" style={{ height: "100%" }}>
+        <Card className="p-2 w-full md:w-80 shadow-lg border-primary h-full">
           <CardHeader className="text-center text-lg font-semibold">Lifetime User (with account)</CardHeader>
           <CardBody>
             <ul className="list-disc ml-6 mb-4">
               <li>All free features +</li>
+              <li>No ads</li>
+              <li>Unlimited tasks</li> 	
               <li>Sync on all your devices (mobile app, desktop app, tablet, chrome extension)</li>
-              <li>Works offline + sync when you are back online</li>
-              <li>Save task history</li>
+              <li>Archive tasks</li>
               <li>Export as PDF</li>
               <li>Access to all upcoming features forever</li>
-              <li>Lifetime access for just $20</li>
             </ul>
             <div className="text-center">
               <a className="text-cyan-600 underline" href="https://buy.stripe.com/6oE4iHeaX4P85hK4gl" target="_blank" rel="noopener noreferrer">

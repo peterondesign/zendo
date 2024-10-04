@@ -108,13 +108,10 @@ function PricingPage() {
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "mt-10 flex flex-col md:flex-row justify-center items-top gap-6",
+                className: "mt-10 flex flex-col md:flex-row justify-center items-stretch gap-6",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$card$2f$dist$2f$chunk$2d$H4VOEXHF$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__card_default__as__Card$3e$__["Card"], {
-                        className: "p-4 w-full md:w-80 shadow-lg",
-                        style: {
-                            height: "100%"
-                        },
+                        className: "p-2 w-full md:w-80 shadow-lg h-full",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$card$2f$dist$2f$chunk$2d$J333S7JQ$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__card_header_default__as__CardHeader$3e$__["CardHeader"], {
                                 className: "text-center text-lg font-semibold",
@@ -137,24 +134,38 @@ function PricingPage() {
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
-                                                children: "Break tasks down into substasks"
+                                                children: "Ads"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/pricing/page.tsx",
                                                 lineNumber: 38,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
-                                                children: "Break tasks down with AI"
+                                                children: "Limited tasks (20 max)"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/pricing/page.tsx",
                                                 lineNumber: 39,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
-                                                children: "Access without creating an account"
+                                                children: "Break tasks down into substasks"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/pricing/page.tsx",
                                                 lineNumber: 40,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                                children: "Break tasks down with AI"
+                                            }, void 0, false, {
+                                                fileName: "[project]/app/pricing/page.tsx",
+                                                lineNumber: 41,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                                children: "Access without creating an account"
+                                            }, void 0, false, {
+                                                fileName: "[project]/app/pricing/page.tsx",
+                                                lineNumber: 42,
                                                 columnNumber: 15
                                             }, this)
                                         ]
@@ -173,17 +184,17 @@ function PricingPage() {
                                                 children: "Start for Free"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/pricing/page.tsx",
-                                                lineNumber: 44,
+                                                lineNumber: 46,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/pricing/page.tsx",
-                                            lineNumber: 43,
+                                            lineNumber: 45,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/pricing/page.tsx",
-                                        lineNumber: 42,
+                                        lineNumber: 44,
                                         columnNumber: 13
                                     }, this)
                                 ]
@@ -199,17 +210,14 @@ function PricingPage() {
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$card$2f$dist$2f$chunk$2d$H4VOEXHF$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__card_default__as__Card$3e$__["Card"], {
-                        className: "p-8 w-full md:w-80 shadow-lg border-primary",
-                        style: {
-                            height: "100%"
-                        },
+                        className: "p-2 w-full md:w-80 shadow-lg border-primary h-full",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$card$2f$dist$2f$chunk$2d$J333S7JQ$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__card_header_default__as__CardHeader$3e$__["CardHeader"], {
                                 className: "text-center text-lg font-semibold",
                                 children: "Lifetime User (with account)"
                             }, void 0, false, {
                                 fileName: "[project]/app/pricing/page.tsx",
-                                lineNumber: 54,
+                                lineNumber: 56,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$card$2f$dist$2f$chunk$2d$5ALFRFZW$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__card_body_default__as__CardBody$3e$__["CardBody"], {
@@ -221,55 +229,55 @@ function PricingPage() {
                                                 children: "All free features +"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/pricing/page.tsx",
-                                                lineNumber: 57,
-                                                columnNumber: 15
-                                            }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
-                                                children: "Sync on all your devices (mobile app, desktop app, tablet, chrome extension)"
-                                            }, void 0, false, {
-                                                fileName: "[project]/app/pricing/page.tsx",
-                                                lineNumber: 58,
-                                                columnNumber: 15
-                                            }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
-                                                children: "Works offline + sync when you are back online"
-                                            }, void 0, false, {
-                                                fileName: "[project]/app/pricing/page.tsx",
                                                 lineNumber: 59,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
-                                                children: "Save task history"
+                                                children: "No ads"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/pricing/page.tsx",
                                                 lineNumber: 60,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
-                                                children: "Export as PDF"
+                                                children: "Unlimited tasks"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/pricing/page.tsx",
                                                 lineNumber: 61,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
-                                                children: "Access to all upcoming features forever"
+                                                children: "Sync on all your devices (mobile app, desktop app, tablet, chrome extension)"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/pricing/page.tsx",
                                                 lineNumber: 62,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
-                                                children: "Lifetime access for just $20"
+                                                children: "Archive tasks"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/pricing/page.tsx",
                                                 lineNumber: 63,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                                children: "Export as PDF"
+                                            }, void 0, false, {
+                                                fileName: "[project]/app/pricing/page.tsx",
+                                                lineNumber: 64,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                                children: "Access to all upcoming features forever"
+                                            }, void 0, false, {
+                                                fileName: "[project]/app/pricing/page.tsx",
+                                                lineNumber: 65,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/pricing/page.tsx",
-                                        lineNumber: 56,
+                                        lineNumber: 58,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -285,29 +293,29 @@ function PricingPage() {
                                                 children: "Buy for $20"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/pricing/page.tsx",
-                                                lineNumber: 67,
+                                                lineNumber: 69,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/pricing/page.tsx",
-                                            lineNumber: 66,
+                                            lineNumber: 68,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/pricing/page.tsx",
-                                        lineNumber: 65,
+                                        lineNumber: 67,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/pricing/page.tsx",
-                                lineNumber: 55,
+                                lineNumber: 57,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/pricing/page.tsx",
-                        lineNumber: 53,
+                        lineNumber: 55,
                         columnNumber: 9
                     }, this)
                 ]
@@ -318,12 +326,12 @@ function PricingPage() {
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("br", {}, void 0, false, {
                 fileName: "[project]/app/pricing/page.tsx",
-                lineNumber: 75,
+                lineNumber: 77,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("br", {}, void 0, false, {
                 fileName: "[project]/app/pricing/page.tsx",
-                lineNumber: 76,
+                lineNumber: 78,
                 columnNumber: 9
             }, this),
             "All the amazing features will work on all your devices (browser, desktop app, phone, tablet, etc.), and it will cost $8 every month (if you don't get the lifetime deal now). If you want any new features, vote here:",
@@ -336,7 +344,7 @@ function PricingPage() {
                 children: "https://tally.so/r/3EDr7L"
             }, void 0, false, {
                 fileName: "[project]/app/pricing/page.tsx",
-                lineNumber: 78,
+                lineNumber: 80,
                 columnNumber: 9
             }, this)
         ]

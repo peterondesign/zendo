@@ -2,7 +2,7 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "Zendo",
-  description: "Block distracting apps. Focus on one task",
+  description: "Prioritise your to-do list with the Eisenhower Matrix, and break tasks down. Focus on one task",
   navItems: [
     {
       label: "Home",

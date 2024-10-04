@@ -642,6 +642,9 @@ const EisenhowerMatrix: React.FC = () => {
             {(['do', 'decide', 'delegate', 'delete', 'unsorted'] as QuadrantType[]).map(renderQuadrant)}
           </div>
         </DragDropContext>
+        <div className="mx-auto justify-center text-center p-4">
+          <a href="https://dang.ai/" target="_blank" ><img src="https://cdn.prod.website-files.com/63d8afd87da01fb58ea3fbcb/6487e2868c6c8f93b4828827_dang-badge.png" alt="Dang.ai" style={{ width: '150px', height: '54px' }} /></a>
+        </div>
       </div>
     </div>
   );

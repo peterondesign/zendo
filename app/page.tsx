@@ -595,7 +595,7 @@ const EisenhowerMatrix: React.FC = () => {
     <div className="flex flex-col">
       <div className="text-center p-4">
         <h1 className="tracking-tight inline font-semibold text-[2.3rem] lg:text-xl leading-9 ">Prioritise your tasks with the Eisenhower Matrix, and break them down</h1>
-        <p className='text-default-500 text-sm'>No account needed, free forever (more features included with <Link href="/pricing"><a className="text-cyan-600 underline">lifetime deal</a></Link>)</p>
+        <p className='text-default-500 text-sm'>No account needed, free forever (more features included with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>)</p>
       </div>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalContent>

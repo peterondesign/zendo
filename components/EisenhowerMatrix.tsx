@@ -425,305 +425,311 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
 
-    const renderTask = (quadrant: QuadrantType, task: Task, index: number) => (
-        <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
-            {(provided, snapshot) => (
-                <li
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    data-task-id={task.id}
-                    data-quadrant={quadrant}
-                    className={`flex flex-col items-start justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-gray-700' : 'hover:bg-default-100'
-                        }`}
-                >
-                    <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center flex-grow">
-                            <span {...provided.dragHandleProps} className="mr-2 cursor-move">
-                                <GripVertical size={16} />
-                            </span>
-                            <input
-                                type="checkbox"
-                                checked={task.completed}
-                                onChange={() => toggleTaskCompletion(quadrant, task.id)}
-                                className="mr-2"
-                                title="Toggle task completion"
-                            />
-                            <span
-                                id={`task-text-${task.id}`}
-                                className={`w-full text-lg ${task.completed ? 'line-through' : ''}`}
-                            >
-                                {task.text}
-                            </span>
-
-                        </div>
-                        <div className="flex items-center">
-                            <ButtonGroup>
-                                <Button
-                                    style={{ minWidth: 'auto' }}
-                                    size="sm"
-                                    variant="light"
-                                    onClick={() => toggleTaskExpansion(task.id)}
+    const renderTask = (quadrant: QuadrantType, task: Task, index: number) => {
+        const completedSubtasks = task.subtasks.filter(subtask => subtask.completed).length;
+        const totalSubtasks = task.subtasks.length;
+    
+        return (
+            <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
+                {(provided, snapshot) => (
+                    <li
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        data-task-id={task.id}
+                        data-quadrant={quadrant}
+                        className={`flex flex-col items-start justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-gray-700' : 'hover:bg-default-100'
+                            }`}
+                    >
+                        <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center flex-grow">
+                                <span {...provided.dragHandleProps} className="mr-2 cursor-move">
+                                    <GripVertical size={16} />
+                                </span>
+                                <input
+                                    type="checkbox"
+                                    checked={task.completed}
+                                    onChange={() => toggleTaskCompletion(quadrant, task.id)}
+                                    className="mr-2"
+                                    title="Toggle task completion"
+                                />
+                                <span
+                                    id={`task-text-${task.id}`}
+                                    className={`w-full text-lg ${task.completed ? 'line-through' : ''}`}
                                 >
-                                    {expandedTaskIds.includes(task.id) ? (
-                                        <ChevronUp size={16} />
-                                    ) : (
-                                        <ChevronDown size={16} />
-                                    )}
-                                </Button>
-                                <Dropdown isOpen={openDropdownId === task.id} onOpenChange={(open) => handleOpenChange(task.id, open)}>
-                                    <DropdownTrigger>
-                                        <Button style={{ minWidth: 'auto' }} size="sm" variant="light">
-                                            <MoreVertical size={16} className="h-4 w-4" />
-                                        </Button>
-                                    </DropdownTrigger>
-                                    <DropdownMenu closeOnSelect={false}>
-                                        <DropdownItem
-                                            onClick={() => {
-                                                setTaskToEdit({ task, quadrant });
-                                                onTaskModalOpen();
-                                                setOpenDropdownId(null);  // Close the dropdown manually
-                                            }}
-                                            onKeyDown={(e) => handleKeyDown(e, task, quadrant)}  // Pass task and quadrant here
-                                            shortcut="e"
-                                        >
-                                            Edit Task
-                                        </DropdownItem>
-
-
-
-                                        <DropdownSection title="AI Tools">
+                                    {task.text}
+                                </span>
+                            </div>
+                            
+                            <div className="flex items-center">
+                                {/* Display subtasks completed/total if subtasks exist */}
+                                {totalSubtasks > 0 && (
+                                    <span className="text-xs text-default-500 mr-2">
+                                        {completedSubtasks}/{totalSubtasks}
+                                    </span>
+                                )}
+                                <ButtonGroup>
+                                    <Button
+                                        style={{ minWidth: 'auto' }}
+                                        size="sm"
+                                        variant="light"
+                                        onClick={() => toggleTaskExpansion(task.id)}
+                                    >
+                                        {expandedTaskIds.includes(task.id) ? (
+                                            <ChevronUp size={16} />
+                                        ) : (
+                                            <ChevronDown size={16} />
+                                        )}
+                                    </Button>
+                                    <Dropdown isOpen={openDropdownId === task.id} onOpenChange={(open) => handleOpenChange(task.id, open)}>
+                                        <DropdownTrigger>
+                                            <Button style={{ minWidth: 'auto' }} size="sm" variant="light">
+                                                <MoreVertical size={16} className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownTrigger>
+                                        <DropdownMenu closeOnSelect={false}>
                                             <DropdownItem
                                                 onClick={() => {
-                                                    if (loadingAI) return;
-                                                    setLoadingAI(true);
-                                                    setTimeout(() => setLoadingAI(false), 10000);
-                                                    handleBreakdownTaskWithAI(quadrant, task.id, task.text);
+                                                    setTaskToEdit({ task, quadrant });
+                                                    onTaskModalOpen();
+                                                    setOpenDropdownId(null);  // Close the dropdown manually
                                                 }}
+                                                onKeyDown={(e) => handleKeyDown(e, task, quadrant)}  // Pass task and quadrant here
+                                                shortcut="e"
                                             >
-                                                {loadingAI ? (
-                                                    <Spinner size="sm" />
-                                                ) : (
-                                                    <>Breakdown with AI</>
-                                                )}
+                                                Edit Task
                                             </DropdownItem>
-                                        </DropdownSection>
-                                        <DropdownSection title="Move">
-                                            {Object.keys(quadrants)
-                                                .filter((q) => q !== quadrant)
-                                                .map((targetQuadrant) => (
-                                                    <DropdownItem
-                                                        key={targetQuadrant}
-                                                        onClick={() => moveTaskToQuadrant(quadrant, task.id, targetQuadrant as QuadrantType)}
-                                                    >
-                                                        Move to {quadrants[targetQuadrant as QuadrantType]}
-                                                    </DropdownItem>
-                                                ))}
-                                        </DropdownSection>
-
-                                        <DropdownSection title="Danger zone">
-                                            <DropdownItem
-                                                onClick={() => deleteTask(quadrant, task.id)}
-                                                className="text-red-500"
-                                            >
-                                                Delete Task
-                                            </DropdownItem>
-
-                                        </DropdownSection>
-                                    </DropdownMenu>
-                                </Dropdown>
-                            </ButtonGroup>
+                                            <DropdownSection title="AI Tools">
+                                                <DropdownItem
+                                                    onClick={() => {
+                                                        if (loadingAI) return;
+                                                        setLoadingAI(true);
+                                                        setTimeout(() => setLoadingAI(false), 10000);
+                                                        handleBreakdownTaskWithAI(quadrant, task.id, task.text);
+                                                    }}
+                                                >
+                                                    {loadingAI ? (
+                                                        <Spinner size="sm" />
+                                                    ) : (
+                                                        <>Breakdown with AI</>
+                                                    )}
+                                                </DropdownItem>
+                                            </DropdownSection>
+                                            <DropdownSection title="Move">
+                                                {Object.keys(quadrants)
+                                                    .filter((q) => q !== quadrant)
+                                                    .map((targetQuadrant) => (
+                                                        <DropdownItem
+                                                            key={targetQuadrant}
+                                                            onClick={() => moveTaskToQuadrant(quadrant, task.id, targetQuadrant as QuadrantType)}
+                                                        >
+                                                            Move to {quadrants[targetQuadrant as QuadrantType]}
+                                                        </DropdownItem>
+                                                    ))}
+                                            </DropdownSection>
+                                            <DropdownSection title="Danger zone">
+                                                <DropdownItem
+                                                    onClick={() => deleteTask(quadrant, task.id)}
+                                                    className="text-red-500"
+                                                >
+                                                    Delete Task
+                                                </DropdownItem>
+                                            </DropdownSection>
+                                        </DropdownMenu>
+                                    </Dropdown>
+                                </ButtonGroup>
+                            </div>
                         </div>
-                    </div>
-                    {expandedTaskIds.includes(task.id) && renderSubtasks(quadrant, task)}
-                </li>
-            )}
-        </Draggable>
-    );
-
-
-    const renderQuadrant = (quadrant: QuadrantType) => (
-        <Droppable droppableId={quadrant} key={quadrant}>
-            {(provided, snapshot) => (
-                <Card
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`p-4 mb-4 ${theme === "dark" ? (snapshot.isDraggingOver ? 'bg-zinc-700' : 'bg-zinc-900') : (snapshot.isDraggingOver ? 'bg-white' : 'bg-background')}`}
-                >          <CardHeader className="flex justify-between items-center">
-                        <div className="text-default-500 text-sm">{quadrants[quadrant]}</div>
-                        <Popover placement="bottom">
-                            <PopoverTrigger>
-                                <Button size="sm" isIconOnly variant="light">
-                                    <Plus size={16} />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent>
-                                <div className="p-4">
-                                    <Input
-                                        placeholder="New task"
-                                        value={newTask}
-                                        onChange={(e) => setNewTask(e.target.value.slice(0, 100))}
-                                        onKeyDown={(e) => e.key === 'Enter' && addTask(quadrant)}
-                                    />
-                                    <Button onClick={() => addTask(quadrant)} className="mt-2">
-                                        Add Task
-                                    </Button>
-                                </div>
-                            </PopoverContent>
-                        </Popover>
-                    </CardHeader>
-                    {tasks[quadrant].length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-10 text-center text-default-500">
-                            <img src="/emptystate.png" className="w-10 h-10 mt-2 mx-auto" alt="No tasks" />
-                            <p className='mt-2 text-default-400 text-sm'>No tasks added yet</p>
-                        </div>
-                    ) : (
-                        <ul className='text-default-90 text-lg'>
-                            {tasks[quadrant].map((task, index) => renderTask(quadrant, task, index))}
-                        </ul>
-                    )}
-                    {provided.placeholder}
-                </Card>
-            )}
-        </Droppable>
-    );
-
-
-    // Function to handle task breakdown with AI and update the task with subtasks
-
-
-    const handleBreakdownTaskWithAI = async (quadrant: QuadrantType, taskId: number, taskText: string) => {
-        setLoadingAI(true); // Show spinner
-        const apiUrl = "https://api-inference.huggingface.co/models/mistralai/Mistral-Small-Instruct-2409";
-
-        const prompt = "Only respond with a numbered list of tasks and nothing else. Break down the following task into minimum of 4 to maximum of 8 subtasks, it must not be a repeat of the main task, each subtask must be a single line and less than 12 words. The subtasks should be manageable for an 18-year-old with focus issues and  ADHD and can be completed within 24 hours:"
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer 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`, // Add your Hugging Face API key here
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    inputs: `${prompt}: ${taskText}`,
-                }),
-            });
-
-            if (!response.ok) {
-                console.error("Error fetching from Hugging Face:", response.statusText);
-                setLoadingAI(false);
-                return;
-            }
-
-            const data = await response.json(); // Parse the JSON response
-            const generatedText = data[0]?.generated_text || "";
-
-            // Split the generated text into lines, remove numbering, asterisks, and filter out empty lines
-            const subtasks = generatedText
-                .split("\n")
-                .map((line: string) => line.replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim()) // Remove numbering and asterisks
-                .filter((subtask: string) => subtask.length > 0 && !subtask.includes(prompt)) // Remove empty lines and the prompt
-                .slice(1); // Remove the empty line at the beginning
-
-            if (subtasks.length > 0) {
-                setTasks((prev) => ({
-                    ...prev,
-                    [quadrant]: prev[quadrant].map((task) =>
-                        task.id === taskId
-                            ? {
-                                ...task,
-                                subtasks: subtasks.map((subtaskText: string, index: number) => ({
-                                    id: Date.now() + index,
-                                    text: subtaskText,
-                                    completed: false,
-                                })),
-                            }
-                            : task
-                    ),
-                }));
-
-                // Automatically expand the task to show generated subtasks
-                setExpandedTaskIds((prev) => [...prev, taskId]);
-            }
-
-            setLoadingAI(false); // Hide spinner
-        } catch (error) {
-            console.error("Error calling Hugging Face API:", error);
-            setLoadingAI(false); // Hide spinner
-        }
+                        {expandedTaskIds.includes(task.id) && renderSubtasks(quadrant, task)}
+                    </li>
+                )}
+            </Draggable>
+        );
     };
+    
 
-    return (
-        <div className="flex flex-col">
-            <div className="text-center p-4">
-                <h1 className="tracking-tight inline font-semibold text-[2.3rem] lg:text-xl leading-9 ">Prioritise your tasks with the Eisenhower Matrix, and break them down</h1>
-                <p className='text-default-500 text-sm'>No account needed, free forever (more features included with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>)</p>
-            </div>
-            <Modal isOpen={isTaskModalOpen} onClose={onTaskModalClose}>
-                <ModalContent>
-                    <ModalHeader>Edit Task</ModalHeader>
-                    <ModalBody>
-                        <Input
-                            value={taskToEdit?.task.text || ''}
-                            onChange={handleTaskInputChange}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    saveEditedTask();
-                                } else if (e.key === 'Escape') {
-                                    onTaskModalClose();
-                                }
-                            }}
-                            fullWidth
-                            placeholder="Enter new task name"
-                        />
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button onClick={saveEditedTask}>Save</Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
+const renderQuadrant = (quadrant: QuadrantType) => (
+    <Droppable droppableId={quadrant} key={quadrant}>
+        {(provided, snapshot) => (
+            <Card
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className={`p-4 mb-4 ${theme === "dark" ? (snapshot.isDraggingOver ? 'bg-zinc-700' : 'bg-zinc-900') : (snapshot.isDraggingOver ? 'bg-white' : 'bg-background')}`}
+            >          <CardHeader className="flex justify-between items-center">
+                    <div className="text-default-500 text-sm">{quadrants[quadrant]}</div>
+                    <Popover placement="bottom">
+                        <PopoverTrigger>
+                            <Button size="sm" isIconOnly variant="light">
+                                <Plus size={16} />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent>
+                            <div className="p-4">
+                                <Input
+                                    placeholder="New task"
+                                    value={newTask}
+                                    onChange={(e) => setNewTask(e.target.value.slice(0, 100))}
+                                    onKeyDown={(e) => e.key === 'Enter' && addTask(quadrant)}
+                                />
+                                <Button onClick={() => addTask(quadrant)} className="mt-2">
+                                    Add Task
+                                </Button>
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+                </CardHeader>
+                {tasks[quadrant].length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center text-default-500">
+                        <img src="/emptystate.png" className="w-10 h-10 mt-2 mx-auto" alt="No tasks" />
+                        <p className='mt-2 text-default-400 text-sm'>No tasks added yet</p>
+                    </div>
+                ) : (
+                    <ul className='text-default-90 text-lg'>
+                        {tasks[quadrant].map((task, index) => renderTask(quadrant, task, index))}
+                    </ul>
+                )}
+                {provided.placeholder}
+            </Card>
+        )}
+    </Droppable>
+);
 
-            <Modal isOpen={isSubtaskModalOpen} onClose={onSubtaskModalClose}>
-                <ModalContent>
-                    <ModalHeader>Edit Subtask</ModalHeader>
-                    <ModalBody>
-                        <Input
-                            value={subtaskToEdit?.subtask.text || ''}
-                            onChange={handleSubtaskInputChange}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    saveEditedSubtask();
-                                } else if (e.key === 'Escape') {
-                                    onSubtaskModalClose();
-                                }
-                            }}
-                            fullWidth
-                            placeholder="Enter new subtask name"
-                        />
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button onClick={saveEditedSubtask}>Save</Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
 
-            {/* <div className='px-4 pb-8'>
+// Function to handle task breakdown with AI and update the task with subtasks
+
+
+const handleBreakdownTaskWithAI = async (quadrant: QuadrantType, taskId: number, taskText: string) => {
+    setLoadingAI(true); // Show spinner
+    const apiUrl = "https://api-inference.huggingface.co/models/mistralai/Mistral-Small-Instruct-2409";
+
+    const prompt = "Only respond with a numbered list of tasks and nothing else. Break down the following task into minimum of 4 to maximum of 8 subtasks, it must not be a repeat of the main task, each subtask must be a single line and less than 12 words. The subtasks should be manageable for an 18-year-old with focus issues and  ADHD and can be completed within 24 hours:"
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer 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`, // Add your Hugging Face API key here
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                inputs: `${prompt}: ${taskText}`,
+            }),
+        });
+
+        if (!response.ok) {
+            console.error("Error fetching from Hugging Face:", response.statusText);
+            setLoadingAI(false);
+            return;
+        }
+
+        const data = await response.json(); // Parse the JSON response
+        const generatedText = data[0]?.generated_text || "";
+
+        // Split the generated text into lines, remove numbering, asterisks, and filter out empty lines
+        const subtasks = generatedText
+            .split("\n")
+            .map((line: string) => line.replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim()) // Remove numbering and asterisks
+            .filter((subtask: string) => subtask.length > 0 && !subtask.includes(prompt)) // Remove empty lines and the prompt
+            .slice(1); // Remove the empty line at the beginning
+
+        if (subtasks.length > 0) {
+            setTasks((prev) => ({
+                ...prev,
+                [quadrant]: prev[quadrant].map((task) =>
+                    task.id === taskId
+                        ? {
+                            ...task,
+                            subtasks: subtasks.map((subtaskText: string, index: number) => ({
+                                id: Date.now() + index,
+                                text: subtaskText,
+                                completed: false,
+                            })),
+                        }
+                        : task
+                ),
+            }));
+
+            // Automatically expand the task to show generated subtasks
+            setExpandedTaskIds((prev) => [...prev, taskId]);
+        }
+
+        setLoadingAI(false); // Hide spinner
+    } catch (error) {
+        console.error("Error calling Hugging Face API:", error);
+        setLoadingAI(false); // Hide spinner
+    }
+};
+
+return (
+    <div className="flex flex-col">
+        <div className="text-center p-4">
+            <h1 className="tracking-tight inline font-semibold text-[2.3rem] lg:text-xl leading-9 ">Prioritise your tasks with the Eisenhower Matrix, and break them down</h1>
+            <p className='text-default-500 text-sm'>No account needed, free forever (more features included with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>)</p>
+        </div>
+        <Modal isOpen={isTaskModalOpen} onClose={onTaskModalClose}>
+            <ModalContent>
+                <ModalHeader>Edit Task</ModalHeader>
+                <ModalBody>
+                    <Input
+                        value={taskToEdit?.task.text || ''}
+                        onChange={handleTaskInputChange}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                saveEditedTask();
+                            } else if (e.key === 'Escape') {
+                                onTaskModalClose();
+                            }
+                        }}
+                        fullWidth
+                        placeholder="Enter new task name"
+                    />
+                </ModalBody>
+                <ModalFooter>
+                    <Button onClick={saveEditedTask}>Save</Button>
+                </ModalFooter>
+            </ModalContent>
+        </Modal>
+
+        <Modal isOpen={isSubtaskModalOpen} onClose={onSubtaskModalClose}>
+            <ModalContent>
+                <ModalHeader>Edit Subtask</ModalHeader>
+                <ModalBody>
+                    <Input
+                        value={subtaskToEdit?.subtask.text || ''}
+                        onChange={handleSubtaskInputChange}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                saveEditedSubtask();
+                            } else if (e.key === 'Escape') {
+                                onSubtaskModalClose();
+                            }
+                        }}
+                        fullWidth
+                        placeholder="Enter new subtask name"
+                    />
+                </ModalBody>
+                <ModalFooter>
+                    <Button onClick={saveEditedSubtask}>Save</Button>
+                </ModalFooter>
+            </ModalContent>
+        </Modal>
+
+        {/* <div className='px-4 pb-8'>
         <GanttChart/>
       </div> */}
-            {loadingAI && (
-                <div className="z-10 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <Spinner size="lg" />
-                </div>
-            )}
-            <div className="flex-grow overflow-auto sm:p-0 lg:p-4">
-                <DragDropContext onDragEnd={onDragEnd}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {(['do', 'decide', 'delegate', 'delete', 'unsorted'] as QuadrantType[]).map(renderQuadrant)}
-                    </div>
-                </DragDropContext>
+        {loadingAI && (
+            <div className="z-10 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <Spinner size="lg" />
             </div>
+        )}
+        <div className="flex-grow overflow-auto sm:p-0 lg:p-4">
+            <DragDropContext onDragEnd={onDragEnd}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {(['do', 'decide', 'delegate', 'delete', 'unsorted'] as QuadrantType[]).map(renderQuadrant)}
+                </div>
+            </DragDropContext>
         </div>
-    );
+    </div>
+);
 };
 
 export default EisenhowerMatrix;

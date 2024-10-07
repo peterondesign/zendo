@@ -1074,6 +1074,10 @@ img, video {
   width: 100vw;
 }
 
+.w-1\/2 {
+  width: 50%;
+}
+
 .min-w-10 {
   min-width: 2.5rem;
 }
@@ -1605,6 +1609,14 @@ img, video {
 
 .gap-6 {
   gap: 1.5rem;
+}
+
+.gap-16 {
+  gap: 4rem;
+}
+
+.gap-8 {
+  gap: 2rem;
 }
 
 .gap-x-0 {

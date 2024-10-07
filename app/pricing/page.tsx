@@ -6,21 +6,20 @@ import { Card, CardHeader, CardBody, Button } from "@nextui-org/react";
 
 export default function PricingPage() {
   return (
-    <>
+    <div className="w-full">
       <h1 className={title()}>Pricing</h1>
-      <div className="mt-10 flex flex-col md:flex-row justify-center items-stretch gap-6">
-
+      <div className="mt-10 flex flex-col md:flex-row items-stretch gap-8" style={{ justifyContent: "space-between" }}>
         {/* Free Pricing Card */}
-        <Card className="p-2 w-full md:w-80 shadow-lg h-full">
+        <Card className="p-2 w-full shadow-lg h-auto">
           <CardHeader className="text-center text-lg font-semibold">Free (without creating an account)
           </CardHeader>
           <CardBody>
             <ul className="list-disc ml-6 mb-4">
-              <li>Prioritize tasks</li>
-              <li>Ads</li> 	
-              <li>Limited tasks (20 max)</li> 	
-              <li>Break tasks down into substasks</li>
-              <li>Break tasks down with AI</li>
+              {/* <li>Ads</li> 	 */}
+              <li>Tasks stored only on a single device</li>
+              <li>Delete tasks (no archive)</li>
+              <li>Limited tasks (24 max)</li> 	
+              <li>Break tasks into subtasks manually or automatically with AI.</li>
               <li>Access without creating an account</li>
             </ul>
             <div className="text-center">
@@ -34,15 +33,15 @@ export default function PricingPage() {
         </Card>
 
         {/* Lifetime User Pricing Card */}
-        <Card className="p-2 w-full md:w-80 shadow-lg border-primary h-full">
+        <Card className="p-2 w-full shadow-lg border-primary h-auto">
           <CardHeader className="text-center text-lg font-semibold">Lifetime User (with account)</CardHeader>
           <CardBody>
             <ul className="list-disc ml-6 mb-4">
-              <li>All free features +</li>
-              <li>No ads</li>
-              <li>Unlimited tasks</li> 	
-              <li>Sync on all your devices (mobile app, desktop app, tablet, chrome extension)</li>
+              {/* <li>No ads</li> */}
+              <li>Sync on all your devices (mobile app, desktop app, chrome extension)</li>
               <li>Archive tasks</li>
+              <li>Unlimited tasks</li> 
+              <li>Break tasks into subtasks manually or automatically with AI.</li>	
               <li>Export as PDF</li>
               <li>Access to all upcoming features forever</li>
             </ul>
@@ -62,6 +61,6 @@ export default function PricingPage() {
         <a className="text-cyan-600 underline" href="/feedback" target="_blank" rel="noopener noreferrer">
           https://tally.so/r/3EDr7L
         </a>
-    </>
+    </div>
   );
 }

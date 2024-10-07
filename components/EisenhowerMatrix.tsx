@@ -10,6 +10,8 @@ import { Popover, PopoverTrigger, PopoverContent, Dropdown, DropdownTrigger, Dro
 import GanttChart from '@/components/ganttchart';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { useTheme } from "next-themes";
+import { Kbd } from "@nextui-org/kbd";
+
 
 
 
@@ -88,8 +90,31 @@ const EisenhowerMatrix: React.FC = () => {
     const { isOpen: isTaskModalOpen, onOpen: onTaskModalOpen, onClose: onTaskModalClose } = useDisclosure();
     const { isOpen: isSubtaskModalOpen, onOpen: onSubtaskModalOpen, onClose: onSubtaskModalClose } = useDisclosure();
     const [editingType, setEditingType] = useState<'task' | 'subtask' | null>(null);
+    const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+
 
     const { theme, setTheme } = useTheme();
+
+    // Function to toggle dropdown based on task ID
+    const handleOpenChange = (taskId: number, open: boolean) => {
+        setOpenDropdownId(open ? taskId : null);  // Set or reset dropdown based on open state
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent, task: Task, quadrant: QuadrantType) => {
+        switch (e.key) {
+            case 'e':
+                setTaskToEdit({ task, quadrant });
+                onTaskModalOpen();
+                break;
+            case 'Delete':
+            case 'Backspace':
+                deleteTask(quadrant, task.id);
+                break;
+        }
+        setOpenDropdownId(null);  // Close dropdown manually after any action
+    };
+
+
 
     const handleTaskInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (taskToEdit) {
@@ -195,6 +220,30 @@ const EisenhowerMatrix: React.FC = () => {
             [quadrant]: prev[quadrant].filter((task) => task.id !== taskId),
         }));
     };
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'e' && (event.metaKey || event.ctrlKey)) {
+                event.preventDefault();
+                // Trigger Edit Task if "E" is pressed
+                if (taskToEdit) {
+                    setTaskToEdit(taskToEdit);
+                    onTaskModalOpen();  // Open the modal to edit the selected task
+                }
+            } else if (event.key === 'Backspace') {
+                // Trigger Delete Task if "Del" key is pressed
+                if (taskToEdit) {
+                    deleteTask(taskToEdit.quadrant, taskToEdit.task.id);
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [taskToEdit, onTaskModalOpen, deleteTask]);
 
     const deleteSubtask = (quadrant: QuadrantType, taskId: number, subtaskId: number) => {
         setTasks((prev) => ({
@@ -324,7 +373,7 @@ const EisenhowerMatrix: React.FC = () => {
                     <div className="flex justify-end">
                         <Dropdown>
                             <DropdownTrigger>
-                                <Button size="sm" variant="light"  style={{ minWidth: 'auto' }}>
+                                <Button size="sm" variant="light" style={{ minWidth: 'auto' }}>
                                     <MoreVertical size={16} className="h-4 w-4" />
                                 </Button>
                             </DropdownTrigger>
@@ -333,16 +382,19 @@ const EisenhowerMatrix: React.FC = () => {
                                     onClick={() => {
                                         setSubtaskToEdit({ subtask, taskId: task.id, quadrant });
                                         onSubtaskModalOpen();
+                                        setOpenDropdownId(null);  // Close the dropdown manually
                                     }}
                                 >
                                     Edit Subtask
                                 </DropdownItem>
+
                                 <DropdownItem
                                     onClick={() => deleteSubtask(quadrant, task.id, subtask.id)}
                                     className="text-red-500"
                                 >
                                     Delete Subtask
                                 </DropdownItem>
+
                             </DropdownMenu>
                         </Dropdown>
                     </div>
@@ -379,6 +431,8 @@ const EisenhowerMatrix: React.FC = () => {
                 <li
                     ref={provided.innerRef}
                     {...provided.draggableProps}
+                    data-task-id={task.id}
+                    data-quadrant={quadrant}
                     className={`flex flex-col items-start justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-gray-700' : 'hover:bg-default-100'
                         }`}
                 >
@@ -416,21 +470,25 @@ const EisenhowerMatrix: React.FC = () => {
                                         <ChevronDown size={16} />
                                     )}
                                 </Button>
-                                <Dropdown>
+                                <Dropdown isOpen={openDropdownId === task.id} onOpenChange={(open) => handleOpenChange(task.id, open)}>
                                     <DropdownTrigger>
                                         <Button style={{ minWidth: 'auto' }} size="sm" variant="light">
                                             <MoreVertical size={16} className="h-4 w-4" />
                                         </Button>
                                     </DropdownTrigger>
-                                    <DropdownMenu>
+                                    <DropdownMenu closeOnSelect={false}>
                                         <DropdownItem
                                             onClick={() => {
                                                 setTaskToEdit({ task, quadrant });
                                                 onTaskModalOpen();
+                                                setOpenDropdownId(null);  // Close the dropdown manually
                                             }}
+                                            onKeyDown={(e) => handleKeyDown(e, task, quadrant)}  // Pass task and quadrant here
+                                            shortcut="e"
                                         >
                                             Edit Task
                                         </DropdownItem>
+
 
 
                                         <DropdownSection title="AI Tools">
@@ -469,6 +527,7 @@ const EisenhowerMatrix: React.FC = () => {
                                             >
                                                 Delete Task
                                             </DropdownItem>
+
                                         </DropdownSection>
                                     </DropdownMenu>
                                 </Dropdown>
@@ -607,6 +666,13 @@ const EisenhowerMatrix: React.FC = () => {
                         <Input
                             value={taskToEdit?.task.text || ''}
                             onChange={handleTaskInputChange}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    saveEditedTask();
+                                } else if (e.key === 'Escape') {
+                                    onTaskModalClose();
+                                }
+                            }}
                             fullWidth
                             placeholder="Enter new task name"
                         />
@@ -624,6 +690,13 @@ const EisenhowerMatrix: React.FC = () => {
                         <Input
                             value={subtaskToEdit?.subtask.text || ''}
                             onChange={handleSubtaskInputChange}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    saveEditedSubtask();
+                                } else if (e.key === 'Escape') {
+                                    onSubtaskModalClose();
+                                }
+                            }}
                             fullWidth
                             placeholder="Enter new subtask name"
                         />

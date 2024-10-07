@@ -2,6 +2,7 @@
   "app/page.tsx -> @/components/EisenhowerMatrix": {
     "id": "app/page.tsx -> @/components/EisenhowerMatrix",
     "files": [
+      "static/chunks/components_EisenhowerMatrix_tsx_8b6f3f._.js",
       "static/chunks/node_modules_next_dist_compiled_react_0bfca7._.js",
       "static/chunks/node_modules_next_dist_compiled_react-dom_cjs_react-dom_development_c9a189.js",
       "static/chunks/node_modules_next_dist_compiled_react-dom_index_99aff8.js",
@@ -18,8 +19,7 @@
       "static/chunks/node_modules_@react-aria_af5b02._.js",
       "static/chunks/node_modules_react-redux_f854eb._.js",
       "static/chunks/node_modules_a70953._.js",
-      "static/chunks/components_EisenhowerMatrix_tsx_8b6f3f._.js",
-      "static/chunks/components_EisenhowerMatrix_tsx_67c477._.js"
+      "static/chunks/components_EisenhowerMatrix_tsx_692f59._.js"
     ]
   }
 }

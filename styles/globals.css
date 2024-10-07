@@ -38,3 +38,7 @@
   .bg-gradient-radial-gray.bg-gradient-noise {
     background: url(/noise.png) repeat, radial-gradient(circle at 20% 40%, #00000012, #1c1c1c18, #4b4b4b05);
 }
+
+.text-lg > * input {
+  font-size: 1.125rem;
+}

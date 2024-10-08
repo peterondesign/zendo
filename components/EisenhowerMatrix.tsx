@@ -11,13 +11,11 @@ import GanttChart from '@/components/ganttchart';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { useTheme } from "next-themes";
 import { Kbd } from "@nextui-org/kbd";
-
-
-
-
 import { Spinner } from '@nextui-org/react';
+import FloatingButton from './floatingbutton';
 
 type Task = {
+    archived: boolean;
     id: number;
     text: string;
     completed: boolean;
@@ -78,6 +76,14 @@ const EisenhowerMatrix: React.FC = () => {
         delete: [],
         unsorted: [],
     });
+    const [archivedTasks, setArchivedTasks] = useState<Record<QuadrantType, Task[]>>({
+        do: [],
+        decide: [],
+        delegate: [],
+        delete: [],
+        unsorted: [],
+    });
+    const [isArchiveMode, setIsArchiveMode] = useState(false);
     const [newTask, setNewTask] = useState('');
     const [selectedQuadrant, setSelectedQuadrant] = useState<QuadrantType>('unsorted');
     const [newSubtask, setNewSubtask] = useState('');
@@ -221,6 +227,17 @@ const EisenhowerMatrix: React.FC = () => {
         }));
     };
 
+    const archiveTask = (quadrant: QuadrantType, taskId: number) => {
+        setTasks((prevTasks) => ({
+            ...prevTasks,
+            [quadrant]: prevTasks[quadrant].map((task) =>
+                task.id === taskId ? { ...task, archived: true } : task
+            ),
+        }));
+    };
+
+
+
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'e' && (event.metaKey || event.ctrlKey)) {
@@ -349,6 +366,51 @@ const EisenhowerMatrix: React.FC = () => {
         }
     };
 
+    // Update the renderArchivedTasks function
+    const renderArchivedTasks = (quadrant: QuadrantType) => (
+        <ul className="mt-4">
+            {archivedTasks[quadrant].length > 0 ? (
+                archivedTasks[quadrant].map((task) => (
+                    <li key={task.id} className="flex items-center justify-between mb-2">
+                        <span className="line-through">{task.text}</span>
+                        <Button
+                            size="sm"
+                            variant="light"
+                            onClick={() => unarchiveTask(quadrant, task.id)}
+                        >
+                            Unarchive
+                        </Button>
+                    </li>
+                ))
+            ) : (
+                <p>No archived tasks</p>
+            )}
+        </ul>
+    );
+
+    // Add a new function to unarchive tasks
+    const unarchiveTask = (quadrant: QuadrantType, taskId: number) => {
+        setArchivedTasks((prevArchived) => {
+            const updatedArchived = { ...prevArchived };
+            const taskToUnarchive = updatedArchived[quadrant].find((task) => task.id === taskId);
+            if (taskToUnarchive) {
+                setTasks((prevTasks) => ({
+                    ...prevTasks,
+                    [quadrant]: [...prevTasks[quadrant], taskToUnarchive],
+                }));
+                updatedArchived[quadrant] = updatedArchived[quadrant].filter((task) => task.id !== taskId);
+            }
+            return updatedArchived;
+        });
+    };
+
+
+    const [showArchived, setShowArchived] = useState(false); // Add this line to manage the archived state.
+
+    const showArchivedTasks = () => {
+        setIsArchiveMode(!isArchiveMode);
+        setShowArchived(!showArchived);
+    };
 
 
     const renderSubtasks = (quadrant: QuadrantType, task: Task) => (
@@ -364,39 +426,14 @@ const EisenhowerMatrix: React.FC = () => {
                             className="max-w-max mr-2"
                         />
                         <span
-                            className="w-full"
-                            style={subtask.completed ? { textDecoration: 'line-through' } : undefined}
+                            className={`w-full ${subtask.completed ? 'line-through' : ''
+                                } ${task.archived ? 'opacity-50 italic' : 'opacity-100'}`} // Apply archived styles from parent task
                         >
                             {subtask.text}
                         </span>
                     </div>
                     <div className="flex justify-end">
-                        <Dropdown>
-                            <DropdownTrigger>
-                                <Button size="sm" variant="light" style={{ minWidth: 'auto' }}>
-                                    <MoreVertical size={16} className="h-4 w-4" />
-                                </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu>
-                                <DropdownItem
-                                    onClick={() => {
-                                        setSubtaskToEdit({ subtask, taskId: task.id, quadrant });
-                                        onSubtaskModalOpen();
-                                        setOpenDropdownId(null);  // Close the dropdown manually
-                                    }}
-                                >
-                                    Edit Subtask
-                                </DropdownItem>
-
-                                <DropdownItem
-                                    onClick={() => deleteSubtask(quadrant, task.id, subtask.id)}
-                                    className="text-red-500"
-                                >
-                                    Delete Subtask
-                                </DropdownItem>
-
-                            </DropdownMenu>
-                        </Dropdown>
+                        {/* Dropdown for editing/deleting subtasks */}
                     </div>
                 </li>
             ))}
@@ -408,13 +445,13 @@ const EisenhowerMatrix: React.FC = () => {
                     onKeyDown={(e) => e.key === 'Enter' && addSubtask(quadrant, task.id)}
                     maxLength={100}
                 />
-                <Button onClick={() => addSubtask(quadrant, task.id)} className="ml-2" style={{ minWidth: 'auto' }}
-                >
+                <Button onClick={() => addSubtask(quadrant, task.id)} className="ml-2" style={{ minWidth: 'auto' }}>
                     <Plus size={16} />
                 </Button>
             </div>
         </ul>
     );
+
 
     // Function to calculate percentage of completed subtasks
     const getSubtaskCompletionPercentage = (task: Task) => {
@@ -426,9 +463,11 @@ const EisenhowerMatrix: React.FC = () => {
 
 
     const renderTask = (quadrant: QuadrantType, task: Task, index: number) => {
-        const completedSubtasks = task.subtasks.filter(subtask => subtask.completed).length;
+        if (task.archived && !isArchiveMode) {
+            return null; // Skip rendering archived tasks unless archive mode is active
+        } const completedSubtasks = task.subtasks.filter(subtask => subtask.completed).length;
         const totalSubtasks = task.subtasks.length;
-    
+
         return (
             <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
                 {(provided, snapshot) => (
@@ -454,12 +493,14 @@ const EisenhowerMatrix: React.FC = () => {
                                 />
                                 <span
                                     id={`task-text-${task.id}`}
-                                    className={`w-full text-lg ${task.completed ? 'line-through' : ''}`}
+                                    className={`w-full text-lg ${task.completed ? 'line-through' : ''} ${task.archived ? 'opacity-50 italic' : 'opacity-100'
+                                        }`} // Fade out and italicize archived tasks
                                 >
-                                    {task.text}
+                                    {task.text}  {/* Make sure the task text is being rendered */}
                                 </span>
+
                             </div>
-                            
+
                             <div className="flex items-center">
                                 {/* Display subtasks completed/total if subtasks exist */}
                                 {totalSubtasks > 0 && (
@@ -526,6 +567,13 @@ const EisenhowerMatrix: React.FC = () => {
                                                         </DropdownItem>
                                                     ))}
                                             </DropdownSection>
+
+                                            <DropdownItem
+                                                onClick={() => archiveTask(quadrant, task.id)}
+                                            >
+                                                Archive Task
+                                            </DropdownItem>
+
                                             <DropdownSection title="Danger zone">
                                                 <DropdownItem
                                                     onClick={() => deleteTask(quadrant, task.id)}
@@ -545,191 +593,197 @@ const EisenhowerMatrix: React.FC = () => {
             </Draggable>
         );
     };
-    
 
-const renderQuadrant = (quadrant: QuadrantType) => (
-    <Droppable droppableId={quadrant} key={quadrant}>
-        {(provided, snapshot) => (
-            <Card
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className={`p-4 mb-4 ${theme === "dark" ? (snapshot.isDraggingOver ? 'bg-zinc-700' : 'bg-zinc-900') : (snapshot.isDraggingOver ? 'bg-white' : 'bg-background')}`}
-            >          <CardHeader className="flex justify-between items-center">
-                    <div className="text-default-500 text-sm">{quadrants[quadrant]}</div>
-                    <Popover placement="bottom">
-                        <PopoverTrigger>
-                            <Button size="sm" isIconOnly variant="light">
-                                <Plus size={16} />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent>
-                            <div className="p-4">
-                                <Input
-                                    placeholder="New task"
-                                    value={newTask}
-                                    onChange={(e) => setNewTask(e.target.value.slice(0, 100))}
-                                    onKeyDown={(e) => e.key === 'Enter' && addTask(quadrant)}
-                                />
-                                <Button onClick={() => addTask(quadrant)} className="mt-2">
-                                    Add Task
+
+    const renderQuadrant = (quadrant: QuadrantType) => (
+        <Droppable droppableId={quadrant} key={quadrant}>
+            {(provided, snapshot) => (
+                <Card
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`p-4 mb-4 ${theme === "dark" ? (snapshot.isDraggingOver ? 'bg-zinc-700' : 'bg-zinc-900') : (snapshot.isDraggingOver ? 'bg-white' : 'bg-background')}`}
+                >          <CardHeader className="flex justify-between items-center">
+                        <div className="text-default-500 text-sm">{quadrants[quadrant]}</div>
+                        <Popover placement="bottom">
+                            <PopoverTrigger>
+                                <Button size="sm" isIconOnly variant="light">
+                                    <Plus size={16} />
                                 </Button>
-                            </div>
-                        </PopoverContent>
-                    </Popover>
-                </CardHeader>
-                {tasks[quadrant].length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-10 text-center text-default-500">
-                        <img src="/emptystate.png" className="w-10 h-10 mt-2 mx-auto" alt="No tasks" />
-                        <p className='mt-2 text-default-400 text-sm'>No tasks added yet</p>
-                    </div>
-                ) : (
-                    <ul className='text-default-90 text-lg'>
-                        {tasks[quadrant].map((task, index) => renderTask(quadrant, task, index))}
-                    </ul>
-                )}
-                {provided.placeholder}
-            </Card>
-        )}
-    </Droppable>
-);
+                            </PopoverTrigger>
+                            <PopoverContent>
+                                <div className="p-4">
+                                    <Input
+                                        placeholder="New task"
+                                        value={newTask}
+                                        onChange={(e) => setNewTask(e.target.value.slice(0, 100))}
+                                        onKeyDown={(e) => e.key === 'Enter' && addTask(quadrant)}
+                                    />
+                                    <Button onClick={() => addTask(quadrant)} className="mt-2">
+                                        Add Task
+                                    </Button>
+                                </div>
+                            </PopoverContent>
+                        </Popover>
+                    </CardHeader>
+                    {tasks[quadrant].length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-10 text-center text-default-500">
+                            <img src="/emptystate.png" className="w-10 h-10 mt-2 mx-auto" alt="No tasks" />
+                            <p className='mt-2 text-default-400 text-sm'>No tasks added yet</p>
+                        </div>
+                    ) : (
+                        <ul className='text-default-90 text-lg'>
+                            {tasks[quadrant].map((task, index) => renderTask(quadrant, task, index))}
+                        </ul>
+                    )}
+                    {provided.placeholder}
+                </Card>
+            )}
+        </Droppable>
+    );
 
 
-// Function to handle task breakdown with AI and update the task with subtasks
+    // Function to handle task breakdown with AI and update the task with subtasks
 
 
-const handleBreakdownTaskWithAI = async (quadrant: QuadrantType, taskId: number, taskText: string) => {
-    setLoadingAI(true); // Show spinner
-    const apiUrl = "https://api-inference.huggingface.co/models/mistralai/Mistral-Small-Instruct-2409";
+    const handleBreakdownTaskWithAI = async (quadrant: QuadrantType, taskId: number, taskText: string) => {
+        setLoadingAI(true); // Show spinner
+        const apiUrl = "https://api-inference.huggingface.co/models/mistralai/Mistral-Small-Instruct-2409";
 
-    const prompt = "Only respond with a numbered list of tasks and nothing else. Break down the following task into minimum of 4 to maximum of 8 subtasks, it must not be a repeat of the main task, each subtask must be a single line and less than 12 words. The subtasks should be manageable for an 18-year-old with focus issues and  ADHD and can be completed within 24 hours:"
+        const prompt = "Only respond with a numbered list of tasks and nothing else. Break down the following task into minimum of 4 to maximum of 8 subtasks, it must not be a repeat of the main task, each subtask must be a single line and less than 12 words. The subtasks should be manageable for an 18-year-old with focus issues and  ADHD and can be completed within 24 hours:"
 
-    try {
-        const response = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer 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`, // Add your Hugging Face API key here
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                inputs: `${prompt}: ${taskText}`,
-            }),
-        });
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer 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`, // Add your Hugging Face API key here
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    inputs: `${prompt}: ${taskText}`,
+                }),
+            });
 
-        if (!response.ok) {
-            console.error("Error fetching from Hugging Face:", response.statusText);
-            setLoadingAI(false);
-            return;
-        }
+            if (!response.ok) {
+                console.error("Error fetching from Hugging Face:", response.statusText);
+                setLoadingAI(false);
+                return;
+            }
 
-        const data = await response.json(); // Parse the JSON response
-        const generatedText = data[0]?.generated_text || "";
+            const data = await response.json(); // Parse the JSON response
+            const generatedText = data[0]?.generated_text || "";
 
-        // Split the generated text into lines, remove numbering, asterisks, and filter out empty lines
-        const subtasks = generatedText
-            .split("\n")
-            .map((line: string) => line.replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim()) // Remove numbering and asterisks
-            .filter((subtask: string) => subtask.length > 0 && !subtask.includes(prompt)) // Remove empty lines and the prompt
-            .slice(1); // Remove the empty line at the beginning
+            // Split the generated text into lines, remove numbering, asterisks, and filter out empty lines
+            const subtasks = generatedText
+                .split("\n")
+                .map((line: string) => line.replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim()) // Remove numbering and asterisks
+                .filter((subtask: string) => subtask.length > 0 && !subtask.includes(prompt)) // Remove empty lines and the prompt
+                .slice(1); // Remove the empty line at the beginning
 
-        if (subtasks.length > 0) {
-            setTasks((prev) => ({
-                ...prev,
-                [quadrant]: prev[quadrant].map((task) =>
-                    task.id === taskId
-                        ? {
-                            ...task,
-                            subtasks: subtasks.map((subtaskText: string, index: number) => ({
-                                id: Date.now() + index,
-                                text: subtaskText,
-                                completed: false,
-                            })),
-                        }
-                        : task
-                ),
-            }));
-
-            // Automatically expand the task to show generated subtasks
-            setExpandedTaskIds((prev) => [...prev, taskId]);
-        }
-
-        setLoadingAI(false); // Hide spinner
-    } catch (error) {
-        console.error("Error calling Hugging Face API:", error);
-        setLoadingAI(false); // Hide spinner
-    }
-};
-
-return (
-    <div className="flex flex-col">
-        <div className="text-center p-4">
-            <h1 className="tracking-tight inline font-semibold text-[2.3rem] lg:text-xl leading-9 ">Prioritise your tasks with the Eisenhower Matrix, and break them down</h1>
-            <p className='text-default-500 text-sm'>No account needed, free forever (more features included with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>)</p>
-        </div>
-        <Modal isOpen={isTaskModalOpen} onClose={onTaskModalClose}>
-            <ModalContent>
-                <ModalHeader>Edit Task</ModalHeader>
-                <ModalBody>
-                    <Input
-                        value={taskToEdit?.task.text || ''}
-                        onChange={handleTaskInputChange}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                saveEditedTask();
-                            } else if (e.key === 'Escape') {
-                                onTaskModalClose();
+            if (subtasks.length > 0) {
+                setTasks((prev) => ({
+                    ...prev,
+                    [quadrant]: prev[quadrant].map((task) =>
+                        task.id === taskId
+                            ? {
+                                ...task,
+                                subtasks: subtasks.map((subtaskText: string, index: number) => ({
+                                    id: Date.now() + index,
+                                    text: subtaskText,
+                                    completed: false,
+                                })),
                             }
-                        }}
-                        fullWidth
-                        placeholder="Enter new task name"
-                    />
-                </ModalBody>
-                <ModalFooter>
-                    <Button onClick={saveEditedTask}>Save</Button>
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
+                            : task
+                    ),
+                }));
 
-        <Modal isOpen={isSubtaskModalOpen} onClose={onSubtaskModalClose}>
-            <ModalContent>
-                <ModalHeader>Edit Subtask</ModalHeader>
-                <ModalBody>
-                    <Input
-                        value={subtaskToEdit?.subtask.text || ''}
-                        onChange={handleSubtaskInputChange}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                saveEditedSubtask();
-                            } else if (e.key === 'Escape') {
-                                onSubtaskModalClose();
-                            }
-                        }}
-                        fullWidth
-                        placeholder="Enter new subtask name"
-                    />
-                </ModalBody>
-                <ModalFooter>
-                    <Button onClick={saveEditedSubtask}>Save</Button>
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
+                // Automatically expand the task to show generated subtasks
+                setExpandedTaskIds((prev) => [...prev, taskId]);
+            }
 
-        {/* <div className='px-4 pb-8'>
+            setLoadingAI(false); // Hide spinner
+        } catch (error) {
+            console.error("Error calling Hugging Face API:", error);
+            setLoadingAI(false); // Hide spinner
+        }
+    };
+
+    return (
+        <div className="flex flex-col">
+            <div className="text-center p-4">
+                <h1 className="tracking-tight inline font-semibold text-[2.3rem] lg:text-xl leading-9 ">Prioritise your tasks with the Eisenhower Matrix, and break them down</h1>
+                <p className='text-default-500 text-sm'>No account needed, free forever (more features included with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>)</p>
+            </div>
+            <Modal isOpen={isTaskModalOpen} onClose={onTaskModalClose}>
+                <ModalContent>
+                    <ModalHeader>Edit Task</ModalHeader>
+                    <ModalBody>
+                        <Input
+                            value={taskToEdit?.task.text || ''}
+                            onChange={handleTaskInputChange}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    saveEditedTask();
+                                } else if (e.key === 'Escape') {
+                                    onTaskModalClose();
+                                }
+                            }}
+                            fullWidth
+                            placeholder="Enter new task name"
+                        />
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button onClick={saveEditedTask}>Save</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            <Modal isOpen={isSubtaskModalOpen} onClose={onSubtaskModalClose}>
+                <ModalContent>
+                    <ModalHeader>Edit Subtask</ModalHeader>
+                    <ModalBody>
+                        <Input
+                            value={subtaskToEdit?.subtask.text || ''}
+                            onChange={handleSubtaskInputChange}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    saveEditedSubtask();
+                                } else if (e.key === 'Escape') {
+                                    onSubtaskModalClose();
+                                }
+                            }}
+                            fullWidth
+                            placeholder="Enter new subtask name"
+                        />
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button onClick={saveEditedSubtask}>Save</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            <FloatingButton
+                tasks={tasks}
+                showArchivedTasks={showArchivedTasks}
+                isArchiveMode={isArchiveMode}
+            />
+
+            {/* <div className='px-4 pb-8'>
         <GanttChart/>
       </div> */}
-        {loadingAI && (
-            <div className="z-10 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <Spinner size="lg" />
-            </div>
-        )}
-        <div className="flex-grow overflow-auto sm:p-0 lg:p-4">
-            <DragDropContext onDragEnd={onDragEnd}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {(['do', 'decide', 'delegate', 'delete', 'unsorted'] as QuadrantType[]).map(renderQuadrant)}
+            {loadingAI && (
+                <div className="z-10 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <Spinner size="lg" />
                 </div>
-            </DragDropContext>
+            )}
+            <div className="flex-grow overflow-auto sm:p-0 lg:p-4">
+                <DragDropContext onDragEnd={onDragEnd}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {(['do', 'decide', 'delegate', 'delete', 'unsorted'] as QuadrantType[]).map(renderQuadrant)}
+                    </div>
+                </DragDropContext>
+            </div>
         </div>
-    </div>
-);
+    );
 };
 
 export default EisenhowerMatrix;

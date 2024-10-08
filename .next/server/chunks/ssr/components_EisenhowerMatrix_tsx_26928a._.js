@@ -4,9 +4,13 @@ module.exports = {
 
 __turbopack_export_value__((__turbopack_import__) => {
     return Promise.all([
-  "server/chunks/ssr/components_EisenhowerMatrix_tsx_971351._.js",
+  "server/chunks/ssr/components_25cfa8._.js",
   "server/chunks/ssr/node_modules_react-beautiful-dnd_dist_react-beautiful-dnd_esm_a5522a.js",
-  "server/chunks/ssr/node_modules_f53958._.js"
+  "server/chunks/ssr/node_modules_jspdf_dist_jspdf_es_min_7b7888.js",
+  "server/chunks/ssr/node_modules_@nextui-org_2b4943._.js",
+  "server/chunks/ssr/node_modules_@react-aria_39075b._.js",
+  "server/chunks/ssr/node_modules_18f26b._.js",
+  "server/chunks/ssr/node_modules_c5fa83._.js"
 ].map((chunk) => __turbopack_load__(chunk))).then(() => {
         return __turbopack_import__("[project]/components/EisenhowerMatrix.tsx [app-ssr] (ecmascript)");
     });

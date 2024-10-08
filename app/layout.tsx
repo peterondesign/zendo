@@ -8,6 +8,8 @@ import { Providers } from "./providers";
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/navbar";
+import { UserProvider } from '@auth0/nextjs-auth0/client';
+
 
 import * as Cronitor from '@cronitorio/cronitor-rum';
 
@@ -63,6 +65,8 @@ export default function RootLayout({
             __html: `(function(v,i,s,a,t){v[t]=v[t]||function(){(v[t].v=v[t].v||[]).push(arguments)};if(!v._visaSettings){v._visaSettings={}}v._visaSettings[a]={v:'1.0',s:a,a:'1',t:t};var b=i.getElementsByTagName('body')[0];var p=i.createElement('script');p.defer=1;p.async=1;p.src=s+'?s='+a;b.appendChild(p)})(window,document,'//app-worker.visitor-analytics.io/main.js','f0c6be6b-7f02-11ef-9280-bee4895ac99e','va')`,
           }}
         />
+                <UserProvider>
+
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <div className="relative flex flex-col min-h-dvh">
             <Navbar />
@@ -82,6 +86,8 @@ export default function RootLayout({
             </footer>
           </div>
         </Providers>
+                </UserProvider>
+
       </body>
     </html>
   );

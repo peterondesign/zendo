@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Navbar as NextUINavbar,
   NavbarContent,
@@ -15,6 +17,9 @@ import { link as linkStyles } from "@nextui-org/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
 
+import { UserProvider, useUser } from '@auth0/nextjs-auth0/client'
+
+
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import {
@@ -27,6 +32,8 @@ import {
 } from "@/components/icons";
 
 export const Navbar = () => {
+  const { user } = useUser();
+
   const searchInput = (
     <Input
       aria-label="Search"
@@ -86,8 +93,21 @@ export const Navbar = () => {
           <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>
             <DiscordIcon className="text-default-500" />
           </Link>
+
+          {/* Conditional rendering for Login/Logout */}
+          {user ? (
+            <Button as="a" href="/api/auth/logout" variant="flat">
+              Logout
+            </Button>
+          ) : (
+            <Button as="a" href="/api/auth/login" variant="flat">
+              Login
+            </Button>
+          )}
+
           <ThemeSwitch />
         </NavbarItem>
+
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
@@ -100,7 +120,7 @@ export const Navbar = () => {
           {siteConfig.navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
               <Link
-              color="foreground"
+                color="foreground"
                 href={item.href}
                 size="lg"
               >

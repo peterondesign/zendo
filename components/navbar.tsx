@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect } from 'react';
 import {
   Navbar as NextUINavbar,
   NavbarContent,
@@ -17,7 +18,6 @@ import { link as linkStyles } from "@nextui-org/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
 import { UserProvider, useUser } from '@auth0/nextjs-auth0/client'
-import { createClient } from '@supabase/supabase-js';
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import {
@@ -31,30 +31,55 @@ import {
 
 import supabase from "@/utils/supabase/supabaseConfig";
 
+import { Avatar } from "@nextui-org/react";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/dropdown";
 
 export const Navbar = () => {
   const { user } = useUser();
 
-  // Function to insert user into Supabase
-  const insertUserToSupabase = async () => {
-    if (user) {
-      const { name, email, sub } = user; // Capture necessary fields from Auth0 user object
-      const { data, error } = await supabase
-        .from('users')
-        .upsert({ id: sub, name, email }, { onConflict: 'id' }); // Avoid inserting duplicates based on 'id'
+  useEffect(() => {
+    const insertUserToSupabase = async () => {
+      if (user) {
+        const { name, email, sub } = user;
+        const { data, error } = await supabase
+          .from('users')
+          .upsert({ id: sub, name, email }, { onConflict: 'id' });
 
-      if (error) {
-        console.error("Error inserting user into Supabase:", error.message);
-      } else {
-        console.log("User successfully inserted/updated in Supabase:", data);
+        if (error) {
+          console.error("Error inserting user into Supabase:", error.message);
+        } else {
+          console.log("User successfully inserted/updated in Supabase:", data);
+        }
       }
-    }
-  };
+    };
 
-  // Insert user to Supabase if logged in
-  if (user) {
-    insertUserToSupabase();
-  }
+    if (user) {
+      insertUserToSupabase();
+    }
+  }, [user]);
+
+  const UserHeader = user ? (
+    <Dropdown>
+      <DropdownTrigger>
+        <Avatar
+          className="cursor-pointer"
+          src={user.picture ?? undefined}
+          size="md"
+        >
+          {user.name?.[0]?.toUpperCase()}
+        </Avatar>
+      </DropdownTrigger>
+      <DropdownMenu className="bg-default-100 text-default-900" aria-label="User menu">
+        <DropdownItem key="logout" href="/api/auth/logout">
+          Logout
+        </DropdownItem>
+      </DropdownMenu>
+    </Dropdown>
+  ) : (
+    <Button as="a" href="/api/auth/login" variant="flat">
+      Login
+    </Button>
+  );
 
   const searchInput = (
     <Input
@@ -115,24 +140,13 @@ export const Navbar = () => {
           <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>
             <DiscordIcon className="text-default-500" />
           </Link>
-
-          {/* Conditional rendering for Login/Logout */}
-          {user ? (
-            <Button as="a" href="/api/auth/logout" variant="flat">
-              Logout
-            </Button>
-          ) : (
-            <Button as="a" href="/api/auth/login" variant="flat">
-              Login
-            </Button>
-          )}
-
           <ThemeSwitch />
+          {UserHeader}
         </NavbarItem>
-
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
+        {UserHeader}
         <ThemeSwitch />
         <NavbarMenuToggle />
       </NavbarContent>
@@ -152,7 +166,6 @@ export const Navbar = () => {
           ))}
         </div>
       </NavbarMenu>
-
     </NextUINavbar>
   );
 };

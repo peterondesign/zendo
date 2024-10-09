@@ -298,7 +298,7 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
     // For saving subtasks
-    const saveEditedSubtask = () => {
+    const saveEditedSubtask: () => void = () => {
         if (subtaskToEdit) {
             const { quadrant, taskId, subtask } = subtaskToEdit;
             setTasks((prev) => ({
@@ -716,12 +716,69 @@ const EisenhowerMatrix: React.FC = () => {
     return (
         <div className="flex flex-col">
             <div className="text-center p-4">
-                <h1 className="tracking-tight inline font-semibold text-[2.3rem] lg:text-xl leading-9 ">Prioritise your tasks with the Eisenhower Matrix, and break them down</h1>
-                {user ? (
-                    <p className='text-default-500 text-sm'>Sync across all devices with this account and unlock more features with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link></p>
-                ) : (
-                    <p className='text-default-500 text-sm'>No account needed, free forever (more features included with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>)</p>
-                )}
+                {
+                    // Check if user is logged in
+                    user ? (
+                        // If user is premium, only show the h1
+                        user.premium ? (
+                            // If user is not premium, show both h1 and p
+                            <>
+                                <h1 className="tracking-tight inline font-semibold text-base mb-4 leading-9">
+                                    {(() => {
+                                        const hour = new Date().getHours();
+                                        if (hour >= 5 && hour < 12) {
+                                            return `Good morning, ${user.name}. Grab your coffee, and let's do this!`;
+                                        } else if (hour >= 12 && hour < 17) {
+                                            return `Good afternoon, ${user.name}. Ready to power through?`;
+                                        } else if (hour >= 17 && hour < 22) {
+                                            return `Good evening, ${user.name}! Ready to close out the day on a high note?`;
+                                        } else {
+                                            return `Let's get some late-night magic going, ${user.name}!`;
+                                        }
+                                    })()}
+                                </h1>
+                                {/* Display sync message only for non-premium users */}
+                                <p className='text-default-500 text-sm'>
+                                    Sync across all devices with this account and unlock more features with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>
+                                </p>
+                            </>
+
+                        ) : (
+                            <h1 className="tracking-tight inline font-semibold text-base mb-4	 leading-9">
+                                {(() => {
+                                    const hour = new Date().getHours();
+                                    // Morning: 5am to 12pm
+                                    if (hour >= 5 && hour < 12) {
+                                        return `Good morning, ${user.name}. Grab your coffee, and let's do this!`;
+                                    }
+                                    // Afternoon: 12pm to 5pm
+                                    else if (hour >= 12 && hour < 17) {
+                                        return `Good afternoon, ${user.name}. Ready to power through?`;
+                                    }
+                                    // Evening: 5pm to 10pm
+                                    else if (hour >= 17 && hour < 22) {
+                                        return `Good evening, ${user.name}! Ready to close out the day on a high note?`;
+                                    }
+                                    // Late night: 10pm to 5am
+                                    else {
+                                        return `Let's get some late-night magic going, ${user.name}!`;
+                                    }
+                                })()}
+                            </h1>
+                        )
+                    ) : (
+                        <>
+                            {/* If user is not logged in, show this default h1 and p */}
+                            <h1 className="tracking-tight inline font-semibold text-base leading-9 mb-4">
+                                Prioritize your tasks with the Eisenhower Matrix, and break them down
+                            </h1>
+                            <p className='text-default-500 text-sm'>
+                                No account needed, free forever (more features included with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>)
+                            </p>
+                        </>
+                    )
+                }
+
                 <Modal isOpen={isTaskModalOpen} onClose={onTaskModalClose}>
                     <ModalContent>
                         <ModalHeader>Edit Task</ModalHeader>

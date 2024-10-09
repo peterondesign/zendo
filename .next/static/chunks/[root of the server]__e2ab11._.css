@@ -3024,6 +3024,11 @@ img, video {
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
+.text-default-900 {
+  --tw-text-opacity: 1;
+  color: hsl(var(--nextui-default-900) / var(--nextui-default-900-opacity, var(--tw-text-opacity)));
+}
+
 .underline {
   text-decoration-line: underline;
 }
@@ -8133,6 +8138,11 @@ img, video {
 
   .lg\:text-xl {
     font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .lg\:text-lg {
+    font-size: 1.125rem;
     line-height: 1.75rem;
   }
 }

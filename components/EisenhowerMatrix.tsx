@@ -14,6 +14,9 @@ import { Kbd } from "@nextui-org/kbd";
 import { Spinner } from '@nextui-org/react';
 import FloatingButton from './floatingbutton';
 
+import { UserProvider, useUser } from '@auth0/nextjs-auth0/client'
+
+
 type Task = {
     archived: boolean;
     id: number;
@@ -100,6 +103,9 @@ const EisenhowerMatrix: React.FC = () => {
 
 
     const { theme, setTheme } = useTheme();
+
+    const { user } = useUser();
+
 
     // Function to toggle dropdown based on task ID
     const handleOpenChange = (taskId: number, open: boolean) => {
@@ -711,62 +717,65 @@ const EisenhowerMatrix: React.FC = () => {
         <div className="flex flex-col">
             <div className="text-center p-4">
                 <h1 className="tracking-tight inline font-semibold text-[2.3rem] lg:text-xl leading-9 ">Prioritise your tasks with the Eisenhower Matrix, and break them down</h1>
-                <p className='text-default-500 text-sm'>No account needed, free forever (more features included with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>)</p>
+                {user ? (
+                    <p className='text-default-500 text-sm'>Sync across all devices with this account and unlock more features with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link></p>
+                ) : (
+                    <p className='text-default-500 text-sm'>No account needed, free forever (more features included with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>)</p>
+                )}
+                <Modal isOpen={isTaskModalOpen} onClose={onTaskModalClose}>
+                    <ModalContent>
+                        <ModalHeader>Edit Task</ModalHeader>
+                        <ModalBody>
+                            <Input
+                                value={taskToEdit?.task.text || ''}
+                                onChange={handleTaskInputChange}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        saveEditedTask();
+                                    } else if (e.key === 'Escape') {
+                                        onTaskModalClose();
+                                    }
+                                }}
+                                fullWidth
+                                placeholder="Enter new task name"
+                            />
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button onClick={saveEditedTask}>Save</Button>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
+
+                <Modal isOpen={isSubtaskModalOpen} onClose={onSubtaskModalClose}>
+                    <ModalContent>
+                        <ModalHeader>Edit Subtask</ModalHeader>
+                        <ModalBody>
+                            <Input
+                                value={subtaskToEdit?.subtask.text || ''}
+                                onChange={handleSubtaskInputChange}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        saveEditedSubtask();
+                                    } else if (e.key === 'Escape') {
+                                        onSubtaskModalClose();
+                                    }
+                                }}
+                                fullWidth
+                                placeholder="Enter new subtask name"
+                            />
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button onClick={saveEditedSubtask}>Save</Button>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
+
+                <FloatingButton
+                    tasks={tasks}
+                    showArchivedTasks={showArchivedTasks}
+                    isArchiveMode={isArchiveMode}
+                />
             </div>
-            <Modal isOpen={isTaskModalOpen} onClose={onTaskModalClose}>
-                <ModalContent>
-                    <ModalHeader>Edit Task</ModalHeader>
-                    <ModalBody>
-                        <Input
-                            value={taskToEdit?.task.text || ''}
-                            onChange={handleTaskInputChange}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    saveEditedTask();
-                                } else if (e.key === 'Escape') {
-                                    onTaskModalClose();
-                                }
-                            }}
-                            fullWidth
-                            placeholder="Enter new task name"
-                        />
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button onClick={saveEditedTask}>Save</Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
-
-            <Modal isOpen={isSubtaskModalOpen} onClose={onSubtaskModalClose}>
-                <ModalContent>
-                    <ModalHeader>Edit Subtask</ModalHeader>
-                    <ModalBody>
-                        <Input
-                            value={subtaskToEdit?.subtask.text || ''}
-                            onChange={handleSubtaskInputChange}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    saveEditedSubtask();
-                                } else if (e.key === 'Escape') {
-                                    onSubtaskModalClose();
-                                }
-                            }}
-                            fullWidth
-                            placeholder="Enter new subtask name"
-                        />
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button onClick={saveEditedSubtask}>Save</Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
-
-            <FloatingButton
-                tasks={tasks}
-                showArchivedTasks={showArchivedTasks}
-                isArchiveMode={isArchiveMode}
-            />
-
             {/* <div className='px-4 pb-8'>
         <GanttChart/>
       </div> */}

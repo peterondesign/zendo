@@ -16,10 +16,8 @@ import { Input } from "@nextui-org/input";
 import { link as linkStyles } from "@nextui-org/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
-
 import { UserProvider, useUser } from '@auth0/nextjs-auth0/client'
-
-
+import { createClient } from '@supabase/supabase-js';
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import {
@@ -31,8 +29,32 @@ import {
   Logo,
 } from "@/components/icons";
 
+import supabase from "@/utils/supabase/supabaseConfig";
+
+
 export const Navbar = () => {
   const { user } = useUser();
+
+  // Function to insert user into Supabase
+  const insertUserToSupabase = async () => {
+    if (user) {
+      const { name, email, sub } = user; // Capture necessary fields from Auth0 user object
+      const { data, error } = await supabase
+        .from('users')
+        .upsert({ id: sub, name, email }, { onConflict: 'id' }); // Avoid inserting duplicates based on 'id'
+
+      if (error) {
+        console.error("Error inserting user into Supabase:", error.message);
+      } else {
+        console.log("User successfully inserted/updated in Supabase:", data);
+      }
+    }
+  };
+
+  // Insert user to Supabase if logged in
+  if (user) {
+    insertUserToSupabase();
+  }
 
   const searchInput = (
     <Input

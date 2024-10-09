@@ -268,12 +268,20 @@ const upsertTask = async (userId, task, quadrant)=>{
         archived: task.archived,
         updated_at: new Date().toISOString()
     }).select();
-    if (error) throw error;
+    if (error) {
+        console.error('Error upserting task:', error);
+        throw error;
+    }
+    console.log('Upserted task data:', data); // Log the data returned from Supabase
     return data;
 };
 const fetchTasks = async (userId)=>{
     const { data, error } = await supabase.from('tasks').select('*').eq('user_id', userId);
-    if (error) throw error;
+    if (error) {
+        console.error('Error fetching tasks:', error);
+        throw error;
+    }
+    console.log('Fetched tasks:', data);
     return data;
 };
 const deleteTask = async (userId, taskId)=>{
@@ -281,7 +289,11 @@ const deleteTask = async (userId, taskId)=>{
         id: taskId,
         user_id: userId
     });
-    if (error) throw error;
+    if (error) {
+        console.error('Error deleting task:', error);
+        throw error;
+    }
+    console.log('Deleted task with ID:', taskId);
 };
 const syncTasks = async (userId, tasks)=>{
     const allTasks = Object.entries(tasks).flatMap(([quadrant, quadrantTasks])=>quadrantTasks.map((task)=>({
@@ -294,7 +306,11 @@ const syncTasks = async (userId, tasks)=>{
                 updated_at: new Date().toISOString()
             })));
     const { data, error } = await supabase.from('tasks').upsert(allTasks).select();
-    if (error) throw error;
+    if (error) {
+        console.error('Error syncing tasks:', error);
+        throw error;
+    }
+    console.log('Synced tasks data:', data);
     return data;
 };
 const upsertSubtask = async (userId, taskId, subtask)=>{
@@ -306,7 +322,11 @@ const upsertSubtask = async (userId, taskId, subtask)=>{
         completed: subtask.completed,
         updated_at: new Date().toISOString()
     }).select();
-    if (error) throw error;
+    if (error) {
+        console.error('Error upserting subtask:', error);
+        throw error;
+    }
+    console.log('Upserted subtask data:', data);
     return data;
 };
 const deleteSubtask = async (userId, subtaskId)=>{
@@ -314,11 +334,19 @@ const deleteSubtask = async (userId, subtaskId)=>{
         id: subtaskId,
         user_id: userId
     });
-    if (error) throw error;
+    if (error) {
+        console.error('Error deleting subtask:', error);
+        throw error;
+    }
+    console.log('Deleted subtask with ID:', subtaskId);
 };
 const fetchSubtasks = async (userId)=>{
     const { data, error } = await supabase.from('subtasks').select('*').eq('user_id', userId);
-    if (error) throw error;
+    if (error) {
+        console.error('Error fetching subtasks:', error);
+        throw error;
+    }
+    console.log('Fetched subtasks:', data);
     return data;
 };
 
@@ -486,38 +514,6 @@ const EisenhowerMatrix = ()=>{
                 ...prev,
                 taskId
             ]);
-    };
-    const addTask = async (quadrant = selectedQuadrant, taskText = newTask)=>{
-        if (taskText.trim()) {
-            // Ensure that the 'archived' property is included when creating the new task
-            const newTask = {
-                id: Date.now(),
-                text: taskText.trim(),
-                completed: false,
-                subtasks: [],
-                archived: false // Default archived state should be false
-            };
-            setTasks((prev)=>({
-                    ...prev,
-                    [quadrant]: [
-                        ...prev[quadrant],
-                        newTask
-                    ]
-                }));
-            setNewTask('');
-            if (user?.premium) {
-                try {
-                    await (0, __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$tasksyncoperations$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["upsertTask"])(user.id, newTask, quadrant);
-                } catch (error) {
-                    console.error('Failed to sync task:', error);
-                    // Revert local state change if sync fails
-                    setTasks((prev)=>({
-                            ...prev,
-                            [quadrant]: prev[quadrant].filter((task)=>task.id !== newTask.id)
-                        }));
-                }
-            }
-        }
     };
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         const loadTasks = async ()=>{
@@ -688,31 +684,49 @@ const EisenhowerMatrix = ()=>{
             }));
     };
     // Handles drag-and-drop reordering of tasks and moving between quadrants
+    // Handles drag-and-drop reordering of tasks, moving between quadrants, and subtasks
     const onDragEnd = (result)=>{
         const { source, destination } = result;
         // If there's no destination (i.e., task was dropped outside a valid area), do nothing
         if (!destination) return;
         const sourceQuadrant = source.droppableId;
         const destinationQuadrant = destination.droppableId;
-        // If the task is dropped in the same quadrant
+        // Get source task and check if it's being dropped into a subtask or out of one
+        const sourceTask = tasks[sourceQuadrant][source.index];
+        // Check if dropping into a subtask
+        if (destinationQuadrant === sourceQuadrant && sourceTask) {
+            const destinationTask = tasks[destinationQuadrant][destination.index];
+            // If the destination is another task, move sourceTask to be a subtask of destinationTask
+            if (sourceQuadrant === destinationQuadrant && destinationTask && sourceTask.id !== destinationTask.id) {
+                // Move the task as a subtask
+                setTasks((prev)=>({
+                        ...prev,
+                        [destinationQuadrant]: prev[destinationQuadrant].map((task)=>task.id === destinationTask.id ? {
+                                ...task,
+                                subtasks: [
+                                    ...task.subtasks,
+                                    sourceTask
+                                ]
+                            } : task),
+                        [sourceQuadrant]: prev[sourceQuadrant].filter((task)=>task.id !== sourceTask.id)
+                    }));
+                return;
+            }
+        }
+        // Move task between quadrants or reorder within same quadrant
         if (sourceQuadrant === destinationQuadrant) {
             const reorderedTasks = Array.from(tasks[sourceQuadrant]);
-            const [movedTask] = reorderedTasks.splice(source.index, 1); // Remove the task from the source index
-            reorderedTasks.splice(destination.index, 0, movedTask); // Insert it at the new index
+            const [movedTask] = reorderedTasks.splice(source.index, 1); // Remove task from source
+            reorderedTasks.splice(destination.index, 0, movedTask); // Insert at new position
             setTasks((prev)=>({
                     ...prev,
                     [sourceQuadrant]: reorderedTasks
                 }));
         } else {
-            // Move task from one quadrant to another (already supported in the previous code)
             const sourceTasks = Array.from(tasks[sourceQuadrant]);
             const [movedTask] = sourceTasks.splice(source.index, 1); // Remove from source
-            const updatedTask = {
-                ...movedTask,
-                quadrant: destinationQuadrant
-            }; // Update the task's quadrant
             const destinationTasks = Array.from(tasks[destinationQuadrant]);
-            destinationTasks.splice(destination.index, 0, updatedTask); // Insert in the destination quadrant
+            destinationTasks.splice(destination.index, 0, movedTask); // Insert in destination
             setTasks((prev)=>({
                     ...prev,
                     [sourceQuadrant]: sourceTasks,
@@ -731,7 +745,7 @@ const EisenhowerMatrix = ()=>{
                             children: task.text
                         }, void 0, false, {
                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                            lineNumber: 438,
+                            lineNumber: 433,
                             columnNumber: 25
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$button$2f$dist$2f$chunk$2d$DBLREEYE$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__button_default__as__Button$3e$__["Button"], {
@@ -741,24 +755,24 @@ const EisenhowerMatrix = ()=>{
                             children: "Unarchive"
                         }, void 0, false, {
                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                            lineNumber: 439,
+                            lineNumber: 434,
                             columnNumber: 25
                         }, this)
                     ]
                 }, task.id, true, {
                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                    lineNumber: 437,
+                    lineNumber: 432,
                     columnNumber: 21
                 }, this)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                 children: "No archived tasks"
             }, void 0, false, {
                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                lineNumber: 449,
+                lineNumber: 444,
                 columnNumber: 17
             }, this)
         }, void 0, false, {
             fileName: "[project]/components/EisenhowerMatrix.tsx",
-            lineNumber: 434,
+            lineNumber: 429,
             columnNumber: 9
         }, this);
     // Add a new function to unarchive tasks
@@ -795,15 +809,15 @@ const EisenhowerMatrix = ()=>{
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "flex items-center",
                                 children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$input$2f$dist$2f$chunk$2d$IR2E3HZF$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__input_default__as__Input$3e$__["Input"], {
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                         type: "checkbox",
-                                        title: "Toggle subtask completion",
                                         checked: subtask.completed,
                                         onChange: ()=>toggleSubtaskCompletion(quadrant, task.id, subtask.id),
-                                        className: "max-w-max mr-2"
+                                        className: "max-w-max mr-2",
+                                        title: "Toggle subtask completion"
                                     }, void 0, false, {
                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                        lineNumber: 484,
+                                        lineNumber: 479,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -811,26 +825,26 @@ const EisenhowerMatrix = ()=>{
                                         children: subtask.text
                                     }, void 0, false, {
                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                        lineNumber: 491,
+                                        lineNumber: 486,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                lineNumber: 483,
+                                lineNumber: 478,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "flex justify-end"
                             }, void 0, false, {
                                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                lineNumber: 498,
+                                lineNumber: 493,
                                 columnNumber: 21
                             }, this)
                         ]
                     }, subtask.id, true, {
                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                        lineNumber: 482,
+                        lineNumber: 477,
                         columnNumber: 17
                     }, this)),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -844,7 +858,7 @@ const EisenhowerMatrix = ()=>{
                             maxLength: 100
                         }, void 0, false, {
                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                            lineNumber: 504,
+                            lineNumber: 499,
                             columnNumber: 17
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$button$2f$dist$2f$chunk$2d$DBLREEYE$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__button_default__as__Button$3e$__["Button"], {
@@ -857,31 +871,57 @@ const EisenhowerMatrix = ()=>{
                                 size: 16
                             }, void 0, false, {
                                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                lineNumber: 512,
+                                lineNumber: 507,
                                 columnNumber: 21
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                            lineNumber: 511,
+                            lineNumber: 506,
                             columnNumber: 17
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                    lineNumber: 503,
+                    lineNumber: 498,
                     columnNumber: 13
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/components/EisenhowerMatrix.tsx",
-            lineNumber: 480,
+            lineNumber: 475,
             columnNumber: 9
         }, this);
-    // Function to calculate percentage of completed subtasks
-    const getSubtaskCompletionPercentage = (task)=>{
-        const totalSubtasks = task.subtasks.length;
-        const completedSubtasks = task.subtasks.filter((subtask)=>subtask.completed).length;
-        return totalSubtasks > 0 ? Math.round(completedSubtasks / totalSubtasks * 100) : 0;
+    const addTask = async (quadrant = selectedQuadrant, taskText = newTask)=>{
+        if (taskText.trim()) {
+            // Ensure that the 'archived' property is included when creating the new task
+            const newTask = {
+                id: Date.now(),
+                text: taskText.trim(),
+                completed: false,
+                subtasks: [],
+                archived: false // Default archived state should be false
+            };
+            setTasks((prev)=>({
+                    ...prev,
+                    [quadrant]: [
+                        ...prev[quadrant],
+                        newTask
+                    ]
+                }));
+            setNewTask('');
+            if (user?.premium) {
+                try {
+                    await (0, __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$tasksyncoperations$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["upsertTask"])(user.id, newTask, quadrant);
+                } catch (error) {
+                    console.error('Failed to sync task:', error);
+                    // Revert local state change if sync fails
+                    setTasks((prev)=>({
+                            ...prev,
+                            [quadrant]: prev[quadrant].filter((task)=>task.id !== newTask.id)
+                        }));
+                }
+            }
+        }
     };
     const renderTask = (quadrant, task, index)=>{
         if (task.archived && !isArchiveMode) {
@@ -912,12 +952,12 @@ const EisenhowerMatrix = ()=>{
                                                 size: 16
                                             }, void 0, false, {
                                                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                lineNumber: 548,
+                                                lineNumber: 565,
                                                 columnNumber: 37
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                            lineNumber: 547,
+                                            lineNumber: 564,
                                             columnNumber: 33
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -928,7 +968,7 @@ const EisenhowerMatrix = ()=>{
                                             title: "Toggle task completion"
                                         }, void 0, false, {
                                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                            lineNumber: 550,
+                                            lineNumber: 567,
                                             columnNumber: 33
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -940,13 +980,13 @@ const EisenhowerMatrix = ()=>{
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                            lineNumber: 557,
+                                            lineNumber: 574,
                                             columnNumber: 33
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                    lineNumber: 546,
+                                    lineNumber: 563,
                                     columnNumber: 29
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -961,7 +1001,7 @@ const EisenhowerMatrix = ()=>{
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                            lineNumber: 570,
+                                            lineNumber: 587,
                                             columnNumber: 37
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$button$2f$dist$2f$chunk$2d$34VS2GW4$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__button_group_default__as__ButtonGroup$3e$__["ButtonGroup"], {
@@ -977,21 +1017,22 @@ const EisenhowerMatrix = ()=>{
                                                         size: 16
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                        lineNumber: 582,
+                                                        lineNumber: 599,
                                                         columnNumber: 45
                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$down$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronDown$3e$__["ChevronDown"], {
                                                         size: 16
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                        lineNumber: 584,
+                                                        lineNumber: 601,
                                                         columnNumber: 45
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                    lineNumber: 575,
+                                                    lineNumber: 592,
                                                     columnNumber: 37
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$dropdown$2f$dist$2f$chunk$2d$GBNLLUVD$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__dropdown_default__as__Dropdown$3e$__["Dropdown"], {
+                                                    shouldBlockScroll: false,
                                                     isOpen: openDropdownId === task.id,
                                                     onOpenChange: (open)=>handleOpenChange(task.id, open),
                                                     children: [
@@ -1007,17 +1048,17 @@ const EisenhowerMatrix = ()=>{
                                                                     className: "h-4 w-4"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                                    lineNumber: 590,
+                                                                    lineNumber: 607,
                                                                     columnNumber: 49
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                                lineNumber: 589,
+                                                                lineNumber: 606,
                                                                 columnNumber: 45
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                            lineNumber: 588,
+                                                            lineNumber: 605,
                                                             columnNumber: 41
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$dropdown$2f$dist$2f$chunk$2d$SXHEBZUY$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__dropdown_menu_default__as__DropdownMenu$3e$__["DropdownMenu"], {
@@ -1040,7 +1081,7 @@ const EisenhowerMatrix = ()=>{
                                                                     children: "Edit Task"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                                    lineNumber: 594,
+                                                                    lineNumber: 611,
                                                                     columnNumber: 45
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$menu$2f$dist$2f$chunk$2d$EEKZGUSR$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__menu_section_base_default__as__DropdownSection$3e$__["DropdownSection"], {
@@ -1056,19 +1097,19 @@ const EisenhowerMatrix = ()=>{
                                                                             size: "sm"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                                            lineNumber: 615,
+                                                                            lineNumber: 632,
                                                                             columnNumber: 57
                                                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                                                             children: "Breakdown with AI"
                                                                         }, void 0, false)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                                        lineNumber: 606,
+                                                                        lineNumber: 623,
                                                                         columnNumber: 49
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                                    lineNumber: 605,
+                                                                    lineNumber: 622,
                                                                     columnNumber: 45
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$menu$2f$dist$2f$chunk$2d$EEKZGUSR$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__menu_section_base_default__as__DropdownSection$3e$__["DropdownSection"], {
@@ -1081,12 +1122,12 @@ const EisenhowerMatrix = ()=>{
                                                                             ]
                                                                         }, targetQuadrant, true, {
                                                                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                                            lineNumber: 625,
+                                                                            lineNumber: 642,
                                                                             columnNumber: 57
                                                                         }, this))
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                                    lineNumber: 621,
+                                                                    lineNumber: 638,
                                                                     columnNumber: 45
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$menu$2f$dist$2f$chunk$2d$EEKZGUSR$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__menu_section_base_default__as__DropdownSection$3e$__["DropdownSection"], {
@@ -1095,19 +1136,19 @@ const EisenhowerMatrix = ()=>{
                                                                         children: "Archive Task (Premium feature)"
                                                                     }, "archivepremium", false, {
                                                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                                        lineNumber: 635,
+                                                                        lineNumber: 652,
                                                                         columnNumber: 53
                                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$menu$2f$dist$2f$chunk$2d$LRDIO3JU$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__menu_item_base_default__as__DropdownItem$3e$__["DropdownItem"], {
                                                                         onClick: ()=>archiveTask(quadrant, task.id),
                                                                         children: "Archive Task"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                                        lineNumber: 641,
+                                                                        lineNumber: 658,
                                                                         columnNumber: 53
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                                    lineNumber: 633,
+                                                                    lineNumber: 650,
                                                                     columnNumber: 45
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$menu$2f$dist$2f$chunk$2d$EEKZGUSR$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__menu_section_base_default__as__DropdownSection$3e$__["DropdownSection"], {
@@ -1118,54 +1159,54 @@ const EisenhowerMatrix = ()=>{
                                                                         children: "Delete Task"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                                        lineNumber: 648,
+                                                                        lineNumber: 665,
                                                                         columnNumber: 49
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                                    lineNumber: 647,
+                                                                    lineNumber: 664,
                                                                     columnNumber: 45
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                            lineNumber: 593,
+                                                            lineNumber: 610,
                                                             columnNumber: 41
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                    lineNumber: 587,
+                                                    lineNumber: 604,
                                                     columnNumber: 37
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                            lineNumber: 574,
+                                            lineNumber: 591,
                                             columnNumber: 33
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                    lineNumber: 567,
+                                    lineNumber: 584,
                                     columnNumber: 29
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                            lineNumber: 545,
+                            lineNumber: 562,
                             columnNumber: 25
                         }, this),
                         expandedTaskIds.includes(task.id) && renderSubtasks(quadrant, task)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                    lineNumber: 537,
+                    lineNumber: 554,
                     columnNumber: 21
                 }, this)
         }, task.id, false, {
             fileName: "[project]/components/EisenhowerMatrix.tsx",
-            lineNumber: 535,
+            lineNumber: 552,
             columnNumber: 13
         }, this);
     };
@@ -1185,7 +1226,7 @@ const EisenhowerMatrix = ()=>{
                                     children: quadrants[quadrant]
                                 }, void 0, false, {
                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                    lineNumber: 676,
+                                    lineNumber: 693,
                                     columnNumber: 25
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$popover$2f$dist$2f$chunk$2d$2QNX3BHZ$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__popover_default__as__Popover$3e$__["Popover"], {
@@ -1200,17 +1241,17 @@ const EisenhowerMatrix = ()=>{
                                                     size: 16
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                    lineNumber: 680,
+                                                    lineNumber: 697,
                                                     columnNumber: 37
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                lineNumber: 679,
+                                                lineNumber: 696,
                                                 columnNumber: 33
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                            lineNumber: 678,
+                                            lineNumber: 695,
                                             columnNumber: 29
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$popover$2f$dist$2f$chunk$2d$AL3RFZCN$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__popover_content_default__as__PopoverContent$3e$__["PopoverContent"], {
@@ -1224,7 +1265,7 @@ const EisenhowerMatrix = ()=>{
                                                         onKeyDown: (e)=>e.key === 'Enter' && addTask(quadrant)
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                        lineNumber: 685,
+                                                        lineNumber: 702,
                                                         columnNumber: 37
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$button$2f$dist$2f$chunk$2d$DBLREEYE$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__button_default__as__Button$3e$__["Button"], {
@@ -1233,30 +1274,30 @@ const EisenhowerMatrix = ()=>{
                                                         children: "Add Task"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                        lineNumber: 691,
+                                                        lineNumber: 708,
                                                         columnNumber: 37
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                                lineNumber: 684,
+                                                lineNumber: 701,
                                                 columnNumber: 33
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                            lineNumber: 683,
+                                            lineNumber: 700,
                                             columnNumber: 29
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                    lineNumber: 677,
+                                    lineNumber: 694,
                                     columnNumber: 25
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                            lineNumber: 675,
+                            lineNumber: 692,
                             columnNumber: 28
                         }, this),
                         tasks[quadrant].length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1268,7 +1309,7 @@ const EisenhowerMatrix = ()=>{
                                     alt: "No tasks"
                                 }, void 0, false, {
                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                    lineNumber: 700,
+                                    lineNumber: 717,
                                     columnNumber: 29
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1276,32 +1317,32 @@ const EisenhowerMatrix = ()=>{
                                     children: "No tasks added yet"
                                 }, void 0, false, {
                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                    lineNumber: 701,
+                                    lineNumber: 718,
                                     columnNumber: 29
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                            lineNumber: 699,
+                            lineNumber: 716,
                             columnNumber: 25
                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
                             className: "text-default-90 text-lg",
                             children: tasks[quadrant].map((task, index)=>renderTask(quadrant, task, index))
                         }, void 0, false, {
                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                            lineNumber: 704,
+                            lineNumber: 721,
                             columnNumber: 25
                         }, this),
                         provided.placeholder
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                    lineNumber: 671,
+                    lineNumber: 688,
                     columnNumber: 17
                 }, this)
         }, quadrant, false, {
             fileName: "[project]/components/EisenhowerMatrix.tsx",
-            lineNumber: 669,
+            lineNumber: 686,
             columnNumber: 9
         }, this);
     // Function to handle task breakdown with AI and update the task with subtasks
@@ -1391,7 +1432,7 @@ const EisenhowerMatrix = ()=>{
                                 })()
                             }, void 0, false, {
                                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                lineNumber: 800,
+                                lineNumber: 817,
                                 columnNumber: 33
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1404,13 +1445,13 @@ const EisenhowerMatrix = ()=>{
                                         children: "lifetime deal"
                                     }, void 0, false, {
                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                        lineNumber: 816,
+                                        lineNumber: 833,
                                         columnNumber: 109
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                lineNumber: 815,
+                                lineNumber: 832,
                                 columnNumber: 33
                             }, this)
                         ]
@@ -1431,7 +1472,7 @@ const EisenhowerMatrix = ()=>{
                         })()
                     }, void 0, false, {
                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                        lineNumber: 821,
+                        lineNumber: 838,
                         columnNumber: 29
                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                         children: [
@@ -1440,7 +1481,7 @@ const EisenhowerMatrix = ()=>{
                                 children: "Prioritize your tasks with the Eisenhower Matrix, and break them down"
                             }, void 0, false, {
                                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                lineNumber: 846,
+                                lineNumber: 863,
                                 columnNumber: 29
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1453,14 +1494,14 @@ const EisenhowerMatrix = ()=>{
                                         children: "lifetime deal"
                                     }, void 0, false, {
                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                        lineNumber: 850,
+                                        lineNumber: 867,
                                         columnNumber: 94
                                     }, this),
                                     ")"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                lineNumber: 849,
+                                lineNumber: 866,
                                 columnNumber: 29
                             }, this)
                         ]
@@ -1474,7 +1515,7 @@ const EisenhowerMatrix = ()=>{
                                     children: "Edit Task"
                                 }, void 0, false, {
                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                    lineNumber: 858,
+                                    lineNumber: 875,
                                     columnNumber: 25
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$modal$2f$dist$2f$chunk$2d$EPDLEVDR$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__modal_body_default__as__ModalBody$3e$__["ModalBody"], {
@@ -1492,12 +1533,12 @@ const EisenhowerMatrix = ()=>{
                                         placeholder: "Enter new task name"
                                     }, void 0, false, {
                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                        lineNumber: 860,
+                                        lineNumber: 877,
                                         columnNumber: 29
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                    lineNumber: 859,
+                                    lineNumber: 876,
                                     columnNumber: 25
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$modal$2f$dist$2f$chunk$2d$QY5NICTW$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__modal_footer_default__as__ModalFooter$3e$__["ModalFooter"], {
@@ -1506,23 +1547,23 @@ const EisenhowerMatrix = ()=>{
                                         children: "Save"
                                     }, void 0, false, {
                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                        lineNumber: 875,
+                                        lineNumber: 892,
                                         columnNumber: 29
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                    lineNumber: 874,
+                                    lineNumber: 891,
                                     columnNumber: 25
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                            lineNumber: 857,
+                            lineNumber: 874,
                             columnNumber: 21
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                        lineNumber: 856,
+                        lineNumber: 873,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$modal$2f$dist$2f$chunk$2d$P2T5LMDM$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__modal_default__as__Modal$3e$__["Modal"], {
@@ -1534,7 +1575,7 @@ const EisenhowerMatrix = ()=>{
                                     children: "Edit Subtask"
                                 }, void 0, false, {
                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                    lineNumber: 882,
+                                    lineNumber: 899,
                                     columnNumber: 25
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$modal$2f$dist$2f$chunk$2d$EPDLEVDR$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__modal_body_default__as__ModalBody$3e$__["ModalBody"], {
@@ -1552,12 +1593,12 @@ const EisenhowerMatrix = ()=>{
                                         placeholder: "Enter new subtask name"
                                     }, void 0, false, {
                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                        lineNumber: 884,
+                                        lineNumber: 901,
                                         columnNumber: 29
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                    lineNumber: 883,
+                                    lineNumber: 900,
                                     columnNumber: 25
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$modal$2f$dist$2f$chunk$2d$QY5NICTW$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__modal_footer_default__as__ModalFooter$3e$__["ModalFooter"], {
@@ -1566,23 +1607,23 @@ const EisenhowerMatrix = ()=>{
                                         children: "Save"
                                     }, void 0, false, {
                                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                        lineNumber: 899,
+                                        lineNumber: 916,
                                         columnNumber: 29
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                                    lineNumber: 898,
+                                    lineNumber: 915,
                                     columnNumber: 25
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/EisenhowerMatrix.tsx",
-                            lineNumber: 881,
+                            lineNumber: 898,
                             columnNumber: 21
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                        lineNumber: 880,
+                        lineNumber: 897,
                         columnNumber: 17
                     }, this),
                     user && !user.premium && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$floatingbutton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -1591,13 +1632,13 @@ const EisenhowerMatrix = ()=>{
                         isArchiveMode: isArchiveMode
                     }, void 0, false, {
                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                        lineNumber: 905,
+                        lineNumber: 922,
                         columnNumber: 21
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                lineNumber: 792,
+                lineNumber: 809,
                 columnNumber: 13
             }, this),
             loadingAI && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1606,12 +1647,12 @@ const EisenhowerMatrix = ()=>{
                     size: "lg"
                 }, void 0, false, {
                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                    lineNumber: 917,
+                    lineNumber: 934,
                     columnNumber: 21
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                lineNumber: 916,
+                lineNumber: 933,
                 columnNumber: 17
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1629,23 +1670,23 @@ const EisenhowerMatrix = ()=>{
                         ].map(renderQuadrant)
                     }, void 0, false, {
                         fileName: "[project]/components/EisenhowerMatrix.tsx",
-                        lineNumber: 922,
+                        lineNumber: 939,
                         columnNumber: 21
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/components/EisenhowerMatrix.tsx",
-                    lineNumber: 921,
+                    lineNumber: 938,
                     columnNumber: 17
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/EisenhowerMatrix.tsx",
-                lineNumber: 920,
+                lineNumber: 937,
                 columnNumber: 13
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/EisenhowerMatrix.tsx",
-        lineNumber: 791,
+        lineNumber: 808,
         columnNumber: 9
     }, this);
 };

@@ -170,37 +170,7 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
 
-    const addTask = async (quadrant: QuadrantType = selectedQuadrant, taskText: string = newTask) => {
-        if (taskText.trim()) {
-            // Ensure that the 'archived' property is included when creating the new task
-            const newTask: Task = { 
-              id: Date.now(), 
-              text: taskText.trim(), 
-              completed: false, 
-              subtasks: [], 
-              archived: false  // Default archived state should be false
-            };
-        
-            setTasks((prev) => ({
-                ...prev,
-                [quadrant]: [...prev[quadrant], newTask],
-            }));
-            setNewTask('');
 
-            if (user?.premium) {  // Only sync tasks if the user is premium
-                try {
-                    await upsertTask(user.id as string, newTask, quadrant);
-                } catch (error) {
-                    console.error('Failed to sync task:', error);
-                    // Revert local state change if sync fails
-                    setTasks((prev) => ({
-                        ...prev,
-                        [quadrant]: prev[quadrant].filter(task => task.id !== newTask.id),
-                    }));
-                }
-            }
-        }
-    };
 
     useEffect(() => {
         const loadTasks = async () => {
@@ -393,6 +363,7 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
     // Handles drag-and-drop reordering of tasks and moving between quadrants
+    // Handles drag-and-drop reordering of tasks, moving between quadrants, and subtasks
     const onDragEnd = (result: DropResult) => {
         const { source, destination } = result;
 
@@ -402,29 +373,53 @@ const EisenhowerMatrix: React.FC = () => {
         const sourceQuadrant = source.droppableId as QuadrantType;
         const destinationQuadrant = destination.droppableId as QuadrantType;
 
-        // If the task is dropped in the same quadrant
+        // Get source task and check if it's being dropped into a subtask or out of one
+        const sourceTask = tasks[sourceQuadrant][source.index];
+
+        // Check if dropping into a subtask
+        if (destinationQuadrant === sourceQuadrant && sourceTask) {
+            const destinationTask = tasks[destinationQuadrant][destination.index];
+
+            // If the destination is another task, move sourceTask to be a subtask of destinationTask
+            if (sourceQuadrant === destinationQuadrant && destinationTask && sourceTask.id !== destinationTask.id) {
+                // Move the task as a subtask
+                setTasks((prev) => ({
+                    ...prev,
+                    [destinationQuadrant]: prev[destinationQuadrant].map((task) =>
+                        task.id === destinationTask.id
+                            ? {
+                                ...task,
+                                subtasks: [...task.subtasks, sourceTask], // Add the dragged task as a subtask
+                            }
+                            : task
+                    ),
+                    [sourceQuadrant]: prev[sourceQuadrant].filter((task) => task.id !== sourceTask.id), // Remove from tasks
+                }));
+                return;
+            }
+        }
+
+        // Move task between quadrants or reorder within same quadrant
         if (sourceQuadrant === destinationQuadrant) {
             const reorderedTasks = Array.from(tasks[sourceQuadrant]);
-            const [movedTask] = reorderedTasks.splice(source.index, 1);  // Remove the task from the source index
-            reorderedTasks.splice(destination.index, 0, movedTask);      // Insert it at the new index
+            const [movedTask] = reorderedTasks.splice(source.index, 1);  // Remove task from source
+            reorderedTasks.splice(destination.index, 0, movedTask);      // Insert at new position
 
             setTasks((prev) => ({
                 ...prev,
-                [sourceQuadrant]: reorderedTasks,  // Update the state with the reordered tasks
+                [sourceQuadrant]: reorderedTasks,  // Update state with reordered tasks
             }));
         } else {
-            // Move task from one quadrant to another (already supported in the previous code)
             const sourceTasks = Array.from(tasks[sourceQuadrant]);
             const [movedTask] = sourceTasks.splice(source.index, 1);  // Remove from source
-            const updatedTask = { ...movedTask, quadrant: destinationQuadrant };  // Update the task's quadrant
             const destinationTasks = Array.from(tasks[destinationQuadrant]);
 
-            destinationTasks.splice(destination.index, 0, updatedTask);  // Insert in the destination quadrant
+            destinationTasks.splice(destination.index, 0, movedTask);  // Insert in destination
 
             setTasks((prev) => ({
                 ...prev,
-                [sourceQuadrant]: sourceTasks,         // Update the source quadrant
-                [destinationQuadrant]: destinationTasks,  // Update the destination quadrant
+                [sourceQuadrant]: sourceTasks,         // Update source quadrant
+                [destinationQuadrant]: destinationTasks,  // Update destination quadrant
             }));
         }
     };
@@ -481,12 +476,12 @@ const EisenhowerMatrix: React.FC = () => {
             {task.subtasks.map((subtask) => (
                 <li key={subtask.id} className="text-lg flex items-center justify-between">
                     <div className="flex items-center">
-                        <Input
+                        <input
                             type="checkbox"
-                            title="Toggle subtask completion"
                             checked={subtask.completed}
                             onChange={() => toggleSubtaskCompletion(quadrant, task.id, subtask.id)}
                             className="max-w-max mr-2"
+                            title="Toggle subtask completion"
                         />
                         <span
                             className={`w-full ${subtask.completed ? 'line-through' : ''
@@ -515,15 +510,37 @@ const EisenhowerMatrix: React.FC = () => {
         </ul>
     );
 
+    const addTask = async (quadrant: QuadrantType = selectedQuadrant, taskText: string = newTask) => {
+        if (taskText.trim()) {
+            // Ensure that the 'archived' property is included when creating the new task
+            const newTask: Task = {
+                id: Date.now(),
+                text: taskText.trim(),
+                completed: false,
+                subtasks: [],
+                archived: false  // Default archived state should be false
+            };
 
-    // Function to calculate percentage of completed subtasks
-    const getSubtaskCompletionPercentage = (task: Task) => {
-        const totalSubtasks = task.subtasks.length;
-        const completedSubtasks = task.subtasks.filter(subtask => subtask.completed).length;
+            setTasks((prev) => ({
+                ...prev,
+                [quadrant]: [...prev[quadrant], newTask],
+            }));
+            setNewTask('');
 
-        return totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
+            if (user?.premium) {  // Only sync tasks if the user is premium
+                try {
+                    await upsertTask(user.id as string, newTask, quadrant);
+                } catch (error) {
+                    console.error('Failed to sync task:', error);
+                    // Revert local state change if sync fails
+                    setTasks((prev) => ({
+                        ...prev,
+                        [quadrant]: prev[quadrant].filter(task => task.id !== newTask.id),
+                    }));
+                }
+            }
+        }
     };
-
 
     const renderTask = (quadrant: QuadrantType, task: Task, index: number) => {
         if (task.archived && !isArchiveMode) {
@@ -584,7 +601,7 @@ const EisenhowerMatrix: React.FC = () => {
                                             <ChevronDown size={16} />
                                         )}
                                     </Button>
-                                    <Dropdown isOpen={openDropdownId === task.id} onOpenChange={(open) => handleOpenChange(task.id, open)}>
+                                    <Dropdown shouldBlockScroll={false} isOpen={openDropdownId === task.id} onOpenChange={(open) => handleOpenChange(task.id, open)}>
                                         <DropdownTrigger>
                                             <Button style={{ minWidth: 'auto' }} size="sm" variant="light">
                                                 <MoreVertical size={16} className="h-4 w-4" />

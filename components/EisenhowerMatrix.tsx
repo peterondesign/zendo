@@ -16,12 +16,13 @@ import FloatingButton from './floatingbutton';
 
 import { UserProvider, useUser } from '@auth0/nextjs-auth0/client'
 
+import { upsertTask, deleteTask, syncTasks, upsertSubtask, deleteSubtask, fetchTasks, fetchSubtasks } from './tasksyncoperations'
 
 type Task = {
-    archived: boolean;
     id: number;
     text: string;
     completed: boolean;
+    archived: boolean;
     subtasks: SubTask[];
 };
 
@@ -87,11 +88,14 @@ const EisenhowerMatrix: React.FC = () => {
         unsorted: [],
     });
     const [isArchiveMode, setIsArchiveMode] = useState(false);
+
     const [newTask, setNewTask] = useState('');
     const [selectedQuadrant, setSelectedQuadrant] = useState<QuadrantType>('unsorted');
     const [newSubtask, setNewSubtask] = useState('');
     const [expandedTaskIds, setExpandedTaskIds] = useState<number[]>([]);
     const [loadingAI, setLoadingAI] = useState(false); // Track AI loading state
+
+
 
 
     const [taskToEdit, setTaskToEdit] = useState<TaskEditInfo | null>(null);
@@ -166,18 +170,71 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
 
-    const addTask = (quadrant: QuadrantType = selectedQuadrant, taskText: string = newTask) => {
+    const addTask = async (quadrant: QuadrantType = selectedQuadrant, taskText: string = newTask) => {
         if (taskText.trim()) {
+            // Ensure that the 'archived' property is included when creating the new task
+            const newTask: Task = { 
+              id: Date.now(), 
+              text: taskText.trim(), 
+              completed: false, 
+              subtasks: [], 
+              archived: false  // Default archived state should be false
+            };
+        
             setTasks((prev) => ({
                 ...prev,
-                [quadrant]: [
-                    ...prev[quadrant],
-                    { id: Date.now(), text: taskText.trim(), completed: false, subtasks: [] },
-                ],
+                [quadrant]: [...prev[quadrant], newTask],
             }));
             setNewTask('');
+
+            if (user?.premium) {  // Only sync tasks if the user is premium
+                try {
+                    await upsertTask(user.id as string, newTask, quadrant);
+                } catch (error) {
+                    console.error('Failed to sync task:', error);
+                    // Revert local state change if sync fails
+                    setTasks((prev) => ({
+                        ...prev,
+                        [quadrant]: prev[quadrant].filter(task => task.id !== newTask.id),
+                    }));
+                }
+            }
         }
     };
+
+    useEffect(() => {
+        const loadTasks = async () => {
+            if (user?.premium) {  // Only load tasks from server if the user is premium
+                try {
+                    const tasks = await fetchTasks(user.id as string);
+                    const subtasks = await fetchSubtasks(user.id as string);
+                    // Group tasks by quadrant and associate subtasks with their parent tasks
+                    const updatedTasks: Record<QuadrantType, Task[]> = {
+                        do: [],
+                        decide: [],
+                        delegate: [],
+                        delete: [],
+                        unsorted: [],
+                    };
+
+                    tasks.forEach(task => {
+                        // Find the quadrant the task belongs to and push it to the respective array
+                        updatedTasks[task.quadrant as QuadrantType].push({
+                            ...task,
+                            subtasks: subtasks.filter(subtask => subtask.taskId === task.id),
+                        });
+                    });
+
+                    setTasks(updatedTasks);  // Update the state with the fetched tasks and subtasks
+                } catch (error) {
+                    console.error('Failed to load tasks:', error);
+                }
+            }
+        };
+
+        loadTasks();
+    }, [user]);
+
 
     const addSubtask = (quadrant: QuadrantType, taskId: number) => {
         if (newSubtask.trim()) {
@@ -533,7 +590,7 @@ const EisenhowerMatrix: React.FC = () => {
                                                 <MoreVertical size={16} className="h-4 w-4" />
                                             </Button>
                                         </DropdownTrigger>
-                                        <DropdownMenu closeOnSelect={false}>
+                                        <DropdownMenu closeOnSelect={false} disabledKeys={["archivepremium"]}>
                                             <DropdownItem
                                                 onClick={() => {
                                                     setTaskToEdit({ task, quadrant });
@@ -573,12 +630,19 @@ const EisenhowerMatrix: React.FC = () => {
                                                         </DropdownItem>
                                                     ))}
                                             </DropdownSection>
+                                            <DropdownSection title="Archive">
+                                                {user?.premium ? (
+                                                    <DropdownItem key="archivepremium">
+                                                        Archive Task (Premium feature)
+                                                    </DropdownItem>
 
-                                            <DropdownItem
-                                                onClick={() => archiveTask(quadrant, task.id)}
-                                            >
-                                                Archive Task
-                                            </DropdownItem>
+
+                                                ) : (
+                                                    <DropdownItem onClick={() => archiveTask(quadrant, task.id)}>
+                                                        Archive Task
+                                                    </DropdownItem>
+                                                )}
+                                            </DropdownSection>
 
                                             <DropdownSection title="Danger zone">
                                                 <DropdownItem
@@ -713,6 +777,16 @@ const EisenhowerMatrix: React.FC = () => {
         }
     };
 
+    const syncAllTasks = async () => {
+        if (user?.premium) {
+            try {
+                await syncTasks(user.id as string, tasks);
+            } catch (error) {
+                console.error('Failed to sync tasks:', error);
+            }
+        }
+    };
+
     return (
         <div className="flex flex-col">
             <div className="text-center p-4">
@@ -827,11 +901,13 @@ const EisenhowerMatrix: React.FC = () => {
                     </ModalContent>
                 </Modal>
 
-                <FloatingButton
-                    tasks={tasks}
-                    showArchivedTasks={showArchivedTasks}
-                    isArchiveMode={isArchiveMode}
-                />
+                {user && !user.premium && (
+                    <FloatingButton
+                        tasks={tasks}
+                        showArchivedTasks={showArchivedTasks}
+                        isArchiveMode={isArchiveMode}
+                    />
+                )}
             </div>
             {/* <div className='px-4 pb-8'>
         <GanttChart/>

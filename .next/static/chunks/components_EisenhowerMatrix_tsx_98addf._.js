@@ -1,9 +1,9 @@
 (globalThis.TURBOPACK = globalThis.TURBOPACK || []).push([
-    "static/chunks/components_EisenhowerMatrix_tsx_98addf._.js",
+    "static/chunks/components_EisenhowerMatrix_tsx_205499._.js",
     {},
 ]);
 (globalThis.TURBOPACK_CHUNK_LISTS = globalThis.TURBOPACK_CHUNK_LISTS || []).push({
-  "path": "static/chunks/components_EisenhowerMatrix_tsx_98addf._.js",
+  "path": "static/chunks/components_EisenhowerMatrix_tsx_205499._.js",
   "chunks": [
     "static/chunks/components_ead29b._.js",
     "static/chunks/node_modules_next_dist_compiled_react_0bfca7._.js",
@@ -23,7 +23,7 @@
     "static/chunks/node_modules_@react-aria_a69a2e._.js",
     "static/chunks/node_modules_react-redux_f854eb._.js",
     "static/chunks/node_modules_ccaf0e._.js",
-    "static/chunks/node_modules_bacc50._.js"
+    "static/chunks/node_modules_82f974._.js"
   ],
   "source": "dynamic"
 });

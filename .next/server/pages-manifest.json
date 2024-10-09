@@ -1,6 +1,4 @@
 {
-  "/api/auth/callback": "pages/api/auth/callback.js",
-  "/api/auth/login": "pages/api/auth/login.js",
   "/api/auth/[...auth0]": "pages/api/auth/[...auth0].js",
   "/_app": "pages/_app.js",
   "/_document": "pages/_document.js",

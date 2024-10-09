@@ -117,6 +117,10 @@ const EisenhowerMatrix: React.FC = () => {
 
     const { user } = useUser();
 
+    const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+    const [selectedQuadrantForAdd, setSelectedQuadrantForAdd] = useState<QuadrantType | null>(null);
+
+
 
     // Function to toggle dropdown based on task ID
     const handleOpenChange = (taskId: number, open: boolean) => {
@@ -184,14 +188,14 @@ const EisenhowerMatrix: React.FC = () => {
             if (user?.premium) {
                 const tasks = await fetchTasksFromDB(user.id as string);
                 const tasksByQuadrant = transformTasksByQuadrant(tasks);
-        
+
                 // Log tasks grouped by quadrant
                 console.log("Tasks grouped by quadrant:", tasksByQuadrant);
-        
+
                 setTasks(tasksByQuadrant);
             }
         };
-        
+
 
         loadTasks();
     }, [user]);
@@ -459,9 +463,9 @@ const EisenhowerMatrix: React.FC = () => {
             console.error('User is undefined');
             return;
         }
-    
+
         const newTaskText = 'Some default task text';
-    
+
         const newTaskObject = {
             user_id: user.id as string, // Cast user.id to string
             quadrant: selectedQuadrant,
@@ -474,20 +478,20 @@ const EisenhowerMatrix: React.FC = () => {
             const { data, error } = await supabase
                 .from('tasks')
                 .insert([newTaskObject]);  // Insert the new task
-        
+
             if (error) {
                 console.error('Error saving task to DB:', error);
                 return { data: null, error };
             }
-        
+
             console.log('Task successfully saved to DB:', data);
             return { data, error: null };
         };
-        
-    
+
+
         // Log the task before saving to DB
         console.log("Task before saving to DB:", newTaskObject);
-    
+
         const { data: savedTask, error } = await saveTaskToDB(newTaskObject);
         if (error) {
             console.error('Error saving task:', error);
@@ -495,9 +499,9 @@ const EisenhowerMatrix: React.FC = () => {
             console.log('Task saved:', savedTask);
         }
     };
-    
-    
-    
+
+
+
     const transformTasksByQuadrant = (tasks: Task[]): Record<QuadrantType, Task[]> => {
         return tasks.reduce((acc, task) => {
             const quadrant = task.quadrant as QuadrantType;
@@ -506,31 +510,31 @@ const EisenhowerMatrix: React.FC = () => {
             return acc;
         }, {} as Record<QuadrantType, Task[]>);
     };
-    
+
     const fetchTasksFromDB = async (userId: string): Promise<Task[]> => {
         const { data, error } = await supabase.from('tasks').select('*').eq('user_id', userId);
         if (error) {
-          console.error('Error fetching tasks:', error);
-          return [];
+            console.error('Error fetching tasks:', error);
+            return [];
         }
         return data;
-      };
-      
-      useEffect(() => {
+    };
+
+    useEffect(() => {
         const loadTasks = async () => {
-          if (user?.premium) {
-            const tasks = await fetchTasksFromDB(user.id as string);
-            const tasksByQuadrant = transformTasksByQuadrant(tasks);
-            setTasks(tasksByQuadrant);
-          }
+            if (user?.premium) {
+                const tasks = await fetchTasksFromDB(user.id as string);
+                const tasksByQuadrant = transformTasksByQuadrant(tasks);
+                setTasks(tasksByQuadrant);
+            }
         };
         loadTasks();
-      }, [user, setTasks]);
-    
-      useEffect(() => {
+    }, [user, setTasks]);
+
+    useEffect(() => {
         console.log("Current tasks state:", tasks);
     }, [tasks]);
-    
+
 
 
     const [showArchived, setShowArchived] = useState(false); // Add this line to manage the archived state.
@@ -631,7 +635,7 @@ const EisenhowerMatrix: React.FC = () => {
                 subtasks: [],
                 archived: false,
                 quadrant: selectedQuadrant // Add this line
-              };
+            };
 
             setTasks((prev) => ({
                 ...prev,
@@ -804,25 +808,17 @@ const EisenhowerMatrix: React.FC = () => {
                     className={`p-4 mb-4 ${theme === "dark" ? (snapshot.isDraggingOver ? 'bg-zinc-700' : 'bg-zinc-900') : (snapshot.isDraggingOver ? 'bg-white' : 'bg-background')}`}
                 >          <CardHeader className="flex justify-between items-center">
                         <div className="text-default-500 text-sm">{quadrants[quadrant]}</div>
-                        <Popover placement="bottom">
-                            <PopoverTrigger>
-                                <Button size="sm" isIconOnly variant="light">
-                                    <Plus size={16} />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent>
-                                <div className="p-4">
-                                    <Input
-                                        placeholder="New task"
-                                        value={newTask}
-                                        onChange={(e) => setNewTask(e.target.value.slice(0, 100))}
-                                        onKeyDown={(e) => e.key === 'Enter' && addTask(quadrant)}
-                                    />
-                                        <button onClick={handleAddTask}>Add Task</button>
-
-                                </div>
-                            </PopoverContent>
-                        </Popover>
+                        <Button
+                            size="sm"
+                            isIconOnly
+                            variant="light"
+                            onClick={() => {
+                                setSelectedQuadrantForAdd(quadrant);
+                                setIsAddTaskModalOpen(true);
+                            }}
+                        >
+                            <Plus size={16} />
+                        </Button>
                     </CardHeader>
                     {tasks[quadrant].length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-10 text-center text-default-500">
@@ -916,6 +912,33 @@ const EisenhowerMatrix: React.FC = () => {
         }
     };
 
+    const addTaskToQuadrant = () => {
+        if (newTask.trim() && selectedQuadrantForAdd) {
+          const newTaskObject: Task = {
+            id: Date.now(),
+            text: newTask.trim(),
+            completed: false,
+            subtasks: [],
+            archived: false,
+            quadrant: selectedQuadrantForAdd,
+          };
+      
+          setTasks((prev) => ({
+            ...prev,
+            [selectedQuadrantForAdd]: [...prev[selectedQuadrantForAdd], newTaskObject],
+          }));
+      
+          setNewTask('');
+          setIsAddTaskModalOpen(false);
+      
+          // Optionally, sync with backend if needed
+          // if (user?.premium) {
+          //   upsertTask(user.id as string, newTaskObject, selectedQuadrantForAdd);
+          // }
+        }
+      };
+      
+
     return (
         <div className="flex flex-col">
             <div className="text-center p-4">
@@ -981,6 +1004,34 @@ const EisenhowerMatrix: React.FC = () => {
                         </>
                     )
                 }
+
+                {/* Add Task Modal */}
+                <Modal isOpen={isAddTaskModalOpen} onClose={() => setIsAddTaskModalOpen(false)}>
+                    <ModalContent>
+                        <ModalHeader>
+                            Add Task to {selectedQuadrantForAdd ? quadrants[selectedQuadrantForAdd] : ''}
+                        </ModalHeader>
+                        <ModalBody>
+                            <Input
+                                value={newTask}
+                                onChange={(e) => setNewTask(e.target.value.slice(0, 100))}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        addTaskToQuadrant();
+                                    } else if (e.key === 'Escape') {
+                                        setIsAddTaskModalOpen(false);
+                                    }
+                                }}
+                                fullWidth
+                                placeholder="Enter new task name"
+                            />
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button onClick={addTaskToQuadrant}>Add Task</Button>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
+
 
                 <Modal isOpen={isTaskModalOpen} onClose={onTaskModalClose}>
                     <ModalContent>

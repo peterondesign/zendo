@@ -73,36 +73,36 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
         const lineHeight = 10;
         let startX = 10;
         let startY = 20; // Start slightly lower on the page for spacing
-    
+
         // Loop through quadrants and render tasks in a table layout
         (Object.keys(quadrantDetails) as QuadrantType[]).forEach((quadrantKey, idx) => {
             const quadrantLabel = quadrantDetails[quadrantKey];
-    
+
             // Add space between quadrants (tables)
             if (idx !== 0) {
                 startY += 20;
             }
-    
+
             // Draw the quadrant title
             pdf.setFontSize(14);
             pdf.text(quadrantLabel, startX, startY);
             startY += lineHeight;
-    
+
             // Draw table for each quadrant
             pdf.setFontSize(12);
-    
+
             // Add table header
             pdf.text('Tasks', startX, startY);
             pdf.text('Subtasks', startX + 80, startY); // Adjust the X position for subtasks
             startY += lineHeight;
-    
+
             // Draw tasks and subtasks inside the table
             tasks[quadrantKey].forEach((task) => {
                 // Task text with checkbox
                 const checkbox = task.completed ? '[x]' : '[ ]';
                 pdf.text(`${checkbox} ${task.text}`, startX, startY);
                 startY += lineHeight;
-    
+
                 // Subtasks indented with checkbox
                 task.subtasks.forEach((subtask) => {
                     const subCheckbox = subtask.completed ? '[x]' : '[ ]';
@@ -110,26 +110,26 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                     startY += lineHeight;
                 });
             });
-    
+
             // If there are no tasks in the quadrant
             if (tasks[quadrantKey].length === 0) {
                 pdf.text('No tasks added yet.', startX, startY);
                 startY += lineHeight;
             }
-    
+
             // Check if the current Y position exceeds the page length, and add a new page if necessary
             if (startY > pdf.internal.pageSize.getHeight() - 30) {
                 pdf.addPage();
                 startY = 20; // Reset the Y position for the new page
             }
         });
-    
+
         // Save the generated PDF
         pdf.save('tasks.pdf');
         toast.success('PDF exported');
     };
-    
-    
+
+
 
     const handleArchiveTasks = () => {
         showArchivedTasks();
@@ -147,26 +147,25 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                                 <CircleEllipsis />
                             </Button>
                         </DropdownTrigger>
-                        <DropdownMenu aria-label="Task options">
-                            <DropdownItem
-                                key="copy"
-                                description="Copy tasks to clipboard"
-                                startContent={<Clipboard size={16} />}
-                                onClick={copyToClipboard}
-                            >
-                                Copy Tasks
-                            </DropdownItem>
+                        <DropdownMenu aria-label="Task options" disabledKeys={["copy", "archive", "save"]}>                           
+                             <DropdownItem
+                            key="copy"
+                            description="Premium feature"
+                            startContent={<Clipboard size={16} />}
+                            onClick={copyToClipboard}
+                        >
+                            Copy Tasks to Clipboard
+                        </DropdownItem>
                             <DropdownItem
                                 key="archive"
-                                description={isArchiveMode ? "Hide archived tasks" : "Show archived tasks"}
-                                startContent={<Archive size={16} />}
+                                description={"Premium feature"}                                startContent={<Archive size={16} />}
                                 onClick={handleArchiveTasks}
                             >
                                 {isArchiveMode ? "Hide Archived" : "Show Archived"}
                             </DropdownItem>
                             <DropdownItem
                                 key="save"
-                                description="Save tasks as PDF"
+                                description="Premium feature"
                                 startContent={<FileDown size={16} />}
                                 onClick={saveAsPDF}
                             >
@@ -174,8 +173,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                             </DropdownItem>
                         </DropdownMenu>
                     </Dropdown>
-                </Tooltip>
-            </ButtonGroup>
+                </Tooltip>            </ButtonGroup>
         </>
     );
 };

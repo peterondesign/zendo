@@ -374,7 +374,7 @@ const EisenhowerMatrix: React.FC = () => {
         const destinationQuadrant = destination.droppableId as QuadrantType;
 
         // Get source task and check if it's being dropped into a subtask or out of one
-        const sourceTask = tasks[sourceQuadrant][source.index];
+        const sourceTask = sourceQuadrant in tasks ? tasks[sourceQuadrant][source.index] : undefined;
 
         // Check if dropping into a subtask
         if (destinationQuadrant === sourceQuadrant && sourceTask) {
@@ -401,7 +401,8 @@ const EisenhowerMatrix: React.FC = () => {
 
         // Move task between quadrants or reorder within same quadrant
         if (sourceQuadrant === destinationQuadrant) {
-            const reorderedTasks = Array.from(tasks[sourceQuadrant]);
+            const sourceTasks = tasks[sourceQuadrant] ?? [];
+            const reorderedTasks = Array.from(sourceTasks);
             const [movedTask] = reorderedTasks.splice(source.index, 1);  // Remove task from source
             reorderedTasks.splice(destination.index, 0, movedTask);      // Insert at new position
 
@@ -472,43 +473,84 @@ const EisenhowerMatrix: React.FC = () => {
 
 
     const renderSubtasks = (quadrant: QuadrantType, task: Task) => (
-        <ul className="pl-6 mt-2 w-full">
-            {task.subtasks.map((subtask) => (
-                <li key={subtask.id} className="text-lg flex items-center justify-between">
-                    <div className="flex items-center">
-                        <input
-                            type="checkbox"
-                            checked={subtask.completed}
-                            onChange={() => toggleSubtaskCompletion(quadrant, task.id, subtask.id)}
-                            className="max-w-max mr-2"
-                            title="Toggle subtask completion"
+        <Droppable droppableId={`subtasks-${task.id}`} type="subtask">
+            {(provided) => (
+                <ul className="pl-6 mt-2 w-full" ref={provided.innerRef} {...provided.droppableProps}>
+                    {task.subtasks.map((subtask, index) => (
+                        <Draggable key={subtask.id} draggableId={`subtask-${subtask.id}`} index={index}>
+                            {(provided, snapshot) => (
+                                <li
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    className={`text-lg flex items-center justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-gray-200' : ''
+                                        }`}
+                                >
+                                    <div className="flex items-center">
+                                        <GripVertical className="w-max mr-2" />
+                                        <input
+                                            type="checkbox"
+                                            checked={subtask.completed}
+                                            onChange={() => toggleSubtaskCompletion(quadrant, task.id, subtask.id)}
+                                            className="max-w-max mr-2"
+                                            title="Toggle subtask completion"
+                                        />
+                                        <span
+                                            className={`w-full ${subtask.completed ? 'line-through' : ''
+                                                } ${task.archived ? 'opacity-50 italic' : 'opacity-100'}`} // Apply archived styles from parent task
+                                        >
+                                            {subtask.text}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-end">
+                                        <div className="flex justify-end">
+                                            <Dropdown>
+                                                <DropdownTrigger>
+                                                    <Button style={{ minWidth: 'auto' }} size="sm" variant="light">
+                                                        <MoreVertical size={16} className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownTrigger>
+                                                <DropdownMenu>
+                                                    <DropdownItem
+                                                        onClick={() => {
+                                                            setSubtaskToEdit({ subtask, taskId: task.id, quadrant });
+                                                            onSubtaskModalOpen();
+                                                        }}
+                                                    >
+                                                        Edit Subtask
+                                                    </DropdownItem>
+                                                    <DropdownItem
+                                                        onClick={() => deleteSubtask(quadrant, task.id, subtask.id)}
+                                                        className="text-red-500"
+                                                    >
+                                                        Delete Subtask
+                                                    </DropdownItem>
+                                                </DropdownMenu>
+                                            </Dropdown>
+                                        </div>
+                                    </div>
+                                </li>
+                            )}
+                        </Draggable>
+                    ))}
+                    {provided.placeholder}
+                    <div className="mt-2 flex items-center">
+                        <Input
+                            value={newSubtask}
+                            onChange={(e) => setNewSubtask(e.target.value.slice(0, 100))}
+                            placeholder="New subtask"
+                            onKeyDown={(e) => e.key === 'Enter' && addSubtask(quadrant, task.id)}
+                            maxLength={100}
                         />
-                        <span
-                            className={`w-full ${subtask.completed ? 'line-through' : ''
-                                } ${task.archived ? 'opacity-50 italic' : 'opacity-100'}`} // Apply archived styles from parent task
-                        >
-                            {subtask.text}
-                        </span>
+                        <Button onClick={() => addSubtask(quadrant, task.id)} className="ml-2" style={{ minWidth: 'auto' }}>
+                            <Plus size={16} />
+                        </Button>
                     </div>
-                    <div className="flex justify-end">
-                        {/* Dropdown for editing/deleting subtasks */}
-                    </div>
-                </li>
-            ))}
-            <div className="mt-2 flex items-center">
-                <Input
-                    value={newSubtask}
-                    onChange={(e) => setNewSubtask(e.target.value.slice(0, 100))}
-                    placeholder="New subtask"
-                    onKeyDown={(e) => e.key === 'Enter' && addSubtask(quadrant, task.id)}
-                    maxLength={100}
-                />
-                <Button onClick={() => addSubtask(quadrant, task.id)} className="ml-2" style={{ minWidth: 'auto' }}>
-                    <Plus size={16} />
-                </Button>
-            </div>
-        </ul>
+                </ul>
+            )}
+        </Droppable>
     );
+
 
     const addTask = async (quadrant: QuadrantType = selectedQuadrant, taskText: string = newTask) => {
         if (taskText.trim()) {
@@ -649,14 +691,15 @@ const EisenhowerMatrix: React.FC = () => {
                                             </DropdownSection>
                                             <DropdownSection title="Archive">
                                                 {user?.premium ? (
-                                                    <DropdownItem key="archivepremium">
-                                                        Archive Task (Premium feature)
+                                                    <DropdownItem onClick={() => archiveTask(quadrant, task.id)}>
+                                                        Archive Task
                                                     </DropdownItem>
 
 
                                                 ) : (
-                                                    <DropdownItem onClick={() => archiveTask(quadrant, task.id)}>
-                                                        Archive Task
+
+                                                    <DropdownItem key="archivepremium">
+                                                        Archive Task (Premium feature)
                                                     </DropdownItem>
                                                 )}
                                             </DropdownSection>
@@ -773,11 +816,11 @@ const EisenhowerMatrix: React.FC = () => {
                         task.id === taskId
                             ? {
                                 ...task,
-                                subtasks: subtasks.map((subtaskText: string, index: number) => ({
+                                subtasks: [...task.subtasks, ...subtasks.map((subtaskText: string, index: number) => ({
                                     id: Date.now() + index,
                                     text: subtaskText,
                                     completed: false,
-                                })),
+                                }))]
                             }
                             : task
                     ),
@@ -918,13 +961,11 @@ const EisenhowerMatrix: React.FC = () => {
                     </ModalContent>
                 </Modal>
 
-                {user && !user.premium && (
-                    <FloatingButton
-                        tasks={tasks}
-                        showArchivedTasks={showArchivedTasks}
-                        isArchiveMode={isArchiveMode}
-                    />
-                )}
+                <FloatingButton
+                    tasks={tasks}
+                    showArchivedTasks={showArchivedTasks}
+                    isArchiveMode={isArchiveMode}
+                />
             </div>
             {/* <div className='px-4 pb-8'>
         <GanttChart/>

@@ -18,12 +18,19 @@ import { UserProvider, useUser } from '@auth0/nextjs-auth0/client'
 
 import { upsertTask, deleteTask, syncTasks, upsertSubtask, deleteSubtask, fetchTasks, fetchSubtasks } from './tasksyncoperations'
 
+import { createClient } from '@supabase/supabase-js'
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabase = createClient(supabaseUrl, supabaseKey)
+
 type Task = {
     id: number;
     text: string;
     completed: boolean;
     archived: boolean;
     subtasks: SubTask[];
+    quadrant: QuadrantType; // Add this property
 };
 
 interface Props {
@@ -174,33 +181,17 @@ const EisenhowerMatrix: React.FC = () => {
 
     useEffect(() => {
         const loadTasks = async () => {
-            if (user?.premium) {  // Only load tasks from server if the user is premium
-                try {
-                    const tasks = await fetchTasks(user.id as string);
-                    const subtasks = await fetchSubtasks(user.id as string);
-                    // Group tasks by quadrant and associate subtasks with their parent tasks
-                    const updatedTasks: Record<QuadrantType, Task[]> = {
-                        do: [],
-                        decide: [],
-                        delegate: [],
-                        delete: [],
-                        unsorted: [],
-                    };
-
-                    tasks.forEach(task => {
-                        // Find the quadrant the task belongs to and push it to the respective array
-                        updatedTasks[task.quadrant as QuadrantType].push({
-                            ...task,
-                            subtasks: subtasks.filter(subtask => subtask.taskId === task.id),
-                        });
-                    });
-
-                    setTasks(updatedTasks);  // Update the state with the fetched tasks and subtasks
-                } catch (error) {
-                    console.error('Failed to load tasks:', error);
-                }
+            if (user?.premium) {
+                const tasks = await fetchTasksFromDB(user.id as string);
+                const tasksByQuadrant = transformTasksByQuadrant(tasks);
+        
+                // Log tasks grouped by quadrant
+                console.log("Tasks grouped by quadrant:", tasksByQuadrant);
+        
+                setTasks(tasksByQuadrant);
             }
         };
+        
 
         loadTasks();
     }, [user]);
@@ -463,6 +454,84 @@ const EisenhowerMatrix: React.FC = () => {
         });
     };
 
+    const handleAddTask = async () => {
+        if (!user) {
+            console.error('User is undefined');
+            return;
+        }
+    
+        const newTaskText = 'Some default task text';
+    
+        const newTaskObject = {
+            user_id: user.id as string, // Cast user.id to string
+            quadrant: selectedQuadrant,
+            text: newTaskText,
+            completed: false,
+            archived: false,
+        };
+
+        const saveTaskToDB = async (newTaskObject: { user_id: string; quadrant: QuadrantType; text: string }) => {
+            const { data, error } = await supabase
+                .from('tasks')
+                .insert([newTaskObject]);  // Insert the new task
+        
+            if (error) {
+                console.error('Error saving task to DB:', error);
+                return { data: null, error };
+            }
+        
+            console.log('Task successfully saved to DB:', data);
+            return { data, error: null };
+        };
+        
+    
+        // Log the task before saving to DB
+        console.log("Task before saving to DB:", newTaskObject);
+    
+        const { data: savedTask, error } = await saveTaskToDB(newTaskObject);
+        if (error) {
+            console.error('Error saving task:', error);
+        } else {
+            console.log('Task saved:', savedTask);
+        }
+    };
+    
+    
+    
+    const transformTasksByQuadrant = (tasks: Task[]): Record<QuadrantType, Task[]> => {
+        return tasks.reduce((acc, task) => {
+            const quadrant = task.quadrant as QuadrantType;
+            if (!acc[quadrant]) acc[quadrant] = [];
+            acc[quadrant].push(task);
+            return acc;
+        }, {} as Record<QuadrantType, Task[]>);
+    };
+    
+    const fetchTasksFromDB = async (userId: string): Promise<Task[]> => {
+        const { data, error } = await supabase.from('tasks').select('*').eq('user_id', userId);
+        if (error) {
+          console.error('Error fetching tasks:', error);
+          return [];
+        }
+        return data;
+      };
+      
+      useEffect(() => {
+        const loadTasks = async () => {
+          if (user?.premium) {
+            const tasks = await fetchTasksFromDB(user.id as string);
+            const tasksByQuadrant = transformTasksByQuadrant(tasks);
+            setTasks(tasksByQuadrant);
+          }
+        };
+        loadTasks();
+      }, [user, setTasks]);
+    
+      useEffect(() => {
+        console.log("Current tasks state:", tasks);
+    }, [tasks]);
+    
+
 
     const [showArchived, setShowArchived] = useState(false); // Add this line to manage the archived state.
 
@@ -560,8 +629,9 @@ const EisenhowerMatrix: React.FC = () => {
                 text: taskText.trim(),
                 completed: false,
                 subtasks: [],
-                archived: false  // Default archived state should be false
-            };
+                archived: false,
+                quadrant: selectedQuadrant // Add this line
+              };
 
             setTasks((prev) => ({
                 ...prev,
@@ -748,9 +818,8 @@ const EisenhowerMatrix: React.FC = () => {
                                         onChange={(e) => setNewTask(e.target.value.slice(0, 100))}
                                         onKeyDown={(e) => e.key === 'Enter' && addTask(quadrant)}
                                     />
-                                    <Button onClick={() => addTask(quadrant)} className="mt-2">
-                                        Add Task
-                                    </Button>
+                                        <button onClick={handleAddTask}>Add Task</button>
+
                                 </div>
                             </PopoverContent>
                         </Popover>
@@ -987,3 +1056,4 @@ const EisenhowerMatrix: React.FC = () => {
 };
 
 export default EisenhowerMatrix;
+

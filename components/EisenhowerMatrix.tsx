@@ -560,21 +560,25 @@ const EisenhowerMatrix: React.FC = () => {
                                         }`}
                                 >
                                     <div className="flex items-center">
-                                        <GripVertical className="w-max mr-2" />
-                                        <input
-                                            type="checkbox"
-                                            checked={subtask.completed}
-                                            onChange={() => toggleSubtaskCompletion(quadrant, task.id, subtask.id)}
-                                            className="max-w-max mr-2"
-                                            title="Toggle subtask completion"
-                                        />
-                                        <span
-                                            className={`w-full ${subtask.completed ? 'line-through' : ''
-                                                } ${task.archived ? 'opacity-50 italic' : 'opacity-100'}`} // Apply archived styles from parent task
-                                        >
-                                            {subtask.text}
-                                        </span>
+                                        <div className="flex items-center">
+                                            <GripVertical className="w-max mr-2" />
+                                            <input
+                                                type="checkbox"
+                                                checked={subtask.completed}
+                                                onChange={() => toggleSubtaskCompletion(quadrant, task.id, subtask.id)}
+                                                className="max-w-max mr-2"
+                                                title="Toggle subtask completion"
+                                            />
+                                            <span
+                                                className={`w-full ${subtask.completed ? 'line-through' : ''
+                                                    } ${task.archived ? 'opacity-50 italic' : 'opacity-100'}`} // Apply archived styles from parent task
+                                                style={{ overflowWrap: 'anywhere' }}
+                                            >
+                                                {subtask.text}
+                                            </span>
+                                        </div>
                                     </div>
+
                                     <div className="flex justify-end">
                                         <div className="flex justify-end">
                                             <Dropdown>
@@ -675,20 +679,24 @@ const EisenhowerMatrix: React.FC = () => {
                         className={`flex flex-col items-start justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-gray-700' : 'hover:bg-default-100'
                             }`}
                     >
-                        <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center flex-grow">
-                                <span {...provided.dragHandleProps} className="mr-2 cursor-move">
-                                    <GripVertical size={16} />
-                                </span>
-                                <input
-                                    type="checkbox"
-                                    checked={task.completed}
-                                    onChange={() => toggleTaskCompletion(quadrant, task.id)}
-                                    className="mr-2"
-                                    title="Toggle task completion"
-                                />
+                        <div className="flex items-start justify-between w-full">
+                            <div className="flex items-start flex-grow">
+                                <div className="flex items-center m-auto flex-grow">
+
+                                    <span {...provided.dragHandleProps} className="mr-2 cursor-move">
+                                        <GripVertical size={16} />
+                                    </span>
+                                    <input
+                                        type="checkbox"
+                                        checked={task.completed}
+                                        onChange={() => toggleTaskCompletion(quadrant, task.id)}
+                                        className="mr-2"
+                                        title="Toggle task completion"
+                                    />
+                                </div>
                                 <span
                                     id={`task-text-${task.id}`}
+                                    style={{ overflowWrap: 'anywhere' }}
                                     className={`w-full text-lg ${task.completed ? 'line-through' : ''} ${task.archived ? 'opacity-50 italic' : 'opacity-100'
                                         }`} // Fade out and italicize archived tasks
                                 >
@@ -700,7 +708,7 @@ const EisenhowerMatrix: React.FC = () => {
                             <div className="flex items-center">
                                 {/* Display subtasks completed/total if subtasks exist */}
                                 {totalSubtasks > 0 && (
-                                    <span className="text-xs text-default-500 mr-2">
+                                    <span className="text-xs text-default-500 ml-2">
                                         {completedSubtasks}/{totalSubtasks}
                                     </span>
                                 )}
@@ -914,30 +922,30 @@ const EisenhowerMatrix: React.FC = () => {
 
     const addTaskToQuadrant = () => {
         if (newTask.trim() && selectedQuadrantForAdd) {
-          const newTaskObject: Task = {
-            id: Date.now(),
-            text: newTask.trim(),
-            completed: false,
-            subtasks: [],
-            archived: false,
-            quadrant: selectedQuadrantForAdd,
-          };
-      
-          setTasks((prev) => ({
-            ...prev,
-            [selectedQuadrantForAdd]: [...prev[selectedQuadrantForAdd], newTaskObject],
-          }));
-      
-          setNewTask('');
-          setIsAddTaskModalOpen(false);
-      
-          // Optionally, sync with backend if needed
-          // if (user?.premium) {
-          //   upsertTask(user.id as string, newTaskObject, selectedQuadrantForAdd);
-          // }
+            const newTaskObject: Task = {
+                id: Date.now(),
+                text: newTask.trim(),
+                completed: false,
+                subtasks: [],
+                archived: false,
+                quadrant: selectedQuadrantForAdd,
+            };
+
+            setTasks((prev) => ({
+                ...prev,
+                [selectedQuadrantForAdd]: [...prev[selectedQuadrantForAdd], newTaskObject],
+            }));
+
+            setNewTask('');
+            setIsAddTaskModalOpen(false);
+
+            // Optionally, sync with backend if needed
+            // if (user?.premium) {
+            //   upsertTask(user.id as string, newTaskObject, selectedQuadrantForAdd);
+            // }
         }
-      };
-      
+    };
+
 
     return (
         <div className="flex flex-col">

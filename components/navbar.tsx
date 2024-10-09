@@ -36,6 +36,8 @@ import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-o
 
 export const Navbar = () => {
   const { user } = useUser();
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+
 
   useEffect(() => {
     const insertUserToSupabase = async () => {
@@ -103,7 +105,7 @@ export const Navbar = () => {
   );
 
   return (
-    <NextUINavbar maxWidth="xl" position="sticky" className="bg-gradient-radial-gray bg-gradient-noise">
+    <NextUINavbar maxWidth="xl" position="sticky" className="bg-gradient-radial-gray bg-gradient-noise" isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen}>
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
@@ -160,12 +162,14 @@ export const Navbar = () => {
                 href={item.href}
                 size="lg"
               >
-                {item.label}
+                <p onClick={() => setIsMenuOpen(false)} // Use onClick instead of onPress
+                >{item.label}</p>
               </Link>
             </NavbarMenuItem>
           ))}
         </div>
       </NavbarMenu>
+
     </NextUINavbar>
   );
 };

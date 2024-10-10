@@ -4,7 +4,7 @@ import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { GripVertical, MoreVertical } from 'lucide-react';
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
-import { SubTask, QuadrantType } from '../types'; // Assuming shared types for SubTask and QuadrantType
+import { SubTask, QuadrantType } from '../customtypes'; // Assuming shared types for SubTask and QuadrantType
 
 interface SubtaskItemProps {
   subtask: SubTask;

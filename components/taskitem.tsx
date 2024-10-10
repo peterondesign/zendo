@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { ChevronDown, ChevronUp, GripVertical, MoreVertical } from 'lucide-react';
 import { Button, ButtonGroup, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Spinner } from '@nextui-org/react';
-import { Task, QuadrantType } from '../types';
+import { Task, QuadrantType } from '../customtypes';
 
 interface TaskItemProps {
     task: Task;

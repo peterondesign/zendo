@@ -631,34 +631,41 @@ const EisenhowerMatrix: React.FC = () => {
 
     const addTask = async (quadrant: QuadrantType = selectedQuadrant, taskText: string = newTask) => {
         if (taskText.trim()) {
-            // Ensure that the 'archived' property is included when creating the new task
             const newTask: Task = {
                 id: Date.now(),
                 text: taskText.trim(),
                 completed: false,
                 subtasks: [],
                 archived: false,
-                quadrant: selectedQuadrant // Add this line
+                quadrant: quadrant
             };
 
+            // Insert the task into Supabase
+            const { data, error } = await supabase
+                .from('tasks')
+                .insert([
+                    {
+                        user_id: user?.id,
+                        quadrant: quadrant,
+                        text: taskText.trim(),
+                        completed: false,
+                        archived: false
+                    }
+                ]);
+
+            if (error) {
+                console.error('Error inserting task into Supabase:', error);
+                return;
+            }
+
+            console.log('Task inserted successfully:', data);
+
+            // Update local state
             setTasks((prev) => ({
                 ...prev,
                 [quadrant]: [...prev[quadrant], newTask],
             }));
             setNewTask('');
-
-            if (user?.premium) {  // Only sync tasks if the user is premium
-                try {
-                    await upsertTask(user.id as string, newTask, quadrant);
-                } catch (error) {
-                    console.error('Failed to sync task:', error);
-                    // Revert local state change if sync fails
-                    setTasks((prev) => ({
-                        ...prev,
-                        [quadrant]: prev[quadrant].filter(task => task.id !== newTask.id),
-                    }));
-                }
-            }
         }
     };
 
@@ -1035,7 +1042,11 @@ const EisenhowerMatrix: React.FC = () => {
                             />
                         </ModalBody>
                         <ModalFooter>
-                            <Button onClick={addTaskToQuadrant}>Add Task</Button>
+                            <Button onClick={() => {
+                                addTask();
+                                addTaskToQuadrant();
+                                handleAddTask();
+                            }}>Add Task</Button>
                         </ModalFooter>
                     </ModalContent>
                 </Modal>

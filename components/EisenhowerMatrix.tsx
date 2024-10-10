@@ -1,88 +1,32 @@
+// EisenhowerMatrix.tsx
+
 "use client";
 
 import React, { useEffect, useState } from 'react';
 import { Button, ButtonGroup } from '@nextui-org/button';
 import { Input } from '@nextui-org/input';
 import { Card, CardHeader } from '@nextui-org/card';
-import { Trash2, GripVertical, Plus, MoreVertical, ChevronDown, ChevronUp } from 'lucide-react';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { Popover, PopoverTrigger, PopoverContent, Dropdown, DropdownTrigger, DropdownSection, DropdownMenu, DropdownItem, Link } from "@nextui-org/react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { GripVertical, Plus, MoreVertical, ChevronDown, ChevronUp } from 'lucide-react';
+import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
+import { Dropdown, DropdownTrigger, DropdownSection, DropdownMenu, DropdownItem, Link, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { useTheme } from "next-themes";
-import { Spinner } from '@nextui-org/react';
 import FloatingButton from './floatingbutton';
 
-import { UserProvider, useUser } from '@auth0/nextjs-auth0/client'
+import { useUser } from '@auth0/nextjs-auth0/client'
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient, PostgrestError } from '@supabase/supabase-js'
 import SubtaskItem from './subtaskitem';
 import TaskItem from './taskitem';
+import { SupabaseTask, Task, QuadrantType, TaskEditInfo, SubtaskEditInfo } from '../customtypes';
+
+
 
 // Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
 
-// Define the structure of a task as stored in Supabase
-// Define the structure of a task as stored in Supabase
-interface SupabaseTask {
-    id: number; // Change to 'string' if using UUIDs
-    text: string;
-    completed: boolean;
-    archived: boolean;
-    quadrant: QuadrantType;
-    user_id: string;
-}
-
-// Represents the structure of data when inserting a new task
-type InsertTask = Omit<SupabaseTask, 'id'>; ``
-
-type Task = {
-    id: number;
-    text: string;
-    completed: boolean;
-    archived: boolean;
-    subtasks: SubTask[];
-    quadrant: QuadrantType;
-};
-
-interface TaskItemProps {
-    task: Task;
-    quadrant: QuadrantType;
-    index: number;
-    expandedTaskIds: number[];
-    toggleTaskCompletion: (quadrant: QuadrantType, taskId: number) => void;
-    toggleTaskExpansion: (taskId: number) => void;
-    setTaskToEdit?: (task: Task, quadrant: QuadrantType) => void;
-    deleteTask: (quadrant: QuadrantType, taskId: number) => void;
-    renderSubtasks: (task: Task) => JSX.Element;
-    archiveTask: () => void;
-    moveTaskToQuadrant: (sourceQuadrant: QuadrantType, taskId: number, targetQuadrant: QuadrantType) => void;
-}
-
-interface Props {
-    quadrant: QuadrantType;
-}
-
-type SubTask = {
-    id: number;
-    text: string;
-    completed: boolean;
-};
-
-type QuadrantType = 'do' | 'decide' | 'delegate' | 'delete' | 'unsorted';
-
-type TaskEditInfo = {
-    task: Task;
-    quadrant: QuadrantType;
-};
-
-type SubtaskEditInfo = {
-    subtask: SubTask;
-    taskId: number;
-    quadrant: QuadrantType;
-};
-
+// Define Quadrants
 const quadrants: Record<QuadrantType, string> = {
     do: 'Do (Urgent & Important)',
     decide: 'Decide (Not Urgent & Important)',
@@ -92,6 +36,13 @@ const quadrants: Record<QuadrantType, string> = {
 };
 
 const EisenhowerMatrix: React.FC = () => {
+    const { user } = useUser();
+    const { isOpen: isTaskModalOpen, onOpen: onTaskModalOpen, onClose: onTaskModalClose } = useDisclosure();
+    const { isOpen: isSubtaskModalOpen, onOpen: onSubtaskModalOpen, onClose: onSubtaskModalClose } = useDisclosure();
+    const { isOpen: isAddTaskModalOpen, onOpen: onAddTaskModalOpen, onClose: onAddTaskModalClose } = useDisclosure();
+
+    const { theme } = useTheme();
+
     const [tasks, setTasks] = useState<Record<QuadrantType, Task[]>>({
         do: [],
         decide: [],
@@ -108,33 +59,20 @@ const EisenhowerMatrix: React.FC = () => {
     });
     const [isArchiveMode, setIsArchiveMode] = useState(false);
     const [newTask, setNewTask] = useState('');
-    const [selectedQuadrant, setSelectedQuadrant] = useState<QuadrantType>('unsorted');
     const [newSubtask, setNewSubtask] = useState('');
+    const [selectedQuadrantForAdd, setSelectedQuadrantForAdd] = useState<QuadrantType | null>(null);
+    const [taskToEdit, setTaskToEditState] = useState<TaskEditInfo | null>(null);
+    const [subtaskToEdit, setSubtaskToEdit] = useState<SubtaskEditInfo | null>(null);
+    const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
     const [expandedTaskIds, setExpandedTaskIds] = useState<number[]>([]);
     const [loadingAI, setLoadingAI] = useState(false); // Track AI loading state
 
-    const [taskToEdit, setTaskToEditState] = useState<TaskEditInfo | null>(null);
-
-    // Create a wrapper function that matches the expected signature
+    // Wrapper function to set task to edit
     const setTaskToEdit = (task: Task, quadrant: QuadrantType) => {
         setTaskToEditState({ task, quadrant });
     };
 
-    // Now you can pass this `setTaskToEdit` to your TaskItem
-    const [subtaskToEdit, setSubtaskToEdit] = useState<SubtaskEditInfo | null>(null);
-    const { isOpen: isTaskModalOpen, onOpen: onTaskModalOpen, onClose: onTaskModalClose } = useDisclosure();
-    const { isOpen: isSubtaskModalOpen, onOpen: onSubtaskModalOpen, onClose: onSubtaskModalClose } = useDisclosure();
-    const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
-    const { theme, setTheme } = useTheme();
-    const { user } = useUser();
-    const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
-    const [selectedQuadrantForAdd, setSelectedQuadrantForAdd] = useState<QuadrantType | null>(null);
-
-    // Function to toggle dropdown based on task ID
-    const handleOpenChange = (taskId: number, open: boolean) => {
-        setOpenDropdownId(open ? taskId : null);  // Set or reset dropdown based on open state
-    };
-
+    // Handle Key Down Events for Accessibility
     const handleKeyDown = (e: React.KeyboardEvent, task: Task, quadrant: QuadrantType) => {
         switch (e.key) {
             case 'e':
@@ -145,10 +83,13 @@ const EisenhowerMatrix: React.FC = () => {
             case 'Backspace':
                 deleteTask(quadrant, task.id);
                 break;
+            default:
+                break;
         }
         setOpenDropdownId(null);  // Close dropdown manually after any action
     };
 
+    // Handle Subtask Input Change
     const handleSubtaskInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (subtaskToEdit) {
             setSubtaskToEdit({
@@ -158,19 +99,137 @@ const EisenhowerMatrix: React.FC = () => {
         }
     };
 
-    // This useEffect runs after the component mounts and ensures that localStorage is accessible
-    useEffect(() => {
-        const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
-        if (storedTasks) {
-            setTasks(JSON.parse(storedTasks));
+    // Handle Task Input Change
+    const handleTaskInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (taskToEdit) {
+            setTaskToEditState(prev => ({
+                ...prev!,
+                task: { ...prev!.task, text: e.target.value },
+            }));
         }
-    }, []); // Empty dependency array ensures this only runs once after mounting
+    };
 
-    // Update localStorage whenever tasks are changed
+
+
+    // Fetch and Merge Tasks from Supabase and LocalStorage
     useEffect(() => {
-        window.localStorage.setItem('eisenhowerMatrixTasks', JSON.stringify(tasks));
-    }, [tasks]);
+        const fetchAndMergeTasks = async () => {
+            if (user) {
+                try {
+                    // Fetch tasks from Supabase
+                    const { data: supabaseTasks, error } = await supabase
+                        .from<SupabaseTask>('tasks')  // 'tasks' is the string (table name), and <SupabaseTask> is the type.
+                        .select('*')
+                        .eq('user_id', user.sub);
 
+                    if (error) {
+                        console.error('Error fetching tasks from Supabase:', error);
+                    }
+
+                    // Parse tasks from localStorage
+                    const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
+                    const localTasks: Record<QuadrantType, Task[]> = storedTasks ? JSON.parse(storedTasks) : {
+                        do: [],
+                        decide: [],
+                        delegate: [],
+                        delete: [],
+                        unsorted: [],
+                    };
+
+                    // Convert SupabaseTask to Task and initialize subtasks
+                    const convertedSupabaseTasks: Record<QuadrantType, Task[]> = {
+                        do: [],
+                        decide: [],
+                        delegate: [],
+                        delete: [],
+                        unsorted: [],
+                    };
+
+                    if (supabaseTasks) {
+                        supabaseTasks.forEach((supTask) => {
+                            const task: Task = {
+                                id: supTask.id,
+                                text: supTask.text,
+                                completed: supTask.completed,
+                                archived: supTask.archived,
+                                quadrant: supTask.quadrant as QuadrantType,  // Cast this to QuadrantType
+                                subtasks: [],
+                                user_id: undefined
+                            };
+
+                            // Now you can index into convertedSupabaseTasks safely
+                            convertedSupabaseTasks[supTask.quadrant as QuadrantType].push(task);
+                        });
+                    }
+
+
+                    // Merge Supabase tasks and local tasks without duplication
+                    const mergedTasks: Record<QuadrantType, Task[]> = {
+                        do: [...convertedSupabaseTasks.do],
+                        decide: [...convertedSupabaseTasks.decide],
+                        delegate: [...convertedSupabaseTasks.delegate],
+                        delete: [...convertedSupabaseTasks.delete],
+                        unsorted: [...convertedSupabaseTasks.unsorted],
+                    };
+
+                    Object.keys(localTasks).forEach((quadrantKey) => {
+                        const quadrant = quadrantKey as QuadrantType;
+                        localTasks[quadrant].forEach((localTask) => {
+                            // Check if the task already exists in Supabase tasks to avoid duplication
+                            const exists = mergedTasks[quadrant].some((supTask) => supTask.id === localTask.id && supTask.text === localTask.text);
+                            if (!exists) {
+                                mergedTasks[quadrant].push(localTask);
+
+                                // Optionally, add the local task to Supabase
+                                supabase.from('tasks').insert({
+                                    text: localTask.text,
+                                    completed: localTask.completed,
+                                    archived: localTask.archived,
+                                    quadrant: localTask.quadrant,
+                                    user_id: localTask.user_id,
+                                }).then(({ data, error }) => {
+                                    if (error) {
+                                        console.error('Error syncing local task to Supabase:', error);
+                                    } else {
+                                        console.log('Local task synced to Supabase:', data);
+                                    }
+                                });
+                            }
+                        });
+                    });
+
+                    setTasks(mergedTasks);
+
+                    // Optionally, clear localStorage after syncing
+                    window.localStorage.removeItem('eisenhowerMatrixTasks');
+                } catch (err) {
+                    console.error('Error fetching and merging tasks:', err);
+                }
+            } else {
+                // If user is not logged in, load tasks from localStorage
+                const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
+                if (storedTasks) {
+                    setTasks(JSON.parse(storedTasks));
+                }
+            }
+        };
+
+        fetchAndMergeTasks();
+    }, [user, supabase]);
+
+    // Update localStorage whenever tasks change (only when not logged in)
+    useEffect(() => {
+        if (!user) {
+            window.localStorage.setItem('eisenhowerMatrixTasks', JSON.stringify(tasks));
+        }
+    }, [tasks, user]);
+
+    // Function to toggle dropdown based on task ID
+    const handleOpenChange = (taskId: number, open: boolean) => {
+        setOpenDropdownId(open ? taskId : null);
+    };
+
+    // Add Subtask
     const addSubtask = (quadrant: QuadrantType, taskId: number) => {
         if (newSubtask.trim()) {
             setTasks((prev) => ({
@@ -191,6 +250,7 @@ const EisenhowerMatrix: React.FC = () => {
         }
     };
 
+    // Toggle Subtask Completion
     const toggleSubtaskCompletion = (quadrant: QuadrantType, taskId: number, subtaskId: number) => {
         setTasks((prev) => ({
             ...prev,
@@ -209,6 +269,7 @@ const EisenhowerMatrix: React.FC = () => {
         }));
     };
 
+    // Toggle Task Completion
     const toggleTaskCompletion = (quadrant: QuadrantType, taskId: number) => {
         setTasks((prev) => ({
             ...prev,
@@ -218,6 +279,7 @@ const EisenhowerMatrix: React.FC = () => {
         }));
     };
 
+    // Delete Task
     const deleteTask = (quadrant: QuadrantType, taskId: number) => {
         setTasks((prev) => ({
             ...prev,
@@ -225,6 +287,7 @@ const EisenhowerMatrix: React.FC = () => {
         }));
     };
 
+    // Archive Task
     const archiveTask = (quadrant: QuadrantType, taskId: number) => {
         setTasks((prevTasks) => ({
             ...prevTasks,
@@ -234,39 +297,7 @@ const EisenhowerMatrix: React.FC = () => {
         }));
     };
 
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'e' && (event.metaKey || event.ctrlKey)) {
-                event.preventDefault();
-                // Trigger Edit Task if "E" is pressed
-                if (taskToEdit) {
-                    // We don't need to call setTaskToEdit here, just open the modal
-                    onTaskModalOpen();
-                }
-            } else if (event.key === 'Backspace') {
-                // Trigger Delete Task if "Backspace" key is pressed
-                if (taskToEdit) {
-                    deleteTask(taskToEdit.quadrant, taskToEdit.task.id);
-                }
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [taskToEdit, onTaskModalOpen, deleteTask]);
-
-    const handleTaskInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (taskToEdit) {
-            setTaskToEditState(prev => ({
-                ...prev!,
-                task: { ...prev!.task, text: e.target.value },
-            }));
-        }
-    };
-
+    // Delete Subtask
     const deleteSubtask = (quadrant: QuadrantType, taskId: number, subtaskId: number) => {
         setTasks((prev) => ({
             ...prev,
@@ -281,7 +312,7 @@ const EisenhowerMatrix: React.FC = () => {
         }));
     };
 
-    // For saving tasks
+    // Save Edited Task
     const saveEditedTask = () => {
         if (taskToEdit) {
             const { quadrant, task } = taskToEdit;
@@ -296,7 +327,7 @@ const EisenhowerMatrix: React.FC = () => {
         }
     };
 
-    // For saving subtasks
+    // Save Edited Subtask
     const saveEditedSubtask: () => void = () => {
         if (subtaskToEdit) {
             const { quadrant, taskId, subtask } = subtaskToEdit;
@@ -318,6 +349,7 @@ const EisenhowerMatrix: React.FC = () => {
         }
     };
 
+    // Toggle Task Expansion
     const toggleTaskExpansion = (taskId: number) => {
         setExpandedTaskIds((currentIds) => {
             if (currentIds.includes(taskId)) {
@@ -328,26 +360,7 @@ const EisenhowerMatrix: React.FC = () => {
         });
     };
 
-    useEffect(() => {
-        setExpandedTaskIds(expandedTaskIds);
-    }, [expandedTaskIds]);
-
-    const moveTaskToQuadrant = (sourceQuadrant: QuadrantType, taskId: number, targetQuadrant: QuadrantType) => {
-        const sourceTasks = Array.from(tasks[sourceQuadrant]);
-        const taskIndex = sourceTasks.findIndex((task) => task.id === taskId);
-        if (taskIndex === -1) return;
-
-        const [task] = sourceTasks.splice(taskIndex, 1);
-        const updatedTargetTasks = [...tasks[targetQuadrant], task];
-
-        setTasks((prev) => ({
-            ...prev,
-            [sourceQuadrant]: sourceTasks,
-            [targetQuadrant]: updatedTargetTasks,
-        }));
-    };
-
-    // Handles drag-and-drop reordering of tasks, moving between quadrants, and subtasks
+    // Drag and Drop Handler
     const onDragEnd = (result: DropResult) => {
         const { source, destination } = result;
 
@@ -357,59 +370,35 @@ const EisenhowerMatrix: React.FC = () => {
         const sourceQuadrant = source.droppableId as QuadrantType;
         const destinationQuadrant = destination.droppableId as QuadrantType;
 
-        // Get source task and check if it's being dropped into a subtask or out of one
-        const sourceTask = sourceQuadrant in tasks ? tasks[sourceQuadrant][source.index] : undefined;
+        // Get source task
+        const sourceTask = tasks[sourceQuadrant][source.index];
 
-        // Check if dropping into a subtask
-        if (destinationQuadrant === sourceQuadrant && sourceTask) {
-            const destinationTask = tasks[destinationQuadrant][destination.index];
-
-            // If the destination is another task, move sourceTask to be a subtask of destinationTask
-            if (sourceQuadrant === destinationQuadrant && destinationTask && sourceTask.id !== destinationTask.id) {
-                // Move the task as a subtask
-                setTasks((prev) => ({
-                    ...prev,
-                    [destinationQuadrant]: prev[destinationQuadrant].map((task) =>
-                        task.id === destinationTask.id
-                            ? {
-                                ...task,
-                                subtasks: [...task.subtasks, sourceTask], // Add the dragged task as a subtask
-                            }
-                            : task
-                    ),
-                    [sourceQuadrant]: prev[sourceQuadrant].filter((task) => task.id !== sourceTask.id), // Remove from tasks
-                }));
-                return;
-            }
-        }
-
-        // Move task between quadrants or reorder within same quadrant
+        // If dragging within the same quadrant
         if (sourceQuadrant === destinationQuadrant) {
-            const sourceTasks = tasks[sourceQuadrant] ?? [];
-            const reorderedTasks = Array.from(sourceTasks);
-            const [movedTask] = reorderedTasks.splice(source.index, 1);  // Remove task from source
-            reorderedTasks.splice(destination.index, 0, movedTask);      // Insert at new position
+            const reorderedTasks = Array.from(tasks[sourceQuadrant]);
+            const [movedTask] = reorderedTasks.splice(source.index, 1);
+            reorderedTasks.splice(destination.index, 0, movedTask);
 
             setTasks((prev) => ({
                 ...prev,
-                [sourceQuadrant]: reorderedTasks,  // Update state with reordered tasks
+                [sourceQuadrant]: reorderedTasks,
             }));
         } else {
+            // Moving to a different quadrant
             const sourceTasks = Array.from(tasks[sourceQuadrant]);
-            const [movedTask] = sourceTasks.splice(source.index, 1);  // Remove from source
+            const [movedTask] = sourceTasks.splice(source.index, 1);
             const destinationTasks = Array.from(tasks[destinationQuadrant]);
-
-            destinationTasks.splice(destination.index, 0, movedTask);  // Insert in destination
+            destinationTasks.splice(destination.index, 0, movedTask);
 
             setTasks((prev) => ({
                 ...prev,
-                [sourceQuadrant]: sourceTasks,         // Update source quadrant
-                [destinationQuadrant]: destinationTasks,  // Update destination quadrant
+                [sourceQuadrant]: sourceTasks,
+                [destinationQuadrant]: destinationTasks,
             }));
         }
     };
 
-    // Update the renderArchivedTasks function
+    // Render Archived Tasks
     const renderArchivedTasks = (quadrant: QuadrantType) => (
         <ul className="mt-4">
             {archivedTasks[quadrant].length > 0 ? (
@@ -431,7 +420,7 @@ const EisenhowerMatrix: React.FC = () => {
         </ul>
     );
 
-    // Add a new function to unarchive tasks
+    // Unarchive Task
     const unarchiveTask = (quadrant: QuadrantType, taskId: number) => {
         setArchivedTasks((prevArchived) => {
             const updatedArchived = { ...prevArchived };
@@ -447,13 +436,12 @@ const EisenhowerMatrix: React.FC = () => {
         });
     };
 
-    const [showArchived, setShowArchived] = useState(false); // Manage the archived state.
-
+    // Toggle Archive Mode
     const showArchivedTasks = () => {
         setIsArchiveMode(!isArchiveMode);
-        setShowArchived(!showArchived);
     };
 
+    // Render Subtasks
     const renderSubtasks = (quadrant: QuadrantType, task: Task) => (
         <Droppable droppableId={`subtasks-${task.id}`} type="subtask">
             {(provided) => (
@@ -491,6 +479,7 @@ const EisenhowerMatrix: React.FC = () => {
         </Droppable>
     );
 
+    // Render Individual Task
     const renderTask = (quadrant: QuadrantType, task: Task, index: number) => {
         if (task.archived && !isArchiveMode) {
             return null; // Skip rendering archived tasks unless archive mode is active
@@ -508,7 +497,7 @@ const EisenhowerMatrix: React.FC = () => {
                 setTaskToEdit={setTaskToEdit} // Adding the missing prop here
                 deleteTask={() => deleteTask(quadrant, task.id)}
                 archiveTask={() => archiveTask(quadrant, task.id)}
-                moveTaskToQuadrant={moveTaskToQuadrant}
+                moveTaskToQuadrant={addTaskToQuadrant}
                 renderSubtasks={(task: Task) => renderSubtasks(quadrant, task)}
                 onTaskModalOpen={onTaskModalOpen} // Pass this function to TaskItem
                 onTaskModalClose={onTaskModalClose}
@@ -516,6 +505,7 @@ const EisenhowerMatrix: React.FC = () => {
         );
     };
 
+    // Render Quadrant
     const renderQuadrant = (quadrant: QuadrantType) => (
         <Droppable droppableId={quadrant} key={quadrant}>
             {(provided, snapshot) => (
@@ -545,7 +535,7 @@ const EisenhowerMatrix: React.FC = () => {
                         </div>
                     ) : (
                         <ul className='text-default-90 text-lg'>
-                            {tasks[quadrant].map((task, index) => renderTask(quadrant, task, index))}
+                            {(isArchiveMode ? archivedTasks : tasks)[quadrant].map((task, index) => renderTask(quadrant, task, index))}
                         </ul>
                     )}
                     {provided.placeholder}
@@ -555,8 +545,51 @@ const EisenhowerMatrix: React.FC = () => {
     );
 
     // Function to handle task breakdown with AI and update the task with subtasks
+    const handleBreakdownTaskWithAI = async (quadrant: QuadrantType, taskId: number, taskText: string) => {
+        setLoadingAI(true);
+        try {
+            const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-Small-Instruct-2409", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY}`, // Store your API key securely
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    inputs: `Break down this task into smaller tasks: ${taskText}`
+                }),
+            });
 
+            if (!response.ok) {
+                throw new Error(`AI request failed with status ${response.status}`);
+            }
 
+            const data = await response.json();
+            if (data && data[0] && data[0].generated_text) {
+                const newSubtasks = data[0].generated_text
+                    .split("\n")
+                    .filter((line: string) => line.trim() !== "")
+                    .map((text: string, idx: number) => ({
+                        id: Date.now() + idx, // Ensure unique IDs
+                        text: text.trim(),
+                        completed: false
+                    }));
+
+                setTasks((prevTasks) => ({
+                    ...prevTasks,
+                    [quadrant]: prevTasks[quadrant].map((t) =>
+                        t.id === taskId ? { ...t, subtasks: t.subtasks.concat(newSubtasks) } : t
+                    )
+                }));
+                setExpandedTaskIds((prev) => [...prev, taskId]); // Ensure the task is expanded to show new subtasks
+            }
+        } catch (error) {
+            console.error("AI breakdown error:", error);
+        } finally {
+            setLoadingAI(false);
+        }
+    };
+
+    // Add Task to Quadrant
     const addTaskToQuadrant = async () => {
         if (newTask.trim() && selectedQuadrantForAdd) {
             // Define the new task object without the ID field, letting Supabase handle the ID generation
@@ -568,15 +601,13 @@ const EisenhowerMatrix: React.FC = () => {
                 user_id: user?.sub || 'anonymous', // Ensure user_id is handled correctly
             };
 
-            if (user && user.premium) {
+            if (user) {
                 try {
-                    const newTaskObjects: InsertTask[] = [newTaskObject];
-
                     // Insert the new task into Supabase, letting Supabase generate the ID
-                    const { data, error } = await supabase
-                        .from('tasks') // Pass the table name as a string
-                        .insert(newTaskObjects as never[]) // Cast to never[]
-                        .select();
+                    const { data, error }: { data: SupabaseTask[] | null; error: PostgrestError | null } = await supabase
+                        .from<SupabaseTask, InsertTask>('tasks') // Specify both Row and Insert types
+                        .insert(newTaskObject)
+                        .select(); // Ensure the inserted row is returned
 
                     if (error) {
                         console.error('Error adding task to Supabase:', error);
@@ -592,6 +623,14 @@ const EisenhowerMatrix: React.FC = () => {
                                 { ...newTaskObject, id: data[0].id }, // Correctly assign 'id' from Supabase
                             ],
                         }));
+
+                        // Optionally, remove the task from localStorage if it exists there
+                        const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
+                        if (storedTasks) {
+                            const parsedTasks: Record<QuadrantType, Task[]> = JSON.parse(storedTasks);
+                            parsedTasks[selectedQuadrantForAdd] = parsedTasks[selectedQuadrantForAdd].filter(task => task.text !== newTaskObject.text);
+                            window.localStorage.setItem('eisenhowerMatrixTasks', JSON.stringify(parsedTasks));
+                        }
                     }
                 } catch (err) {
                     console.error('Error inserting task into Supabase:', err);
@@ -602,7 +641,7 @@ const EisenhowerMatrix: React.FC = () => {
                 console.log('User not logged in, saving task locally');
 
                 // Save locally to state
-                const localId = Date.now(); // Use a unique local ID (consider using UUIDs for better uniqueness)
+                const localId = Date.now(); // Use a unique local ID as number
                 const localTask: Task = { ...newTaskObject, id: localId, subtasks: [] }; // Initialize subtasks if necessary
 
                 setTasks((prev) => ({
@@ -613,16 +652,21 @@ const EisenhowerMatrix: React.FC = () => {
                     ],
                 }));
 
-                // Optionally, you can save to localStorage if needed
+                // Save to localStorage
+                const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
+                const parsedTasks: Record<QuadrantType, Task[]> = storedTasks ? JSON.parse(storedTasks) : {
+                    do: [],
+                    decide: [],
+                    delegate: [],
+                    delete: [],
+                    unsorted: [],
+                };
+
+                parsedTasks[selectedQuadrantForAdd].push(localTask);
+
                 window.localStorage.setItem(
                     'eisenhowerMatrixTasks',
-                    JSON.stringify({
-                        ...tasks,
-                        [selectedQuadrantForAdd]: [
-                            ...tasks[selectedQuadrantForAdd],
-                            localTask,
-                        ],
-                    })
+                    JSON.stringify(parsedTasks)
                 );
             }
 
@@ -632,6 +676,9 @@ const EisenhowerMatrix: React.FC = () => {
         }
     };
 
+    function setIsAddTaskModalOpen(arg0: boolean) {
+        throw new Error('Function not implemented.');
+    }
 
     return (
         <div className="flex flex-col">
@@ -639,9 +686,8 @@ const EisenhowerMatrix: React.FC = () => {
                 {
                     // Check if user is logged in
                     user ? (
-                        // If user is premium, only show the h1
+                        // If user is premium, show h1 and p
                         user.premium ? (
-                            // If user is not premium, show both h1 and p
                             <>
                                 <h1 className="tracking-tight inline font-semibold text-base mb-4 leading-9">
                                     {(() => {
@@ -657,30 +703,23 @@ const EisenhowerMatrix: React.FC = () => {
                                         }
                                     })()}
                                 </h1>
-                                {/* Display sync message only for non-premium users */}
+                                {/* Display sync message only for premium users */}
                                 <p className='text-default-500 text-sm'>
                                     Sync across all devices with this account and unlock more features with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>
                                 </p>
                             </>
-
                         ) : (
-                            <h1 className="tracking-tight inline font-semibold text-base mb-4	 leading-9">
+                            // If user is not premium, show only h1
+                            <h1 className="tracking-tight inline font-semibold text-base mb-4 leading-9">
                                 {(() => {
                                     const hour = new Date().getHours();
-                                    // Morning: 5am to 12pm
                                     if (hour >= 5 && hour < 12) {
                                         return `Good morning, ${user.name}. Grab your coffee, and let's do this!`;
-                                    }
-                                    // Afternoon: 12pm to 5pm
-                                    else if (hour >= 12 && hour < 17) {
+                                    } else if (hour >= 12 && hour < 17) {
                                         return `Good afternoon, ${user.name}. Ready to power through?`;
-                                    }
-                                    // Evening: 5pm to 10pm
-                                    else if (hour >= 17 && hour < 22) {
+                                    } else if (hour >= 17 && hour < 22) {
                                         return `Good evening, ${user.name}! Ready to close out the day on a high note?`;
-                                    }
-                                    // Late night: 10pm to 5am
-                                    else {
+                                    } else {
                                         return `Let's get some late-night magic going, ${user.name}!`;
                                     }
                                 })()}
@@ -800,7 +839,7 @@ const EisenhowerMatrix: React.FC = () => {
                 </DragDropContext>
             </div>
         </div>
-    );
+    )
 };
 
 export default EisenhowerMatrix;

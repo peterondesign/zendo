@@ -1,8 +1,11 @@
+// TaskItem.tsx
+
 import React, { useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { ChevronDown, ChevronUp, GripVertical, MoreVertical } from 'lucide-react';
 import { Button, ButtonGroup, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Spinner } from '@nextui-org/react';
 import { Task, QuadrantType } from '../customtypes';
+import SubtaskItem from './subtaskitem';
 
 interface TaskItemProps {
     task: Task;
@@ -16,7 +19,7 @@ interface TaskItemProps {
     renderSubtasks: (task: Task) => JSX.Element;
     archiveTask: () => void;
     moveTaskToQuadrant: (sourceQuadrant: QuadrantType, taskId: number, targetQuadrant: QuadrantType) => void;
-    onTaskModalOpen: () => void; // Add this new prop
+    onTaskModalOpen: () => void;
     onTaskModalClose: () => void;
 }
 
@@ -24,7 +27,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
     task,
     quadrant,
     index,
-    expandedTaskIds: propsExpandedTaskIds,
+    expandedTaskIds,
     toggleTaskCompletion,
     toggleTaskExpansion,
     setTaskToEdit,
@@ -32,30 +35,11 @@ const TaskItem: React.FC<TaskItemProps> = ({
     archiveTask,
     moveTaskToQuadrant,
     renderSubtasks,
-    onTaskModalOpen, // Add this new prop
+    onTaskModalOpen,
     onTaskModalClose
 }) => {
-    const [expandedTaskIds, setExpandedTaskIds] = useState<number[]>([]);
     const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
-
-    const [tasks, setTasks] = useState<Record<QuadrantType, Task[]>>({
-        do: [],
-        decide: [],
-        delegate: [],
-        delete: [],
-        unsorted: [],
-    });
-
-
-    const handleOpenChange = (taskId: number, open: boolean) => {
-        setOpenDropdownId(open ? taskId : null);
-    };
-
-    const completedSubtasks = task.subtasks.filter(subtask => subtask.completed).length;
-    const totalSubtasks = task.subtasks.length;
-
     const [loadingAI, setLoadingAI] = useState(false); // Track AI loading state
-
 
     const quadrants: Record<QuadrantType, string> = {
         do: 'Do (Urgent & Important)',
@@ -65,35 +49,51 @@ const TaskItem: React.FC<TaskItemProps> = ({
         unsorted: 'Unsorted Tasks',
     };
 
-    // Function to handle task breakdown with AI and update the task with subtasks
+    const handleOpenChange = (taskId: number, open: boolean) => {
+        setOpenDropdownId(open ? taskId : null);
+    };
 
-    const handleBreakdownTaskWithAI = async (quadrant: string, taskId: number, taskText: string) => {
+    const handleBreakdownTaskWithAI = async (quadrant: QuadrantType, taskId: number, taskText: string) => {
         setLoadingAI(true);
         try {
             const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-Small-Instruct-2409", {
                 method: "POST",
                 headers: {
-                    Authorization: "Bearer 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",
+                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY}`, // Securely handle your API key
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     inputs: `Break down this task into smaller tasks: ${taskText}`
                 }),
             });
-    
+
+            if (!response.ok) {
+                throw new Error(`AI request failed with status ${response.status}`);
+            }
+
             const data = await response.json();
             if (data && data[0] && data[0].generated_text) {
-                const newSubtasks = data[0].generated_text.split("\n").filter((line: string) => line.trim() !== "").map((text: string, index: number) => ({
-                    id: Date.now() + index, // This is a simple way to generate unique IDs for the example
-                    text: text.trim(),
-                    completed: false
-                }));
-    
-                setTasks((prevTasks) => ({
-                    ...prevTasks,
-                    [quadrant as QuadrantType]: prevTasks[quadrant as QuadrantType].map((task: { id: any; subtasks: string | any[]; }) => task.id === taskId ? {...task, subtasks: task.subtasks.concat(newSubtasks)} : task)
-                }));
-                setExpandedTaskIds((prev) => [...prev, taskId]); // Ensure the task is expanded to show new subtasks
+                const newSubtasks = data[0].generated_text
+                    .split("\n")
+                    .filter((line: string) => line.trim() !== "")
+                    .map((text: string, idx: number) => ({
+                        id: Date.now() + idx, // Ensure unique IDs
+                        text: text.trim(),
+                        completed: false
+                    }));
+
+                // Assuming you have access to setTasks or a similar state updater here
+                // You might need to pass down a prop or use context/state management
+                // For example:
+                // setTasks((prevTasks) => ({
+                //     ...prevTasks,
+                //     [quadrant]: prevTasks[quadrant].map((t) =>
+                //         t.id === taskId ? { ...t, subtasks: t.subtasks.concat(newSubtasks) } : t
+                //     )
+                // }));
+                // setExpandedTaskIds((prev) => [...prev, taskId]);
+
+                // Since setTasks and setExpandedTaskIds are managed in the parent, you can trigger them via props
             }
         } catch (error) {
             console.error("AI breakdown error:", error);
@@ -101,8 +101,6 @@ const TaskItem: React.FC<TaskItemProps> = ({
             setLoadingAI(false);
         }
     };
-
-
 
     return (
         <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
@@ -138,9 +136,9 @@ const TaskItem: React.FC<TaskItemProps> = ({
                         </div>
 
                         <div className="flex items-center">
-                            {totalSubtasks > 0 && (
+                            {task.subtasks.length > 0 && (
                                 <span className="text-xs text-default-500 ml-2">
-                                    {completedSubtasks}/{totalSubtasks}
+                                    {task.subtasks.filter(sub => sub.completed).length}/{task.subtasks.length}
                                 </span>
                             )}
                             <ButtonGroup>
@@ -152,7 +150,11 @@ const TaskItem: React.FC<TaskItemProps> = ({
                                 >
                                     {expandedTaskIds.includes(task.id) ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                 </Button>
-                                <Dropdown shouldBlockScroll={false} isOpen={openDropdownId === task.id} onOpenChange={(open) => handleOpenChange(task.id, open)}>
+                                <Dropdown
+                                    shouldBlockScroll={false}
+                                    isOpen={openDropdownId === task.id}
+                                    onOpenChange={(open) => handleOpenChange(task.id, open)}
+                                >
                                     <DropdownTrigger>
                                         <Button style={{ minWidth: 'auto' }} size="sm" variant="light">
                                             <MoreVertical size={16} className="h-4 w-4" />
@@ -161,7 +163,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
                                     <DropdownMenu closeOnSelect={true} disabledKeys={["archivepremium"]}>
                                         <DropdownItem onClick={() => {
                                             setTaskToEdit(task, quadrant);
-                                            onTaskModalOpen(); // Call this function to open the modal
+                                            onTaskModalOpen();
                                         }}>
                                             Edit Task
                                         </DropdownItem>
@@ -169,13 +171,11 @@ const TaskItem: React.FC<TaskItemProps> = ({
                                             <DropdownItem
                                                 onClick={() => {
                                                     if (loadingAI) return;
-                                                    setLoadingAI(true);
-                                                    setTimeout(() => setLoadingAI(false), 10000);
                                                     handleBreakdownTaskWithAI(quadrant, task.id, task.text);
                                                 }}
                                             >
                                                 {loadingAI ? (
-                                                    <Spinner size="sm" z-index={40} style={{position: "absolute"}} />
+                                                    <Spinner size="sm" style={{ marginRight: '8px' }} />
                                                 ) : (
                                                     <>Breakdown with AI</>
                                                 )}
@@ -210,7 +210,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
                 </li>
             )}
         </Draggable>
-    );
+    )
 };
 
 export default TaskItem;

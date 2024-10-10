@@ -4,12 +4,12 @@
 
 __turbopack_export_value__((__turbopack_import__) => {
     return Promise.all([
-  "static/chunks/components_e5e325._.js",
+  "static/chunks/components_be2ac9._.js",
   "static/chunks/node_modules_react-beautiful-dnd_dist_react-beautiful-dnd_esm_d54df0.js",
   "static/chunks/node_modules_jspdf_dist_jspdf_es_min_c277e7.js",
   "static/chunks/node_modules_e73e90._.js",
-  "static/chunks/node_modules_9587e9._.js",
-  "static/chunks/components_EisenhowerMatrix_tsx_6e0c0a._.js"
+  "static/chunks/node_modules_28e093._.js",
+  "static/chunks/components_EisenhowerMatrix_tsx_f2f984._.js"
 ].map((chunk) => __turbopack_load__(chunk))).then(() => {
         return __turbopack_import__("[project]/components/EisenhowerMatrix.tsx [app-client] (ecmascript)");
     });

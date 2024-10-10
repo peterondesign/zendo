@@ -25,3 +25,5 @@ export interface SubtaskEditInfo {
     taskId: number;
     quadrant: QuadrantType;
 }
+
+  

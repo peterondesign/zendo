@@ -14,7 +14,6 @@ import FloatingButton from './floatingbutton';
 
 import { UserProvider, useUser } from '@auth0/nextjs-auth0/client'
 
-import { upsertTask, deleteTask, syncTasks, upsertSubtask, deleteSubtask, fetchTasks, fetchSubtasks } from './tasksyncoperations'
 
 import { createClient } from '@supabase/supabase-js'
 import SubtaskItem from './subtaskitem';
@@ -564,19 +563,6 @@ const EisenhowerMatrix: React.FC = () => {
 
 
     // Function to handle task breakdown with AI and update the task with subtasks
-
-
-
-
-    const syncAllTasks = async () => {
-        if (user?.premium) {
-            try {
-                await syncTasks(user.id as string, tasks);
-            } catch (error) {
-                console.error('Failed to sync tasks:', error);
-            }
-        }
-    };
 
     const addTaskToQuadrant = async () => {
         if (newTask.trim() && selectedQuadrantForAdd) {

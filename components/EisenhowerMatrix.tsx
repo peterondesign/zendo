@@ -7,10 +7,8 @@ import { Card, CardHeader } from '@nextui-org/card';
 import { Trash2, GripVertical, Plus, MoreVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Popover, PopoverTrigger, PopoverContent, Dropdown, DropdownTrigger, DropdownSection, DropdownMenu, DropdownItem, Link } from "@nextui-org/react";
-import GanttChart from '@/components/ganttchart';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { useTheme } from "next-themes";
-import { Kbd } from "@nextui-org/kbd";
 import { Spinner } from '@nextui-org/react';
 import FloatingButton from './floatingbutton';
 
@@ -57,26 +55,12 @@ type SubtaskEditInfo = {
     quadrant: QuadrantType;
 };
 
-
 const quadrants: Record<QuadrantType, string> = {
     do: 'Do (Urgent & Important)',
     decide: 'Decide (Not Urgent & Important)',
     delegate: 'Delegate (Urgent & Not Important)',
     delete: 'Delete (Not Urgent & Not Important)',
     unsorted: 'Unsorted Tasks',
-};
-
-const initialTasks = () => {
-    const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
-    return storedTasks
-        ? JSON.parse(storedTasks)
-        : {
-            do: [],
-            decide: [],
-            delegate: [],
-            delete: [],
-            unsorted: [],
-        };
 };
 
 const EisenhowerMatrix: React.FC = () => {
@@ -95,31 +79,20 @@ const EisenhowerMatrix: React.FC = () => {
         unsorted: [],
     });
     const [isArchiveMode, setIsArchiveMode] = useState(false);
-
     const [newTask, setNewTask] = useState('');
     const [selectedQuadrant, setSelectedQuadrant] = useState<QuadrantType>('unsorted');
     const [newSubtask, setNewSubtask] = useState('');
     const [expandedTaskIds, setExpandedTaskIds] = useState<number[]>([]);
     const [loadingAI, setLoadingAI] = useState(false); // Track AI loading state
-
-
-
-
     const [taskToEdit, setTaskToEdit] = useState<TaskEditInfo | null>(null);
     const [subtaskToEdit, setSubtaskToEdit] = useState<SubtaskEditInfo | null>(null);
     const { isOpen: isTaskModalOpen, onOpen: onTaskModalOpen, onClose: onTaskModalClose } = useDisclosure();
     const { isOpen: isSubtaskModalOpen, onOpen: onSubtaskModalOpen, onClose: onSubtaskModalClose } = useDisclosure();
-    const [editingType, setEditingType] = useState<'task' | 'subtask' | null>(null);
     const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
-
-
     const { theme, setTheme } = useTheme();
-
     const { user } = useUser();
-
     const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
     const [selectedQuadrantForAdd, setSelectedQuadrantForAdd] = useState<QuadrantType | null>(null);
-
 
 
     // Function to toggle dropdown based on task ID
@@ -140,8 +113,6 @@ const EisenhowerMatrix: React.FC = () => {
         }
         setOpenDropdownId(null);  // Close dropdown manually after any action
     };
-
-
 
     const handleTaskInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (taskToEdit) {
@@ -179,26 +150,6 @@ const EisenhowerMatrix: React.FC = () => {
             prev.includes(taskId) ? prev.filter((id) => id !== taskId) : [...prev, taskId]
         );
     };
-
-
-
-
-    useEffect(() => {
-        const loadTasks = async () => {
-            if (user?.premium) {
-                const tasks = await fetchTasksFromDB(user.id as string);
-                const tasksByQuadrant = transformTasksByQuadrant(tasks);
-
-                // Log tasks grouped by quadrant
-                console.log("Tasks grouped by quadrant:", tasksByQuadrant);
-
-                setTasks(tasksByQuadrant);
-            }
-        };
-
-
-        loadTasks();
-    }, [user]);
 
 
     const addSubtask = (quadrant: QuadrantType, taskId: number) => {
@@ -263,8 +214,6 @@ const EisenhowerMatrix: React.FC = () => {
             ),
         }));
     };
-
-
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -357,7 +306,6 @@ const EisenhowerMatrix: React.FC = () => {
         }));
     };
 
-    // Handles drag-and-drop reordering of tasks and moving between quadrants
     // Handles drag-and-drop reordering of tasks, moving between quadrants, and subtasks
     const onDragEnd = (result: DropResult) => {
         const { source, destination } = result;
@@ -458,84 +406,6 @@ const EisenhowerMatrix: React.FC = () => {
         });
     };
 
-    const handleAddTask = async () => {
-        if (!user) {
-            console.error('User is undefined');
-            return;
-        }
-
-        const newTaskText = 'Some default task text';
-
-        const newTaskObject = {
-            user_id: user.id as string, // Cast user.id to string
-            quadrant: selectedQuadrant,
-            text: newTaskText,
-            completed: false,
-            archived: false,
-        };
-
-        const saveTaskToDB = async (newTaskObject: { user_id: string; quadrant: QuadrantType; text: string }) => {
-            const { data, error } = await supabase
-                .from('tasks')
-                .insert([newTaskObject]);  // Insert the new task
-
-            if (error) {
-                console.error('Error saving task to DB:', error);
-                return { data: null, error };
-            }
-
-            console.log('Task successfully saved to DB:', data);
-            return { data, error: null };
-        };
-
-
-        // Log the task before saving to DB
-        console.log("Task before saving to DB:", newTaskObject);
-
-        const { data: savedTask, error } = await saveTaskToDB(newTaskObject);
-        if (error) {
-            console.error('Error saving task:', error);
-        } else {
-            console.log('Task saved:', savedTask);
-        }
-    };
-
-
-
-    const transformTasksByQuadrant = (tasks: Task[]): Record<QuadrantType, Task[]> => {
-        return tasks.reduce((acc, task) => {
-            const quadrant = task.quadrant as QuadrantType;
-            if (!acc[quadrant]) acc[quadrant] = [];
-            acc[quadrant].push(task);
-            return acc;
-        }, {} as Record<QuadrantType, Task[]>);
-    };
-
-    const fetchTasksFromDB = async (userId: string): Promise<Task[]> => {
-        const { data, error } = await supabase.from('tasks').select('*').eq('user_id', userId);
-        if (error) {
-            console.error('Error fetching tasks:', error);
-            return [];
-        }
-        return data;
-    };
-
-    useEffect(() => {
-        const loadTasks = async () => {
-            if (user?.premium) {
-                const tasks = await fetchTasksFromDB(user.id as string);
-                const tasksByQuadrant = transformTasksByQuadrant(tasks);
-                setTasks(tasksByQuadrant);
-            }
-        };
-        loadTasks();
-    }, [user, setTasks]);
-
-    useEffect(() => {
-        console.log("Current tasks state:", tasks);
-    }, [tasks]);
-
-
 
     const [showArchived, setShowArchived] = useState(false); // Add this line to manage the archived state.
 
@@ -561,7 +431,9 @@ const EisenhowerMatrix: React.FC = () => {
                                 >
                                     <div className="flex items-center">
                                         <div className="flex items-center">
-                                            <GripVertical className="w-max mr-2" />
+                                            <span className="mr-2 cursor-move">
+                                                <GripVertical size={16} className="mr-2" />
+                                            </span>
                                             <input
                                                 type="checkbox"
                                                 checked={subtask.completed}
@@ -572,7 +444,7 @@ const EisenhowerMatrix: React.FC = () => {
                                             <span
                                                 className={`w-full ${subtask.completed ? 'line-through' : ''
                                                     } ${task.archived ? 'opacity-50 italic' : 'opacity-100'}`} // Apply archived styles from parent task
-                                                style={{ overflowWrap: 'anywhere' }}
+                                                style={{ overflowWrap: 'anywhere', userSelect: 'auto' }}
                                             >
                                                 {subtask.text}
                                             </span>
@@ -629,46 +501,6 @@ const EisenhowerMatrix: React.FC = () => {
     );
 
 
-    const addTask = async (quadrant: QuadrantType = selectedQuadrant, taskText: string = newTask) => {
-        if (taskText.trim()) {
-            const newTask: Task = {
-                id: Date.now(),
-                text: taskText.trim(),
-                completed: false,
-                subtasks: [],
-                archived: false,
-                quadrant: quadrant
-            };
-
-            // Insert the task into Supabase
-            const { data, error } = await supabase
-                .from('tasks')
-                .insert([
-                    {
-                        user_id: user?.id,
-                        quadrant: quadrant,
-                        text: taskText.trim(),
-                        completed: false,
-                        archived: false
-                    }
-                ]);
-
-            if (error) {
-                console.error('Error inserting task into Supabase:', error);
-                return;
-            }
-
-            console.log('Task inserted successfully:', data);
-
-            // Update local state
-            setTasks((prev) => ({
-                ...prev,
-                [quadrant]: [...prev[quadrant], newTask],
-            }));
-            setNewTask('');
-        }
-    };
-
     const renderTask = (quadrant: QuadrantType, task: Task, index: number) => {
         if (task.archived && !isArchiveMode) {
             return null; // Skip rendering archived tasks unless archive mode is active
@@ -689,7 +521,6 @@ const EisenhowerMatrix: React.FC = () => {
                         <div className="flex items-start justify-between w-full">
                             <div className="flex items-start flex-grow">
                                 <div className="flex items-center m-auto flex-grow">
-
                                     <span {...provided.dragHandleProps} className="mr-2 cursor-move">
                                         <GripVertical size={16} />
                                     </span>
@@ -1043,9 +874,8 @@ const EisenhowerMatrix: React.FC = () => {
                         </ModalBody>
                         <ModalFooter>
                             <Button onClick={() => {
-                                addTask();
+                                // addTask();
                                 addTaskToQuadrant();
-                                handleAddTask();
                             }}>Add Task</Button>
                         </ModalFooter>
                     </ModalContent>
@@ -1106,9 +936,7 @@ const EisenhowerMatrix: React.FC = () => {
                     isArchiveMode={isArchiveMode}
                 />
             </div>
-            {/* <div className='px-4 pb-8'>
-        <GanttChart/>
-      </div> */}
+
             {loadingAI && (
                 <div className="z-10 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                     <Spinner size="lg" />
@@ -1126,4 +954,3 @@ const EisenhowerMatrix: React.FC = () => {
 };
 
 export default EisenhowerMatrix;
-

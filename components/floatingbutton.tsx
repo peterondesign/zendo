@@ -43,6 +43,60 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
 
     const [isPremium, setIsPremium] = useState(false);
 
+    useEffect(() => {
+        if (user && user.premium) {
+            setIsPremium(true);
+        }
+    }, [user]);
+
+    if (!isPremium) {
+        // If the user is not premium, do not render the FloatingButton
+        return (
+            <Dropdown>
+                <DropdownTrigger>
+                    <Button
+                    className='z-10 fixed bottom-10 right-10'
+                        variant="flat"
+                    >
+                        Features
+                    </Button>
+                </DropdownTrigger>
+                <DropdownMenu variant="faded" aria-label="Dropdown menu with description">
+                    <DropdownItem
+                        key="new"
+                        shortcut="⌘A"
+                        description="Lifetime plan only"
+                        startContent={<Archive />}
+                        isDisabled={true}
+                    >
+                        Show Archived tasks
+                    </DropdownItem>
+                    <DropdownItem
+                        key="copy"
+                        shortcut="⌘C"
+                        description="Lifetime plan only"
+                        startContent={<Clipboard />}
+                        isDisabled={true}
+                    >
+                        Copy to clipboard
+                    </DropdownItem>
+                    <DropdownItem
+                        key="edit"
+                        shortcut="⌘E"
+                        showDivider
+                        description="Lifetime plan only"
+                        startContent={<FileDown />}
+                        isDisabled={true}
+                    >
+                        Export to PDF
+                    </DropdownItem>
+                </DropdownMenu>
+            </Dropdown>
+
+
+        );
+    }
+
     const formatTasksToMarkdown = () => {
         let markdown = '';
         (Object.keys(quadrantDetails) as QuadrantType[]).forEach((quadrantKey) => {
@@ -136,8 +190,6 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
         toast.success('PDF exported');
     };
 
-
-
     const handleArchiveTasks = () => {
         showArchivedTasks();
         toast.success(isArchiveMode ? 'Hiding archived tasks' : 'Showing archived tasks');
@@ -158,7 +210,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
 
                             disabledKeys={isPremium ? ["copy", "archive", "save"] : []}  // Disable if not premium
                         >
-                             <DropdownItem
+                            <DropdownItem
                                 key="archive"
                                 startContent={<Archive size={16} />}
                                 onClick={handleArchiveTasks}
@@ -166,7 +218,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                             >
                                 {isArchiveMode ? "Hide Archived" : "Show Archived"}
                             </DropdownItem>
-                            
+
                             <DropdownItem
                                 key="copy"
                                 startContent={<Clipboard size={16} />}
@@ -175,7 +227,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                             >
                                 Copy Tasks to Clipboard
                             </DropdownItem>
-                           
+
                             <DropdownItem
                                 key="save"
                                 startContent={<FileDown size={16} />}
@@ -186,7 +238,8 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                             </DropdownItem>
                         </DropdownMenu>
                     </Dropdown>
-                </Tooltip>            </ButtonGroup>
+                </Tooltip>
+            </ButtonGroup>
         </>
     );
 };

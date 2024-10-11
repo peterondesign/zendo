@@ -826,6 +826,31 @@ const EisenhowerMatrix: React.FC = () => {
                 </div>
             )}
 
+            <Modal isOpen={isAddTaskModalOpen} onClose={onAddTaskModalClose}>
+                <ModalContent>
+                    <ModalHeader>Add Task</ModalHeader>
+                    <ModalBody>
+                        <Input
+                            value={newTask}
+                            onChange={(e) => setNewTask(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    addTaskToQuadrant();  // Updated function call
+                                } else if (e.key === 'Escape') {
+                                    onAddTaskModalClose();
+                                }
+                            }}
+                            fullWidth
+                            placeholder="Enter task name"
+                        />
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button onClick={addTaskToQuadrant}>Add</Button>  {/* Updated function call */}
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+
             <Modal isOpen={isTaskModalOpen} onClose={onTaskModalClose}>
                 <ModalContent>
                     <ModalHeader>Edit Task</ModalHeader>

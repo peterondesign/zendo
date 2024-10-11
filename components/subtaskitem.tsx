@@ -38,13 +38,15 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
     onSubtaskModalOpen();     // Open the modal
   };
 
+  
+
   return (
     <Draggable key={subtask.id} draggableId={`subtask-${subtask.id}`} index={index}>
       {(provided, snapshot) => (
         <li
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`flex items-start justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-gray-700' : 'hover:bg-default-100'
+          className={`flex items-start justify-between my-4 pl-2 rounded ${snapshot.isDragging ? 'bg-gray-700' : 'hover:bg-default-100'
           }`}
         >
           <div className="flex items-center flex-grow w-full">
@@ -71,8 +73,8 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
               onOpenChange={(open) => handleOpenChange(subtask.id, open)}
             >
               <DropdownTrigger>
-                <Button size="sm" variant="light">
-                  <MoreVertical size={16} style={{ minWidth: 'auto'}} />                </Button>
+                <Button size="sm" variant="light" style={{ minWidth: 'auto'}}>
+                  <MoreVertical size={16}  />                </Button>
               </DropdownTrigger>
               <DropdownMenu closeOnSelect={true}>
                 <DropdownItem onClick={handleEditSubtask}>Edit Subtask</DropdownItem>

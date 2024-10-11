@@ -17,7 +17,7 @@ import { useUser } from '@auth0/nextjs-auth0/client'
 import { createClient, SupabaseClient, PostgrestError } from '@supabase/supabase-js'
 import SubtaskItem from './subtaskitem';
 import TaskItem from './taskitem';
-import { SupabaseTask, Task, QuadrantType, TaskEditInfo, SubtaskEditInfo } from '../customtypes';
+import { SupabaseTask, Task, QuadrantType, TaskEditInfo, SubtaskEditInfo, InsertTask } from '../customtypes';
 
 
 
@@ -109,8 +109,6 @@ const EisenhowerMatrix: React.FC = () => {
         }
     };
 
-
-
     // Fetch and Merge Tasks from Supabase and LocalStorage
     useEffect(() => {
         const fetchAndMergeTasks = async () => {
@@ -118,17 +116,17 @@ const EisenhowerMatrix: React.FC = () => {
                 try {
                     // Fetch tasks from Supabase
                     const { data: supabaseTasks, error } = await supabase
-                        .from<SupabaseTask>('tasks')  // 'tasks' is the string (table name), and <SupabaseTask> is the type.
+                        .from('tasks')
                         .select('*')
                         .eq('user_id', user.sub);
 
                     if (error) {
                         console.error('Error fetching tasks from Supabase:', error);
+                        return;
                     }
 
-                    // Parse tasks from localStorage
-                    const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
-                    const localTasks: Record<QuadrantType, Task[]> = storedTasks ? JSON.parse(storedTasks) : {
+                    // Initialize task containers for both active and archived tasks
+                    const activeTasks: Record<QuadrantType, Task[]> = {
                         do: [],
                         decide: [],
                         delegate: [],
@@ -136,8 +134,7 @@ const EisenhowerMatrix: React.FC = () => {
                         unsorted: [],
                     };
 
-                    // Convert SupabaseTask to Task and initialize subtasks
-                    const convertedSupabaseTasks: Record<QuadrantType, Task[]> = {
+                    const archivedTasksContainer: Record<QuadrantType, Task[]> = {
                         do: [],
                         decide: [],
                         delegate: [],
@@ -145,68 +142,33 @@ const EisenhowerMatrix: React.FC = () => {
                         unsorted: [],
                     };
 
-                    if (supabaseTasks) {
-                        supabaseTasks.forEach((supTask) => {
-                            const task: Task = {
-                                id: supTask.id,
-                                text: supTask.text,
-                                completed: supTask.completed,
-                                archived: supTask.archived,
-                                quadrant: supTask.quadrant as QuadrantType,  // Cast this to QuadrantType
-                                subtasks: [],
-                                user_id: undefined
-                            };
+                    // Separate tasks into active and archived categories
+                    supabaseTasks.forEach((supTask) => {
+                        const task: Task = {
+                            id: supTask.id,
+                            text: supTask.text,
+                            completed: supTask.completed,
+                            subtasks: [],
+                            archived: supTask.archived,
+                            user_id: supTask.user_id,
+                            quadrant: 'do'
+                        };
 
-                            // Now you can index into convertedSupabaseTasks safely
-                            convertedSupabaseTasks[supTask.quadrant as QuadrantType].push(task);
-                        });
-                    }
-
-
-                    // Merge Supabase tasks and local tasks without duplication
-                    const mergedTasks: Record<QuadrantType, Task[]> = {
-                        do: [...convertedSupabaseTasks.do],
-                        decide: [...convertedSupabaseTasks.decide],
-                        delegate: [...convertedSupabaseTasks.delegate],
-                        delete: [...convertedSupabaseTasks.delete],
-                        unsorted: [...convertedSupabaseTasks.unsorted],
-                    };
-
-                    Object.keys(localTasks).forEach((quadrantKey) => {
-                        const quadrant = quadrantKey as QuadrantType;
-                        localTasks[quadrant].forEach((localTask) => {
-                            // Check if the task already exists in Supabase tasks to avoid duplication
-                            const exists = mergedTasks[quadrant].some((supTask) => supTask.id === localTask.id && supTask.text === localTask.text);
-                            if (!exists) {
-                                mergedTasks[quadrant].push(localTask);
-
-                                // Optionally, add the local task to Supabase
-                                supabase.from('tasks').insert({
-                                    text: localTask.text,
-                                    completed: localTask.completed,
-                                    archived: localTask.archived,
-                                    quadrant: localTask.quadrant,
-                                    user_id: localTask.user_id,
-                                }).then(({ data, error }) => {
-                                    if (error) {
-                                        console.error('Error syncing local task to Supabase:', error);
-                                    } else {
-                                        console.log('Local task synced to Supabase:', data);
-                                    }
-                                });
-                            }
-                        });
+                        if (supTask.archived) {
+                            archivedTasksContainer[supTask.quadrant as QuadrantType].push(task);
+                        } else {
+                            activeTasks[supTask.quadrant as QuadrantType].push(task);
+                        }
                     });
 
-                    setTasks(mergedTasks);
-
-                    // Optionally, clear localStorage after syncing
-                    window.localStorage.removeItem('eisenhowerMatrixTasks');
+                    // Set the state for active and archived tasks
+                    setTasks(activeTasks);
+                    setArchivedTasks(archivedTasksContainer);
                 } catch (err) {
                     console.error('Error fetching and merging tasks:', err);
                 }
             } else {
-                // If user is not logged in, load tasks from localStorage
+                // Load tasks from localStorage if user is not logged in
                 const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
                 if (storedTasks) {
                     setTasks(JSON.parse(storedTasks));
@@ -215,7 +177,9 @@ const EisenhowerMatrix: React.FC = () => {
         };
 
         fetchAndMergeTasks();
-    }, [user, supabase]);
+    }, [user]);
+
+
 
     // Update localStorage whenever tasks change (only when not logged in)
     useEffect(() => {
@@ -270,13 +234,28 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
     // Toggle Task Completion
-    const toggleTaskCompletion = (quadrant: QuadrantType, taskId: number) => {
+    const toggleTaskCompletion = async (quadrant: QuadrantType, taskId: number) => {
         setTasks((prev) => ({
             ...prev,
             [quadrant]: prev[quadrant].map((task) =>
                 task.id === taskId ? { ...task, completed: !task.completed } : task
             ),
         }));
+
+        if (user) {
+            try {
+                const { error } = await supabase
+                    .from('tasks')
+                    .update({ completed: !tasks[quadrant].find((task) => task.id === taskId)?.completed })
+                    .eq('id', taskId);
+
+                if (error) {
+                    console.error('Error toggling task completion in Supabase:', error);
+                }
+            } catch (err) {
+                console.error('Error during Supabase toggle:', err);
+            }
+        }
     };
 
     // Delete Task
@@ -288,13 +267,28 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
     // Archive Task
-    const archiveTask = (quadrant: QuadrantType, taskId: number) => {
-        setTasks((prevTasks) => ({
-            ...prevTasks,
-            [quadrant]: prevTasks[quadrant].map((task) =>
-                task.id === taskId ? { ...task, archived: true } : task
-            ),
-        }));
+    const archiveTask = async (quadrant: QuadrantType, taskId: number) => {
+        if (user) {
+            try {
+                const { error } = await supabase
+                    .from('tasks')
+                    .update({ archived: true })
+                    .eq('id', taskId);
+
+                if (error) {
+                    console.error('Error archiving task in Supabase:', error);
+                } else {
+                    setTasks((prevTasks) => ({
+                        ...prevTasks,
+                        [quadrant]: prevTasks[quadrant].map((task) =>
+                            task.id === taskId ? { ...task, archived: true } : task
+                        ),
+                    }));
+                }
+            } catch (err) {
+                console.error('Error during Supabase archive:', err);
+            }
+        }
     };
 
     // Delete Subtask
@@ -313,15 +307,54 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
     // Save Edited Task
-    const saveEditedTask = () => {
-        if (taskToEdit) {
+    // Updated saveEditedTask function
+    const saveEditedTask = async () => {
+        if (taskToEdit && user) {
             const { quadrant, task } = taskToEdit;
-            setTasks((prev) => ({
-                ...prev,
-                [quadrant]: prev[quadrant].map((t) =>
-                    t.id === task.id ? { ...t, text: task.text } : t
-                ),
-            }));
+
+            try {
+                // Update the task in Supabase
+                const { data, error } = await supabase
+                    .from('tasks')
+                    .update({ text: task.text })
+                    .eq('id', task.id)
+                    .select();
+
+                if (error) {
+                    console.error('Error updating task in Supabase:', error);
+                    // Optionally, show an error message to the user
+                    return;
+                }
+
+                if (data && data.length > 0) {
+                    // Update local state only after successful DB update
+                    setTasks((prev) => ({
+                        ...prev,
+                        [quadrant]: prev[quadrant].map((t) =>
+                            t.id === task.id ? { ...t, text: task.text } : t
+                        ),
+                    }));
+                    console.log('Task updated successfully in Supabase:', data[0]);
+                }
+            } catch (err) {
+                console.error('Error updating task:', err);
+                // Optionally, show an error message to the user
+            }
+
+            // Clear the editing state and close the modal
+            setTaskToEditState(null);
+            onTaskModalClose();
+        } else if (!user) {
+            // If user is not logged in, just update local state
+            if (taskToEdit) {
+                const { quadrant, task } = taskToEdit;
+                setTasks((prev) => ({
+                    ...prev,
+                    [quadrant]: prev[quadrant].map((t) =>
+                        t.id === task.id ? { ...t, text: task.text } : t
+                    ),
+                }));
+            }
             setTaskToEditState(null);
             onTaskModalClose();
         }
@@ -481,8 +514,13 @@ const EisenhowerMatrix: React.FC = () => {
 
     // Render Individual Task
     const renderTask = (quadrant: QuadrantType, task: Task, index: number) => {
+        // Only render archived tasks if archive mode is active
         if (task.archived && !isArchiveMode) {
-            return null; // Skip rendering archived tasks unless archive mode is active
+            return null;  // Skip rendering archived tasks unless archive mode is active
+        }
+
+        if (!task.archived && isArchiveMode) {
+            return null;  // Skip rendering active tasks if archive mode is active
         }
 
         return (
@@ -522,12 +560,13 @@ const EisenhowerMatrix: React.FC = () => {
                             variant="light"
                             onClick={() => {
                                 setSelectedQuadrantForAdd(quadrant);
-                                setIsAddTaskModalOpen(true);
+                                onAddTaskModalOpen();
                             }}
                         >
                             <Plus size={16} />
                         </Button>
                     </CardHeader>
+                    {/* Show tasks based on archive mode */}
                     {(isArchiveMode ? archivedTasks : tasks)[quadrant].length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-10 text-center text-default-500">
                             <img src="/emptystate.png" className="w-10 h-10 mt-2 mx-auto" alt="No tasks" />
@@ -592,7 +631,7 @@ const EisenhowerMatrix: React.FC = () => {
     // Add Task to Quadrant
     const addTaskToQuadrant = async () => {
         if (newTask.trim() && selectedQuadrantForAdd) {
-            // Define the new task object without the ID field, letting Supabase handle the ID generation
+            // Define the new task object
             const newTaskObject: InsertTask = {
                 text: newTask.trim(),
                 completed: false,
@@ -603,15 +642,14 @@ const EisenhowerMatrix: React.FC = () => {
 
             if (user) {
                 try {
-                    // Insert the new task into Supabase, letting Supabase generate the ID
+                    // Insert the new task into Supabase, wrapped in an array
                     const { data, error }: { data: SupabaseTask[] | null; error: PostgrestError | null } = await supabase
-                        .from<SupabaseTask, InsertTask>('tasks') // Specify both Row and Insert types
-                        .insert(newTaskObject)
-                        .select(); // Ensure the inserted row is returned
+                        .from('tasks')
+                        .insert([newTaskObject])      // Wrap `newTaskObject` in an array
+                        .select();                    // Ensure the inserted row is returned
 
                     if (error) {
                         console.error('Error adding task to Supabase:', error);
-                        // Optionally, set an error state here to inform the user
                     } else if (data && data.length > 0) {
                         console.log(`Task added successfully to Supabase by ${user.name}:`, data);
 
@@ -623,62 +661,26 @@ const EisenhowerMatrix: React.FC = () => {
                                 { ...newTaskObject, id: data[0].id }, // Correctly assign 'id' from Supabase
                             ],
                         }));
-
-                        // Optionally, remove the task from localStorage if it exists there
-                        const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
-                        if (storedTasks) {
-                            const parsedTasks: Record<QuadrantType, Task[]> = JSON.parse(storedTasks);
-                            parsedTasks[selectedQuadrantForAdd] = parsedTasks[selectedQuadrantForAdd].filter(task => task.text !== newTaskObject.text);
-                            window.localStorage.setItem('eisenhowerMatrixTasks', JSON.stringify(parsedTasks));
-                        }
                     }
                 } catch (err) {
                     console.error('Error inserting task into Supabase:', err);
-                    // Optionally, set an error state here to inform the user
                 }
             } else {
                 // User is not logged in
-                console.log('User not logged in, saving task locally');
-
-                // Save locally to state
-                const localId = Date.now(); // Use a unique local ID as number
+                const localId = Date.now(); // Use a unique local ID as a number
                 const localTask: Task = { ...newTaskObject, id: localId, subtasks: [] }; // Initialize subtasks if necessary
 
                 setTasks((prev) => ({
                     ...prev,
-                    [selectedQuadrantForAdd]: [
-                        ...prev[selectedQuadrantForAdd],
-                        localTask,
-                    ],
+                    [selectedQuadrantForAdd]: [...prev[selectedQuadrantForAdd], localTask],
                 }));
-
-                // Save to localStorage
-                const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
-                const parsedTasks: Record<QuadrantType, Task[]> = storedTasks ? JSON.parse(storedTasks) : {
-                    do: [],
-                    decide: [],
-                    delegate: [],
-                    delete: [],
-                    unsorted: [],
-                };
-
-                parsedTasks[selectedQuadrantForAdd].push(localTask);
-
-                window.localStorage.setItem(
-                    'eisenhowerMatrixTasks',
-                    JSON.stringify(parsedTasks)
-                );
             }
-
             // Clear the input and close the modal
             setNewTask('');
-            setIsAddTaskModalOpen(false);
-        }
+            onAddTaskModalClose();        }
     };
 
-    function setIsAddTaskModalOpen(arg0: boolean) {
-        throw new Error('Function not implemented.');
-    }
+
 
     return (
         <div className="flex flex-col">
@@ -741,7 +743,7 @@ const EisenhowerMatrix: React.FC = () => {
                 }
 
                 {/* Add Task Modal */}
-                <Modal isOpen={isAddTaskModalOpen} onClose={() => setIsAddTaskModalOpen(false)}>
+                <Modal isOpen={isAddTaskModalOpen} onClose={onAddTaskModalClose}>
                     <ModalContent>
                         <ModalHeader>
                             Add Task to {selectedQuadrantForAdd ? quadrants[selectedQuadrantForAdd] : ''}
@@ -754,7 +756,7 @@ const EisenhowerMatrix: React.FC = () => {
                                     if (e.key === 'Enter') {
                                         addTaskToQuadrant();
                                     } else if (e.key === 'Escape') {
-                                        setIsAddTaskModalOpen(false);
+                                        onAddTaskModalClose();
                                     }
                                 }}
                                 fullWidth
@@ -823,7 +825,7 @@ const EisenhowerMatrix: React.FC = () => {
                     tasks={tasks}
                     showArchivedTasks={showArchivedTasks}
                     isArchiveMode={isArchiveMode}
-                />
+                    user={user} />
             </div>
 
             {loadingAI && (

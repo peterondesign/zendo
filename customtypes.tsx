@@ -29,14 +29,14 @@ export interface SubtaskEditInfo {
     quadrant: QuadrantType;
 }
 
-// Define the structure of a task as stored in Supabase
+/// Define the structure of a task as stored in Supabase
 export interface SupabaseTask {
-    id: number; // Change to 'string' if using UUIDs
+    id: string; // Assuming UUIDs are used, which are strings in Supabase
     text: string;
     completed: boolean;
     archived: boolean;
     quadrant: QuadrantType;
-    user_id: string;
+    user_id: string; // This should be string if you're storing a reference to the user's ID (likely a UUID or similar)
 }
 
 // Define the structure for inserting a new task (without the ID)

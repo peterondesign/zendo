@@ -136,7 +136,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
                         </div>
 
                         <div className="flex items-center">
-                            {task.subtasks.length > 0 && (
+                            {task.subtasks?.length > 0 && (
                                 <span className="text-xs text-default-500 ml-2">
                                     {task.subtasks.filter(sub => sub.completed).length}/{task.subtasks.length}
                                 </span>

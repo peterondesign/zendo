@@ -1,10 +1,12 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, ButtonGroup, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tooltip } from "@nextui-org/react";
 import { Clipboard, Archive, FileDown, CircleEllipsis } from 'lucide-react';
 import jsPDF from 'jspdf';
 import toast, { Toaster } from 'react-hot-toast';
+import { useUser } from '@auth0/nextjs-auth0/client'
+
 
 type QuadrantType = 'do' | 'decide' | 'delegate' | 'delete' | 'unsorted';
 
@@ -33,9 +35,14 @@ interface FloatingButtonProps {
     tasks: Record<QuadrantType, Task[]>;
     showArchivedTasks: () => void;
     isArchiveMode: boolean;
+    user: any;
 }
 
-const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTasks, isArchiveMode }) => {
+
+const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTasks, isArchiveMode, user }) => {
+
+    const [isPremium, setIsPremium] = useState(false);
+
     const formatTasksToMarkdown = () => {
         let markdown = '';
         (Object.keys(quadrantDetails) as QuadrantType[]).forEach((quadrantKey) => {
@@ -147,27 +154,33 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                                 <CircleEllipsis />
                             </Button>
                         </DropdownTrigger>
-                        <DropdownMenu aria-label="Task options" disabledKeys={["copy", "archive", "save"]}>                           
-                             <DropdownItem
-                            key="copy"
-                            description="Premium feature"
-                            startContent={<Clipboard size={16} />}
-                            onClick={copyToClipboard}
+                        <DropdownMenu aria-label="Task options"
+
+                            disabledKeys={isPremium ? ["copy", "archive", "save"] : []}  // Disable if not premium
                         >
-                            Copy Tasks to Clipboard
-                        </DropdownItem>
-                            <DropdownItem
+                             <DropdownItem
                                 key="archive"
-                                description={"Premium feature"}                                startContent={<Archive size={16} />}
+                                startContent={<Archive size={16} />}
                                 onClick={handleArchiveTasks}
+                                description={!isPremium ? undefined : "Premium feature"}
                             >
                                 {isArchiveMode ? "Hide Archived" : "Show Archived"}
                             </DropdownItem>
+                            
+                            <DropdownItem
+                                key="copy"
+                                startContent={<Clipboard size={16} />}
+                                onClick={copyToClipboard}
+                                description={!isPremium ? undefined : "Premium feature"}
+                            >
+                                Copy Tasks to Clipboard
+                            </DropdownItem>
+                           
                             <DropdownItem
                                 key="save"
-                                description="Premium feature"
                                 startContent={<FileDown size={16} />}
                                 onClick={saveAsPDF}
+                                description={!isPremium ? undefined : "Premium feature"}
                             >
                                 Save as PDF
                             </DropdownItem>

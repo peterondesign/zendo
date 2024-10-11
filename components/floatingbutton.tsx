@@ -49,7 +49,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
         }
     }, [user]);
 
-    if (!isPremium) {
+    if (isPremium) {
         // If the user is not premium, do not render the FloatingButton
         return (
             <Dropdown>

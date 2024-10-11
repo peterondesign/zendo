@@ -41,3 +41,10 @@ export interface SupabaseTask {
 
 // Define the structure for inserting a new task (without the ID)
 export type InsertTask = Omit<SupabaseTask, 'id'>;
+
+export interface Subtask {
+    id: number;
+    text: string;
+    completed: boolean;
+  }
+  

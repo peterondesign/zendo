@@ -8,7 +8,7 @@ import { Input } from '@nextui-org/input';
 import { Card, CardHeader } from '@nextui-org/card';
 import { GripVertical, Plus, MoreVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
-import { Dropdown, DropdownTrigger, DropdownSection, DropdownMenu, DropdownItem, Link, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Chip, Dropdown, DropdownTrigger, DropdownSection, DropdownMenu, DropdownItem, Link, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { useTheme } from "next-themes";
 import FloatingButton from './floatingbutton';
 
@@ -18,8 +18,6 @@ import { createClient, SupabaseClient, PostgrestError } from '@supabase/supabase
 import SubtaskItem from './subtaskitem';
 import TaskItem from './taskitem';
 import { SupabaseTask, Task, QuadrantType, TaskEditInfo, SubtaskEditInfo, InsertTask } from '../customtypes';
-
-
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -35,6 +33,9 @@ const quadrants: Record<QuadrantType, string> = {
     unsorted: 'Unsorted Tasks',
 };
 
+
+
+
 const EisenhowerMatrix: React.FC = () => {
     const { user } = useUser();
     const { isOpen: isTaskModalOpen, onOpen: onTaskModalOpen, onClose: onTaskModalClose } = useDisclosure();
@@ -42,6 +43,9 @@ const EisenhowerMatrix: React.FC = () => {
     const { isOpen: isAddTaskModalOpen, onOpen: onAddTaskModalOpen, onClose: onAddTaskModalClose } = useDisclosure();
 
     const { theme } = useTheme();
+
+    // const [expandedTaskIds, setExpandedTaskIds] = useState<number[]>([]);
+
 
     const [tasks, setTasks] = useState<Record<QuadrantType, Task[]>>({
         do: [],
@@ -148,10 +152,10 @@ const EisenhowerMatrix: React.FC = () => {
                             id: supTask.id,
                             text: supTask.text,
                             completed: supTask.completed,
-                            subtasks: [],
+                            subtasks: supTask.subtasks || [],
                             archived: supTask.archived,
                             user_id: supTask.user_id,
-                            quadrant: 'do'
+                            quadrant: supTask.quadrant
                         };
 
                         if (supTask.archived) {
@@ -179,8 +183,6 @@ const EisenhowerMatrix: React.FC = () => {
         fetchAndMergeTasks();
     }, [user]);
 
-
-
     // Update localStorage whenever tasks change (only when not logged in)
     useEffect(() => {
         if (!user) {
@@ -194,43 +196,88 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
     // Add Subtask
-    const addSubtask = (quadrant: QuadrantType, taskId: number) => {
+    const addSubtask = async (quadrant: QuadrantType, taskId: number) => {
         if (newSubtask.trim()) {
-            setTasks((prev) => ({
-                ...prev,
-                [quadrant]: prev[quadrant].map((task) =>
-                    task.id === taskId
-                        ? {
-                            ...task,
-                            subtasks: [
-                                ...task.subtasks,
-                                { id: Date.now(), text: newSubtask.trim(), completed: false },
-                            ],
+            const task = tasks[quadrant].find((task) => task.id === taskId);
+            if (task) {
+                const newSubtaskObj = { id: Date.now(), text: newSubtask.trim(), completed: false };
+                const newSubtasks = [...task.subtasks, newSubtaskObj];
+
+                if (user) {
+                    try {
+                        const { error } = await supabase
+                            .from('tasks')
+                            .update({ subtasks: newSubtasks })
+                            .eq('id', taskId);
+
+                        if (error) {
+                            console.error('Error updating subtasks in Supabase:', error);
+                        } else {
+                            // Update local state only after successful DB update
+                            setTasks((prev) => ({
+                                ...prev,
+                                [quadrant]: prev[quadrant].map((t) =>
+                                    t.id === taskId ? { ...t, subtasks: newSubtasks } : t
+                                ),
+                            }));
                         }
-                        : task
-                ),
-            }));
+                    } catch (err) {
+                        console.error('Error during Supabase update:', err);
+                    }
+                } else {
+                    // Update local state
+                    setTasks((prev) => ({
+                        ...prev,
+                        [quadrant]: prev[quadrant].map((t) =>
+                            t.id === taskId
+                                ? { ...t, subtasks: newSubtasks }
+                                : t
+                        ),
+                    }));
+                }
+            }
             setNewSubtask('');
         }
     };
 
     // Toggle Subtask Completion
-    const toggleSubtaskCompletion = (quadrant: QuadrantType, taskId: number, subtaskId: number) => {
-        setTasks((prev) => ({
-            ...prev,
-            [quadrant]: prev[quadrant].map((task) =>
-                task.id === taskId
-                    ? {
-                        ...task,
-                        subtasks: task.subtasks.map((subtask) =>
-                            subtask.id === subtaskId
-                                ? { ...subtask, completed: !subtask.completed }
-                                : subtask
-                        ),
+    const toggleSubtaskCompletion = async (quadrant: QuadrantType, taskId: number, subtaskId: number) => {
+        const task = tasks[quadrant].find((task) => task.id === taskId);
+        if (task) {
+            const newSubtasks = task.subtasks.map((subtask) =>
+                subtask.id === subtaskId ? { ...subtask, completed: !subtask.completed } : subtask
+            );
+            if (user) {
+                try {
+                    const { error } = await supabase
+                        .from('tasks')
+                        .update({ subtasks: newSubtasks })
+                        .eq('id', taskId);
+
+                    if (error) {
+                        console.error('Error updating subtasks in Supabase:', error);
+                    } else {
+                        // Update local state
+                        setTasks((prev) => ({
+                            ...prev,
+                            [quadrant]: prev[quadrant].map((t) =>
+                                t.id === taskId ? { ...t, subtasks: newSubtasks } : t
+                            ),
+                        }));
                     }
-                    : task
-            ),
-        }));
+                } catch (err) {
+                    console.error('Error during Supabase update:', err);
+                }
+            } else {
+                // Update local state
+                setTasks((prev) => ({
+                    ...prev,
+                    [quadrant]: prev[quadrant].map((t) =>
+                        t.id === taskId ? { ...t, subtasks: newSubtasks } : t
+                    ),
+                }));
+            }
+        }
     };
 
     // Toggle Task Completion
@@ -292,22 +339,44 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
     // Delete Subtask
-    const deleteSubtask = (quadrant: QuadrantType, taskId: number, subtaskId: number) => {
-        setTasks((prev) => ({
-            ...prev,
-            [quadrant]: prev[quadrant].map((task) =>
-                task.id === taskId
-                    ? {
-                        ...task,
-                        subtasks: task.subtasks.filter((subtask) => subtask.id !== subtaskId),
+    const deleteSubtask = async (quadrant: QuadrantType, taskId: number, subtaskId: number) => {
+        const task = tasks[quadrant].find((task) => task.id === taskId);
+        if (task) {
+            const newSubtasks = task.subtasks.filter((subtask) => subtask.id !== subtaskId);
+            if (user) {
+                try {
+                    const { error } = await supabase
+                        .from('tasks')
+                        .update({ subtasks: newSubtasks })
+                        .eq('id', taskId);
+
+                    if (error) {
+                        console.error('Error updating subtasks in Supabase:', error);
+                    } else {
+                        // Update local state
+                        setTasks((prev) => ({
+                            ...prev,
+                            [quadrant]: prev[quadrant].map((t) =>
+                                t.id === taskId ? { ...t, subtasks: newSubtasks } : t
+                            ),
+                        }));
                     }
-                    : task
-            ),
-        }));
+                } catch (err) {
+                    console.error('Error during Supabase update:', err);
+                }
+            } else {
+                // Update local state
+                setTasks((prev) => ({
+                    ...prev,
+                    [quadrant]: prev[quadrant].map((t) =>
+                        t.id === taskId ? { ...t, subtasks: newSubtasks } : t
+                    ),
+                }));
+            }
+        }
     };
 
     // Save Edited Task
-    // Updated saveEditedTask function
     const saveEditedTask = async () => {
         if (taskToEdit && user) {
             const { quadrant, task } = taskToEdit;
@@ -322,7 +391,6 @@ const EisenhowerMatrix: React.FC = () => {
 
                 if (error) {
                     console.error('Error updating task in Supabase:', error);
-                    // Optionally, show an error message to the user
                     return;
                 }
 
@@ -338,7 +406,6 @@ const EisenhowerMatrix: React.FC = () => {
                 }
             } catch (err) {
                 console.error('Error updating task:', err);
-                // Optionally, show an error message to the user
             }
 
             // Clear the editing state and close the modal
@@ -361,24 +428,47 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
     // Save Edited Subtask
-    const saveEditedSubtask: () => void = () => {
+    const saveEditedSubtask = async () => {
         if (subtaskToEdit) {
             const { quadrant, taskId, subtask } = subtaskToEdit;
-            setTasks((prev) => ({
-                ...prev,
-                [quadrant]: prev[quadrant].map((task) =>
-                    task.id === taskId
-                        ? {
-                            ...task,
-                            subtasks: task.subtasks.map((st) =>
-                                st.id === subtask.id ? { ...st, text: subtask.text } : st
-                            ),
+            const task = tasks[quadrant].find((task) => task.id === taskId);
+            if (task) {
+                const newSubtasks = task.subtasks.map((st) =>
+                    st.id === subtask.id ? { ...st, text: subtask.text } : st
+                );
+                if (user) {
+                    try {
+                        const { error } = await supabase
+                            .from('tasks')
+                            .update({ subtasks: newSubtasks })
+                            .eq('id', taskId);
+
+                        if (error) {
+                            console.error('Error updating subtasks in Supabase:', error);
+                        } else {
+                            // Update local state
+                            setTasks((prev) => ({
+                                ...prev,
+                                [quadrant]: prev[quadrant].map((t) =>
+                                    t.id === taskId ? { ...t, subtasks: newSubtasks } : t
+                                ),
+                            }));
                         }
-                        : task
-                ),
-            }));
-            setSubtaskToEdit(null);
-            onSubtaskModalClose();  // Close the modal after saving
+                    } catch (err) {
+                        console.error('Error during Supabase update:', err);
+                    }
+                } else {
+                    // Update local state
+                    setTasks((prev) => ({
+                        ...prev,
+                        [quadrant]: prev[quadrant].map((t) =>
+                            t.id === taskId ? { ...t, subtasks: newSubtasks } : t
+                        ),
+                    }));
+                }
+                setSubtaskToEdit(null);
+                onSubtaskModalClose();  // Close the modal after saving
+            }
         }
     };
 
@@ -393,6 +483,22 @@ const EisenhowerMatrix: React.FC = () => {
         });
     };
 
+    const moveTaskToQuadrant = (sourceQuadrant: QuadrantType, taskId: number, targetQuadrant: QuadrantType) => {
+        const sourceTasks = [...tasks[sourceQuadrant]];
+        const taskIndex = sourceTasks.findIndex((task) => task.id === taskId);
+
+        if (taskIndex === -1) return;
+
+        const [task] = sourceTasks.splice(taskIndex, 1);
+        const updatedTargetTasks = [...tasks[targetQuadrant], task];
+
+        setTasks((prevTasks) => ({
+            ...prevTasks,
+            [sourceQuadrant]: sourceTasks,
+            [targetQuadrant]: updatedTargetTasks,
+        }));
+    };
+
     // Drag and Drop Handler
     const onDragEnd = (result: DropResult) => {
         const { source, destination } = result;
@@ -404,12 +510,12 @@ const EisenhowerMatrix: React.FC = () => {
         const destinationQuadrant = destination.droppableId as QuadrantType;
 
         // Get source task
-        const sourceTask = tasks[sourceQuadrant][source.index];
+        const sourceTask = sourceQuadrant in tasks && source.index in tasks[sourceQuadrant] ? tasks[sourceQuadrant][source.index] : null;
 
         // If dragging within the same quadrant
         if (sourceQuadrant === destinationQuadrant) {
-            const reorderedTasks = Array.from(tasks[sourceQuadrant]);
-            const [movedTask] = reorderedTasks.splice(source.index, 1);
+            const reorderedTasks = sourceQuadrant in tasks ? Array.from(tasks[sourceQuadrant]) : [];
+            const [movedTask] = source.index in reorderedTasks ? reorderedTasks.splice(source.index, 1) : [];
             reorderedTasks.splice(destination.index, 0, movedTask);
 
             setTasks((prev) => ({
@@ -478,8 +584,8 @@ const EisenhowerMatrix: React.FC = () => {
     const renderSubtasks = (quadrant: QuadrantType, task: Task) => (
         <Droppable droppableId={`subtasks-${task.id}`} type="subtask">
             {(provided) => (
-                <ul className="pl-6 mt-2 w-full" ref={provided.innerRef} {...provided.droppableProps}>
-                    {task.subtasks.map((subtask, index) => (
+                <ul className="pl-2 mt-2 w-full" ref={provided.innerRef} {...provided.droppableProps}>
+                    {task.subtasks?.map((subtask, index) => (
                         <SubtaskItem
                             key={subtask.id}
                             subtask={subtask}
@@ -492,6 +598,7 @@ const EisenhowerMatrix: React.FC = () => {
                                 setSubtaskToEdit({ subtask, taskId: task.id, quadrant });
                                 onSubtaskModalOpen();
                             }}
+                            onSubtaskModalOpen={onSubtaskModalOpen}
                         />
                     ))}
                     {provided.placeholder}
@@ -529,19 +636,23 @@ const EisenhowerMatrix: React.FC = () => {
                 task={task}
                 quadrant={quadrant}
                 index={index}
+                handleBreakdownTaskWithAI={handleBreakdownTaskWithAI}
                 expandedTaskIds={expandedTaskIds}
                 toggleTaskCompletion={() => toggleTaskCompletion(quadrant, task.id)}
                 toggleTaskExpansion={() => toggleTaskExpansion(task.id)}
                 setTaskToEdit={setTaskToEdit} // Adding the missing prop here
                 deleteTask={() => deleteTask(quadrant, task.id)}
                 archiveTask={() => archiveTask(quadrant, task.id)}
-                moveTaskToQuadrant={addTaskToQuadrant}
+                moveTaskToQuadrant={moveTaskToQuadrant}
                 renderSubtasks={(task: Task) => renderSubtasks(quadrant, task)}
                 onTaskModalOpen={onTaskModalOpen} // Pass this function to TaskItem
                 onTaskModalClose={onTaskModalClose}
             />
         );
     };
+
+    const handleBreakdownTaskWithAI = async (quadrant: QuadrantType, taskId: number, taskText: string) => {
+    }
 
     // Render Quadrant
     const renderQuadrant = (quadrant: QuadrantType) => (
@@ -583,51 +694,6 @@ const EisenhowerMatrix: React.FC = () => {
         </Droppable>
     );
 
-    // Function to handle task breakdown with AI and update the task with subtasks
-    const handleBreakdownTaskWithAI = async (quadrant: QuadrantType, taskId: number, taskText: string) => {
-        setLoadingAI(true);
-        try {
-            const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-Small-Instruct-2409", {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY}`, // Store your API key securely
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    inputs: `Break down this task into smaller tasks: ${taskText}`
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`AI request failed with status ${response.status}`);
-            }
-
-            const data = await response.json();
-            if (data && data[0] && data[0].generated_text) {
-                const newSubtasks = data[0].generated_text
-                    .split("\n")
-                    .filter((line: string) => line.trim() !== "")
-                    .map((text: string, idx: number) => ({
-                        id: Date.now() + idx, // Ensure unique IDs
-                        text: text.trim(),
-                        completed: false
-                    }));
-
-                setTasks((prevTasks) => ({
-                    ...prevTasks,
-                    [quadrant]: prevTasks[quadrant].map((t) =>
-                        t.id === taskId ? { ...t, subtasks: t.subtasks.concat(newSubtasks) } : t
-                    )
-                }));
-                setExpandedTaskIds((prev) => [...prev, taskId]); // Ensure the task is expanded to show new subtasks
-            }
-        } catch (error) {
-            console.error("AI breakdown error:", error);
-        } finally {
-            setLoadingAI(false);
-        }
-    };
-
     // Add Task to Quadrant
     const addTaskToQuadrant = async () => {
         if (newTask.trim() && selectedQuadrantForAdd) {
@@ -658,7 +724,7 @@ const EisenhowerMatrix: React.FC = () => {
                             ...prev,
                             [selectedQuadrantForAdd]: [
                                 ...prev[selectedQuadrantForAdd],
-                                { ...newTaskObject, id: data[0].id }, // Correctly assign 'id' from Supabase
+                                { ...newTaskObject, id: data[0].id, subtasks: [] }, // Correctly assign 'id' from Supabase and initialize subtasks
                             ],
                         }));
                     }
@@ -677,10 +743,9 @@ const EisenhowerMatrix: React.FC = () => {
             }
             // Clear the input and close the modal
             setNewTask('');
-            onAddTaskModalClose();        }
+            onAddTaskModalClose();
+        }
     };
-
-
 
     return (
         <div className="flex flex-col">
@@ -688,8 +753,9 @@ const EisenhowerMatrix: React.FC = () => {
                 {
                     // Check if user is logged in
                     user ? (
-                        // If user is premium, show h1 and p
+                        // If user is premium, only show the h1
                         user.premium ? (
+                            // If user is not premium, show both h1 and p
                             <>
                                 <h1 className="tracking-tight inline font-semibold text-base mb-4 leading-9">
                                     {(() => {
@@ -705,23 +771,30 @@ const EisenhowerMatrix: React.FC = () => {
                                         }
                                     })()}
                                 </h1>
-                                {/* Display sync message only for premium users */}
+                                {/* Display sync message only for non-premium users */}
                                 <p className='text-default-500 text-sm'>
                                     Sync across all devices with this account and unlock more features with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>
                                 </p>
                             </>
+
                         ) : (
-                            // If user is not premium, show only h1
-                            <h1 className="tracking-tight inline font-semibold text-base mb-4 leading-9">
+                            <h1 className="tracking-tight inline font-semibold text-base mb-4	 leading-9">
                                 {(() => {
                                     const hour = new Date().getHours();
+                                    // Morning: 5am to 12pm
                                     if (hour >= 5 && hour < 12) {
                                         return `Good morning, ${user.name}. Grab your coffee, and let's do this!`;
-                                    } else if (hour >= 12 && hour < 17) {
+                                    }
+                                    // Afternoon: 12pm to 5pm
+                                    else if (hour >= 12 && hour < 17) {
                                         return `Good afternoon, ${user.name}. Ready to power through?`;
-                                    } else if (hour >= 17 && hour < 22) {
+                                    }
+                                    // Evening: 5pm to 10pm
+                                    else if (hour >= 17 && hour < 22) {
                                         return `Good evening, ${user.name}! Ready to close out the day on a high note?`;
-                                    } else {
+                                    }
+                                    // Late night: 10pm to 5am
+                                    else {
                                         return `Let's get some late-night magic going, ${user.name}!`;
                                     }
                                 })()}
@@ -730,96 +803,15 @@ const EisenhowerMatrix: React.FC = () => {
                     ) : (
                         <>
                             {/* If user is not logged in, show this default h1 and p */}
-                            <h1 className="tracking-tight inline font-semibold leading-0 md:leading-9">
+                            <h1 className="tracking-tight inline font-semibold text-base leading-9 mb-4">
                                 Prioritize your tasks with the Eisenhower Matrix, and break them down
                             </h1>
-                            <div className='mb-8 md:mb-0'>
-                                <p className='text-default-500 text-sm mb-8'>
-                                    No account needed, free forever (more features included with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>)
-                                </p>
-                            </div>
+                            <p className='text-default-500 text-sm'>
+                                No account needed, free forever (more features included with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>)
+                            </p>
                         </>
                     )
                 }
-
-                {/* Add Task Modal */}
-                <Modal isOpen={isAddTaskModalOpen} onClose={onAddTaskModalClose}>
-                    <ModalContent>
-                        <ModalHeader>
-                            Add Task to {selectedQuadrantForAdd ? quadrants[selectedQuadrantForAdd] : ''}
-                        </ModalHeader>
-                        <ModalBody>
-                            <Input
-                                value={newTask}
-                                onChange={(e) => setNewTask(e.target.value.slice(0, 100))}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        addTaskToQuadrant();
-                                    } else if (e.key === 'Escape') {
-                                        onAddTaskModalClose();
-                                    }
-                                }}
-                                fullWidth
-                                placeholder="Enter new task name"
-                            />
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button onClick={() => {
-                                addTaskToQuadrant();
-                            }}>Add Task</Button>
-                        </ModalFooter>
-                    </ModalContent>
-                </Modal>
-
-                {/* Edit Task Modal */}
-                <Modal isOpen={isTaskModalOpen} onClose={onTaskModalClose}>
-                    <ModalContent>
-                        <ModalHeader>Edit Task</ModalHeader>
-                        <ModalBody>
-                            <Input
-                                value={taskToEdit?.task.text || ''}
-                                onChange={handleTaskInputChange}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        saveEditedTask();
-                                    } else if (e.key === 'Escape') {
-                                        onTaskModalClose();
-                                    }
-                                }}
-                                fullWidth
-                                placeholder="Enter new task name"
-                            />
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button onClick={() => saveEditedTask()}>Save</Button>
-                        </ModalFooter>
-                    </ModalContent>
-                </Modal>
-
-                {/* Edit Subtask Modal */}
-                <Modal isOpen={isSubtaskModalOpen} onClose={onSubtaskModalClose}>
-                    <ModalContent>
-                        <ModalHeader>Edit Subtask</ModalHeader>
-                        <ModalBody>
-                            <Input
-                                value={subtaskToEdit?.subtask.text || ''}
-                                onChange={handleSubtaskInputChange}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        saveEditedSubtask();
-                                    } else if (e.key === 'Escape') {
-                                        onSubtaskModalClose();
-                                    }
-                                }}
-                                fullWidth
-                                placeholder="Enter new subtask name"
-                            />
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button onClick={saveEditedSubtask}>Save</Button>
-                        </ModalFooter>
-                    </ModalContent>
-                </Modal>
 
                 <FloatingButton
                     tasks={tasks}
@@ -833,6 +825,55 @@ const EisenhowerMatrix: React.FC = () => {
                     <Spinner size="lg" />
                 </div>
             )}
+
+            <Modal isOpen={isTaskModalOpen} onClose={onTaskModalClose}>
+                <ModalContent>
+                    <ModalHeader>Edit Task</ModalHeader>
+                    <ModalBody>
+                        <Input
+                            value={taskToEdit?.task.text || ''}
+                            onChange={handleTaskInputChange}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    saveEditedTask();
+                                } else if (e.key === 'Escape') {
+                                    onTaskModalClose();
+                                }
+                            }}
+                            fullWidth
+                            placeholder="Enter new task name"
+                        />
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button onClick={saveEditedTask}>Save</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            <Modal isOpen={isSubtaskModalOpen} onClose={onSubtaskModalClose}>
+                <ModalContent>
+                    <ModalHeader>Edit Subtask</ModalHeader>
+                    <ModalBody>
+                        <Input
+                            value={subtaskToEdit?.subtask.text || ''}
+                            onChange={handleSubtaskInputChange}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    saveEditedSubtask();
+                                } else if (e.key === 'Escape') {
+                                    onSubtaskModalClose();
+                                }
+                            }}
+                            fullWidth
+                            placeholder="Enter new subtask name"
+                        />
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button onClick={saveEditedSubtask}>Save</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
             <div className="flex-grow overflow-auto sm:p-0 lg:p-4">
                 <DragDropContext onDragEnd={onDragEnd}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

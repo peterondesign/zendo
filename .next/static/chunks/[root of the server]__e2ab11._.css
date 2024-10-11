@@ -916,6 +916,10 @@ img, video {
   max-height: calc(100% - 8rem);
 }
 
+.max-h-4 {
+  max-height: 1rem;
+}
+
 .min-h-10 {
   min-height: 2.5rem;
 }
@@ -2326,6 +2330,10 @@ img, video {
   --tw-bg-opacity: .5;
 }
 
+.bg-opacity-75 {
+  --tw-bg-opacity: .75;
+}
+
 .bg-gradient-to-b {
   background-image: linear-gradient(to bottom, var(--tw-gradient-stops));
 }
@@ -2648,6 +2656,10 @@ img, video {
 
 .pt-px {
   padding-top: 1px;
+}
+
+.pl-2 {
+  padding-left: .5rem;
 }
 
 .text-left {

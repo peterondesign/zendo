@@ -19,6 +19,8 @@ import SubtaskItem from './subtaskitem';
 import TaskItem from './taskitem';
 import { SupabaseTask, Task, QuadrantType, TaskEditInfo, SubtaskEditInfo, InsertTask } from '../customtypes';
 import PiPWindow from './floatingwindow';
+import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/react";
+
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -34,6 +36,14 @@ const quadrants: Record<QuadrantType, string> = {
     unsorted: 'Unsorted Tasks',
 };
 
+// Mental model explanations for each quadrant
+const quadrantExplanations: Record<QuadrantType, string> = {
+    do: "Require immediate attention and have significant consequences if not completed.",
+    decide: "Contribute to your long-term goals but don't require immediate action.",
+    delegate: "Need to be done soon but can be handled by someone else.",
+    delete: "Do not contribute to your goals and can be removed.",
+    unsorted: "Tasks that need to be categorized."
+};
 const EisenhowerMatrix: React.FC = () => {
     const { user } = useUser();
     const { isOpen: isTaskModalOpen, onOpen: onTaskModalOpen, onClose: onTaskModalClose } = useDisclosure();
@@ -71,7 +81,7 @@ const EisenhowerMatrix: React.FC = () => {
             setPipVisible(false); // Hide PiP when no task exists
         }
     }, [tasks]);
-    
+
 
     const [isArchiveMode, setIsArchiveMode] = useState(false);
     const [newTask, setNewTask] = useState('');
@@ -677,7 +687,17 @@ const EisenhowerMatrix: React.FC = () => {
                     className={`p-4 mb-4 ${theme === "dark" ? (snapshot.isDraggingOver ? 'bg-zinc-700' : 'bg-zinc-900') : (snapshot.isDraggingOver ? 'bg-white' : 'bg-background')}`}
                 >
                     <CardHeader className="flex justify-between items-center">
-                        <div className="text-default-500 text-sm">{quadrants[quadrant]}</div>
+                        {/* <div className="text-default-500 text-sm">{quadrants[quadrant]}</div> */}
+                        <Popover shadow="lg" containerPadding={8} triggerType="tree" size='sm' backdrop='opaque' placement="top">
+                            <PopoverTrigger className="cursor-pointer text-default-500 text-sm">
+                                {quadrants[quadrant]}
+                            </PopoverTrigger>
+                            <PopoverContent>
+                                <p className="p-2 text-xs max-w-[32rem]">
+                                    {quadrantExplanations[quadrant]}
+                                </p>
+                            </PopoverContent>
+                        </Popover>
                         <Button
                             size="sm"
                             isIconOnly

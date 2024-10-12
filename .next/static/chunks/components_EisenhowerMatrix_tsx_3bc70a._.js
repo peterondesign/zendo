@@ -1,11 +1,10 @@
 (globalThis.TURBOPACK = globalThis.TURBOPACK || []).push([
-    "static/chunks/components_EisenhowerMatrix_tsx_8a296a._.js",
+    "static/chunks/components_EisenhowerMatrix_tsx_3bc70a._.js",
     {},
 ]);
 (globalThis.TURBOPACK_CHUNK_LISTS = globalThis.TURBOPACK_CHUNK_LISTS || []).push({
-  "path": "static/chunks/components_EisenhowerMatrix_tsx_8a296a._.js",
+  "path": "static/chunks/components_EisenhowerMatrix_tsx_3bc70a._.js",
   "chunks": [
-    "static/chunks/components_c4075f._.js",
     "static/chunks/node_modules_next_dist_compiled_react_0bfca7._.js",
     "static/chunks/node_modules_next_dist_compiled_react-dom_cjs_react-dom_development_c9a189.js",
     "static/chunks/node_modules_next_dist_compiled_react-dom_index_99aff8.js",
@@ -24,6 +23,7 @@
     "static/chunks/node_modules_@react-aria_af5b02._.js",
     "static/chunks/node_modules_@supabase_068ff5._.js",
     "static/chunks/node_modules_0ec01f._.js",
+    "static/chunks/components_c4075f._.js",
     "static/chunks/node_modules_89af6d._.js"
   ],
   "source": "dynamic"

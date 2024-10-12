@@ -199,7 +199,6 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
         <>
             <div><Toaster /></div>
             <ButtonGroup className='z-10 fixed bottom-10 right-10' variant="flat">
-                <Tooltip content="Choose an action">
                     <Dropdown placement="top-end">
                         <DropdownTrigger>
                             <Button isIconOnly>
@@ -238,7 +237,6 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                             </DropdownItem>
                         </DropdownMenu>
                     </Dropdown>
-                </Tooltip>
             </ButtonGroup>
         </>
     );

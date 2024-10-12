@@ -1,5 +1,5 @@
 import React, {  useState } from 'react';
-import { Draggable } from 'react-beautiful-dnd';
+import { Draggable } from '@hello-pangea/dnd';
 import { ChevronDown, ChevronUp, GripVertical, MoreVertical } from 'lucide-react';
 import { Button, ButtonGroup, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Spinner } from '@nextui-org/react';
 import { Task, QuadrantType } from '../customtypes';
@@ -114,7 +114,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
                                 </Button>
                                 <Dropdown
                                     shouldBlockScroll={false}
-                                    backdrop={"blur"}
+                                    backdrop={"opaque"}
                                     // scrollRef={scrollRef}
                                     isOpen={openDropdownId === task.id}
                                     onOpenChange={(open) => handleOpenChange(task.id, open)}

@@ -1,7 +1,7 @@
 // SubtaskItem.tsx
 
 import React, { useState } from 'react';
-import { Draggable } from 'react-beautiful-dnd';
+import { Draggable } from '@hello-pangea/dnd';
 import { GripVertical, MoreVertical } from 'lucide-react';
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
 import { Subtask, QuadrantType } from '../customtypes';

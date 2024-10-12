@@ -125,7 +125,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
                                         </Button>
                                     </DropdownTrigger>
                                     <DropdownMenu
-                                        style={{ height: '40vh', overflowY: 'scroll' }}
+                                        style={{ maxHeight: '40vh', overflowY: 'auto' }}
                                         closeOnSelect={true}
                                     >
                                         <DropdownItem onClick={() => {

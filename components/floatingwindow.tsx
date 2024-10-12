@@ -14,6 +14,7 @@ const PiPWindow: React.FC<PiPWindowProps> = ({ taskText, isVisible, onClose }) =
     if (!videoRef.current) return;
     
     try {
+      // Create a canvas to render the task text
       const canvas = document.createElement('canvas');
       canvas.width = 400;
       canvas.height = 180;
@@ -21,9 +22,12 @@ const PiPWindow: React.FC<PiPWindowProps> = ({ taskText, isVisible, onClose }) =
 
       if (ctx) {
         const renderTask = () => {
+          // Clear the canvas
           ctx.clearRect(0, 0, canvas.width, canvas.height);
+          // Background
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
+          // Text content
           ctx.fillStyle = '#333333';
           ctx.font = '16px Inter';
           ctx.fillText('Urgent Task:', 20, 40);
@@ -34,11 +38,19 @@ const PiPWindow: React.FC<PiPWindowProps> = ({ taskText, isVisible, onClose }) =
         };
 
         renderTask();
-        const stream = canvas.captureStream();
-        videoRef.current!.srcObject = stream;
 
-        await videoRef.current!.play();
-        await videoRef.current!.requestPictureInPicture();
+        // Stop any previous streams before assigning a new one
+        if (videoRef.current.srcObject) {
+          (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+        }
+
+        // Capture the canvas as a stream and set it to the video element
+        const stream = canvas.captureStream();
+        videoRef.current.srcObject = stream;
+
+        // Ensure the video plays before requesting Picture-in-Picture
+        await videoRef.current.play();
+        await videoRef.current.requestPictureInPicture();
 
         setPipActive(true); // Set PiP as active
       }
@@ -46,6 +58,7 @@ const PiPWindow: React.FC<PiPWindowProps> = ({ taskText, isVisible, onClose }) =
       console.error('Error entering PiP:', error);
     }
   };
+
   // Handle PiP close event
   useEffect(() => {
     const handlePipClose = () => {

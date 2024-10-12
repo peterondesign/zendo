@@ -61,16 +61,17 @@ const EisenhowerMatrix: React.FC = () => {
     const [firstUrgentTask, setFirstUrgentTask] = useState<string | null>(null);
     const [pipVisible, setPipVisible] = useState(false);
 
-    // Watch for changes in tasks and set the first urgent task
     useEffect(() => {
-        if (tasks.do.length > 0) {
-            setFirstUrgentTask(tasks.do[0].text);
+        const nonArchivedTasks = tasks.do.filter(task => !task.archived); // Only consider non-archived tasks
+        if (nonArchivedTasks.length > 0) {
+            setFirstUrgentTask(nonArchivedTasks[0].text); // Set the first non-archived task
             setPipVisible(true); // Show PiP when task exists
         } else {
             setFirstUrgentTask(null);
             setPipVisible(false); // Hide PiP when no task exists
         }
     }, [tasks]);
+    
 
     const [isArchiveMode, setIsArchiveMode] = useState(false);
     const [newTask, setNewTask] = useState('');

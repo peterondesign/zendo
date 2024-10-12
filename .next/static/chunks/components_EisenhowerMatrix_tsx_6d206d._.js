@@ -9,7 +9,7 @@
     "static/chunks/node_modules_@hello-pangea_dnd_dist_dnd_esm_f3930d.js",
     "static/chunks/node_modules_jspdf_dist_jspdf_es_min_c277e7.js",
     "static/chunks/node_modules_6b573a._.js",
-    "static/chunks/node_modules_03e7a2._.js"
+    "static/chunks/node_modules_55d08b._.js"
   ],
   "source": "dynamic"
 });

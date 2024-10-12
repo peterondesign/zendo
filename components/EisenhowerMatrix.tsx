@@ -18,7 +18,7 @@ import { createClient, SupabaseClient, PostgrestError } from '@supabase/supabase
 import SubtaskItem from './subtaskitem';
 import TaskItem from './taskitem';
 import { SupabaseTask, Task, QuadrantType, TaskEditInfo, SubtaskEditInfo, InsertTask } from '../customtypes';
-import openFloatingTaskWindow from './floatingwindow';
+import PiPWindow from './floatingwindow';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -34,9 +34,6 @@ const quadrants: Record<QuadrantType, string> = {
     unsorted: 'Unsorted Tasks',
 };
 
-
-
-
 const EisenhowerMatrix: React.FC = () => {
     const { user } = useUser();
     const { isOpen: isTaskModalOpen, onOpen: onTaskModalOpen, onClose: onTaskModalClose } = useDisclosure();
@@ -44,8 +41,6 @@ const EisenhowerMatrix: React.FC = () => {
     const { isOpen: isAddTaskModalOpen, onOpen: onAddTaskModalOpen, onClose: onAddTaskModalClose } = useDisclosure();
 
     const { theme } = useTheme();
-
-    // const [expandedTaskIds, setExpandedTaskIds] = useState<number[]>([]);
 
 
     const [tasks, setTasks] = useState<Record<QuadrantType, Task[]>>({
@@ -62,6 +57,21 @@ const EisenhowerMatrix: React.FC = () => {
         delete: [],
         unsorted: [],
     });
+
+    const [firstUrgentTask, setFirstUrgentTask] = useState<string | null>(null);
+    const [pipVisible, setPipVisible] = useState(false);
+
+    // Watch for changes in tasks and set the first urgent task
+    useEffect(() => {
+        if (tasks.do.length > 0) {
+            setFirstUrgentTask(tasks.do[0].text);
+            setPipVisible(true); // Show PiP when task exists
+        } else {
+            setFirstUrgentTask(null);
+            setPipVisible(false); // Hide PiP when no task exists
+        }
+    }, [tasks]);
+
     const [isArchiveMode, setIsArchiveMode] = useState(false);
     const [newTask, setNewTask] = useState('');
     const [newSubtask, setNewSubtask] = useState('');
@@ -828,8 +838,15 @@ const EisenhowerMatrix: React.FC = () => {
                 </div>
             )}
 
-            {/* Add a hidden video element to trigger PiP mode */}
-            <video ref={videoRef} style={{ display: 'none' }} muted playsInline></video>
+            {/* Render the PiPWindow and pass props */}
+            {firstUrgentTask && (
+                <PiPWindow
+                    taskText={firstUrgentTask}
+                    isVisible={pipVisible}
+                    onClose={() => setPipVisible(false)}  // Handle PiP close event
+                />
+            )}
+
 
             <Modal isOpen={isAddTaskModalOpen} onClose={onAddTaskModalClose}>
                 <ModalContent>

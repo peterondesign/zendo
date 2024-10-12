@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {  useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { ChevronDown, ChevronUp, GripVertical, MoreVertical } from 'lucide-react';
 import { Button, ButtonGroup, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Spinner } from '@nextui-org/react';
@@ -114,6 +114,8 @@ const TaskItem: React.FC<TaskItemProps> = ({
                                 </Button>
                                 <Dropdown
                                     shouldBlockScroll={false}
+                                    backdrop={"blur"}
+                                    // scrollRef={scrollRef}
                                     isOpen={openDropdownId === task.id}
                                     onOpenChange={(open) => handleOpenChange(task.id, open)}
                                 >
@@ -122,7 +124,10 @@ const TaskItem: React.FC<TaskItemProps> = ({
                                             <MoreVertical size={16} className="h-4 w-4" />
                                         </Button>
                                     </DropdownTrigger>
-                                    <DropdownMenu closeOnSelect={true}>
+                                    <DropdownMenu
+                                        style={{ height: '40vh', overflowY: 'scroll' }}
+                                        closeOnSelect={true}
+                                    >
                                         <DropdownItem onClick={() => {
                                             setTaskToEdit(task, quadrant);
                                             onTaskModalOpen();

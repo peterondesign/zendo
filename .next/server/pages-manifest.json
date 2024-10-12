@@ -2,8 +2,5 @@
   "/api/auth/[...auth0]": "pages/api/auth/[...auth0].js",
   "/_app": "pages/_app.js",
   "/_document": "pages/_document.js",
-  "/_error": "pages/_error.js",
-  "/api/auth/login": "pages/api/auth/login.js",
-  "/api/auth/callback": "pages/api/auth/callback.js",
-  "/api/auth/logout": "pages/api/auth/logout.js"
+  "/_error": "pages/_error.js"
 }

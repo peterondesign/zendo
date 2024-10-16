@@ -3,17 +3,15 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, ButtonGroup } from '@nextui-org/button';
+import { Button } from '@nextui-org/button';
 import { Input } from '@nextui-org/input';
 import { Card, CardHeader } from '@nextui-org/card';
-import { GripVertical, Plus, MoreVertical, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
-import { Chip, Dropdown, DropdownTrigger, DropdownSection, DropdownMenu, DropdownItem, Link, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Link, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { useTheme } from "next-themes";
 import FloatingButton from './floatingbutton';
-
 import { useUser } from '@auth0/nextjs-auth0/client'
-
 import { createClient, SupabaseClient, PostgrestError } from '@supabase/supabase-js'
 import SubtaskItem from './subtaskitem';
 import TaskItem from './taskitem';
@@ -674,8 +672,68 @@ const EisenhowerMatrix: React.FC = () => {
         );
     };
 
+    // Function to handle task breakdown with AI and update the task with subtasks
     const handleBreakdownTaskWithAI = async (quadrant: QuadrantType, taskId: number, taskText: string) => {
-    }
+        setLoadingAI(true); // Show spinner
+        const apiUrl = "https://api-inference.huggingface.co/models/mistralai/Mistral-Small-Instruct-2409";
+
+        const prompt = "Only respond with a numbered list of tasks and nothing else. Break down the following task into minimum of 4 to maximum of 8 subtasks, it must not be a repeat of the main task, each subtask must be a single line and less than 12 words. The subtasks should be manageable for an 18-year-old with focus issues and  ADHD and can be completed within 24 hours:"
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer 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`, // Add your Hugging Face API key here
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    inputs: `${prompt}: ${taskText}`,
+                }),
+            });
+
+            if (!response.ok) {
+                console.error("Error fetching from Hugging Face:", response.statusText);
+                setLoadingAI(false);
+                return;
+            }
+
+            const data = await response.json(); // Parse the JSON response
+            const generatedText = data[0]?.generated_text || "";
+
+            // Split the generated text into lines, remove numbering, asterisks, and filter out empty lines
+            const subtasks = generatedText
+                .split("\n")
+                .map((line: string) => line.replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim()) // Remove numbering and asterisks
+                .filter((subtask: string) => subtask.length > 0 && !subtask.includes(prompt)) // Remove empty lines and the prompt
+                .slice(1); // Remove the empty line at the beginning
+
+            if (subtasks.length > 0) {
+                setTasks((prev) => ({
+                    ...prev,
+                    [quadrant]: prev[quadrant].map((task) =>
+                        task.id === taskId
+                            ? {
+                                ...task,
+                                subtasks: subtasks.map((subtaskText: string, index: number) => ({
+                                    id: Date.now() + index,
+                                    text: subtaskText,
+                                    completed: false,
+                                })),
+                            }
+                            : task
+                    ),
+                }));
+
+                // Automatically expand the task to show generated subtasks
+                setExpandedTaskIds((prev) => [...prev, taskId]);
+            }
+
+            setLoadingAI(false); // Hide spinner
+        } catch (error) {
+            console.error("Error calling Hugging Face API:", error);
+            setLoadingAI(false); // Hide spinner
+        }
+    };
 
     // Render Quadrant
     const renderQuadrant = (quadrant: QuadrantType) => (

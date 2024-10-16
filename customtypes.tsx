@@ -16,6 +16,8 @@ export interface Task {
     archived: boolean;
     subtasks: SubTask[];
     quadrant: QuadrantType;
+    created_at: Date;
+    updated_at: Date;
 }
 
 export interface TaskEditInfo {

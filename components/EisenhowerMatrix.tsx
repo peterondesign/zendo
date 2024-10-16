@@ -6,7 +6,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Button } from '@nextui-org/button';
 import { Input } from '@nextui-org/input';
 import { Card, CardHeader } from '@nextui-org/card';
-import { Plus } from 'lucide-react';
+import { Flame, Plus } from 'lucide-react';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
 import { Link, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { useTheme } from "next-themes";
@@ -50,6 +50,7 @@ const EisenhowerMatrix: React.FC = () => {
 
     const { theme } = useTheme();
 
+    const [streak, setStreak] = useState(0);
 
     const [tasks, setTasks] = useState<Record<QuadrantType, Task[]>>({
         do: [],
@@ -134,6 +135,7 @@ const EisenhowerMatrix: React.FC = () => {
         }
     };
 
+
     // Fetch and Merge Tasks from Supabase and LocalStorage
     useEffect(() => {
         const fetchAndMergeTasks = async () => {
@@ -176,7 +178,9 @@ const EisenhowerMatrix: React.FC = () => {
                             subtasks: supTask.subtasks || [],
                             archived: supTask.archived,
                             user_id: supTask.user_id,
-                            quadrant: supTask.quadrant
+                            quadrant: supTask.quadrant,
+                            created_at: new Date(), // Assign a new Date object
+                            updated_at: new Date(), //
                         };
 
                         if (supTask.archived) {
@@ -672,6 +676,26 @@ const EisenhowerMatrix: React.FC = () => {
         );
     };
 
+
+    // Update the streak when tasks are completed
+    useEffect(() => {
+        const calculateStreak = () => {
+            // Get all completed tasks in the "Do" quadrant
+            const completedUrgentTasks = tasks.do.filter(task => task.completed);
+
+            // Calculate streak based on the number of completed tasks
+            if (completedUrgentTasks.length > 0) {
+                // Set the streak based on the number of days the user has completed at least one urgent task
+                // You can customize the logic to increment streak based on specific conditions, like task creation dates
+                setStreak(streak + 1);
+            } else {
+                setStreak(0); // Reset streak if no urgent task is completed
+            }
+        };
+
+        calculateStreak();
+    }, [tasks]);
+
     // Function to handle task breakdown with AI and update the task with subtasks
     const handleBreakdownTaskWithAI = async (quadrant: QuadrantType, taskId: number, taskText: string) => {
         setLoadingAI(true); // Show spinner
@@ -825,7 +849,11 @@ const EisenhowerMatrix: React.FC = () => {
             } else {
                 // User is not logged in
                 const localId = Date.now(); // Use a unique local ID as a number
-                const localTask: Task = { ...newTaskObject, id: localId, subtasks: [] }; // Initialize subtasks if necessary
+                const localTask: Task = {
+                    ...newTaskObject, id: localId, subtasks: [],
+                    created_at: new Date(),
+                    updated_at: new Date()
+                }; // Initialize subtasks if necessary
 
                 setTasks((prev) => ({
                     ...prev,
@@ -903,12 +931,18 @@ const EisenhowerMatrix: React.FC = () => {
                         </>
                     )
                 }
+                <div className="flex justify-end items-center space-x-4">
 
-                <FloatingButton
-                    tasks={tasks}
-                    showArchivedTasks={showArchivedTasks}
-                    isArchiveMode={isArchiveMode}
-                    user={user} />
+
+                    {/* Existing floating button */}
+                    <FloatingButton
+                        tasks={tasks}
+                        showArchivedTasks={showArchivedTasks}
+                        isArchiveMode={isArchiveMode}
+                        user={user}
+                        streak={streak}
+                    />
+                </div>
             </div>
 
             {loadingAI && (

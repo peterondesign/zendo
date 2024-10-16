@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Button, ButtonGroup, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tooltip } from "@nextui-org/react";
+import { Button, ButtonGroup, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tooltip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Table, TableHeader, TableColumn, TableBody, TableCell, TableRow } from "@nextui-org/react";
 import { Clipboard, Archive, FileDown, CircleEllipsis } from 'lucide-react';
 import jsPDF from 'jspdf';
 import toast, { Toaster } from 'react-hot-toast';
 import { useUser } from '@auth0/nextjs-auth0/client'
+import { Flame } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns'; // Import from date-fns
 
 
 type QuadrantType = 'do' | 'decide' | 'delegate' | 'delete' | 'unsorted';
@@ -15,6 +17,8 @@ interface Task {
     text: string;
     completed: boolean;
     subtasks: SubTask[];
+    created_at: Date;
+    updated_at: Date;  // We will use updated_at to show when the task was last updated/completed
 }
 
 interface SubTask {
@@ -36,12 +40,22 @@ interface FloatingButtonProps {
     showArchivedTasks: () => void;
     isArchiveMode: boolean;
     user: any;
+    streak: number; // Add streak as a prop
 }
 
 
-const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTasks, isArchiveMode, user }) => {
+const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTasks, isArchiveMode, user, streak }) => {
 
     const [isPremium, setIsPremium] = useState(false);
+    const [isTaskHistoryOpen, setTaskHistoryOpen] = useState(false);
+
+    const [taskHistory, setTaskHistory] = useState<Task[]>([]);
+
+    useEffect(() => {
+        // Fetch task history (both created and completed will be shown as one table)
+        const allTasks = Object.values(tasks).flat();
+        setTaskHistory(allTasks);
+    }, [tasks]);
 
     useEffect(() => {
         if (user && user.premium) {
@@ -50,12 +64,11 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
     }, [user]);
 
     if (isPremium) {
-        // If the user is not premium, do not render the FloatingButton
         return (
             <Dropdown>
                 <DropdownTrigger>
                     <Button
-                    className='z-10 fixed bottom-10 right-10'
+                        className='z-10 fixed bottom-10 right-10'
                         variant="flat"
                     >
                         Features
@@ -92,8 +105,6 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                     </DropdownItem>
                 </DropdownMenu>
             </Dropdown>
-
-
         );
     }
 
@@ -135,36 +146,27 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
         let startX = 10;
         let startY = 20; // Start slightly lower on the page for spacing
 
-        // Loop through quadrants and render tasks in a table layout
         (Object.keys(quadrantDetails) as QuadrantType[]).forEach((quadrantKey, idx) => {
             const quadrantLabel = quadrantDetails[quadrantKey];
 
-            // Add space between quadrants (tables)
             if (idx !== 0) {
                 startY += 20;
             }
 
-            // Draw the quadrant title
             pdf.setFontSize(14);
             pdf.text(quadrantLabel, startX, startY);
             startY += lineHeight;
 
-            // Draw table for each quadrant
             pdf.setFontSize(12);
-
-            // Add table header
             pdf.text('Tasks', startX, startY);
             pdf.text('Subtasks', startX + 80, startY); // Adjust the X position for subtasks
             startY += lineHeight;
 
-            // Draw tasks and subtasks inside the table
             tasks[quadrantKey].forEach((task) => {
-                // Task text with checkbox
                 const checkbox = task.completed ? '[x]' : '[ ]';
                 pdf.text(`${checkbox} ${task.text}`, startX, startY);
                 startY += lineHeight;
 
-                // Subtasks indented with checkbox
                 task.subtasks.forEach((subtask) => {
                     const subCheckbox = subtask.completed ? '[x]' : '[ ]';
                     pdf.text(`${subCheckbox} ${subtask.text}`, startX + 80, startY); // Indent subtasks
@@ -172,20 +174,17 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                 });
             });
 
-            // If there are no tasks in the quadrant
             if (tasks[quadrantKey].length === 0) {
                 pdf.text('No tasks added yet.', startX, startY);
                 startY += lineHeight;
             }
 
-            // Check if the current Y position exceeds the page length, and add a new page if necessary
             if (startY > pdf.internal.pageSize.getHeight() - 30) {
                 pdf.addPage();
-                startY = 20; // Reset the Y position for the new page
+                startY = 20;
             }
         });
 
-        // Save the generated PDF
         pdf.save('tasks.pdf');
         toast.success('PDF exported');
     };
@@ -195,49 +194,66 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
         toast.success(isArchiveMode ? 'Hiding archived tasks' : 'Showing archived tasks');
     };
 
+
     return (
         <>
             <div><Toaster /></div>
+
             <ButtonGroup className='z-10 fixed bottom-10 right-10' variant="flat">
-                    <Dropdown placement="top-end">
-                        <DropdownTrigger>
-                            <Button isIconOnly>
-                                <CircleEllipsis />
-                            </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu aria-label="Task options"
+                <Button isIconOnly onClick={() => setTaskHistoryOpen(true)}>
+                    <Flame color="orange" size={16} />
+                    <span>{streak}D</span>
+                </Button>
+                <Dropdown placement="top-end">
+                    <DropdownTrigger>
+                        <Button isIconOnly>
+                            <CircleEllipsis />
+                        </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu aria-label="Task options"
+                        disabledKeys={isPremium ? ["copy", "archive", "save"] : []}>
+                        <DropdownItem key="archive" startContent={<Archive size={16} />} onClick={handleArchiveTasks}>
+                            {isArchiveMode ? "Hide Archived" : "Show Archived"}
+                        </DropdownItem>
 
-                            disabledKeys={isPremium ? ["copy", "archive", "save"] : []}  // Disable if not premium
-                        >
-                            <DropdownItem
-                                key="archive"
-                                startContent={<Archive size={16} />}
-                                onClick={handleArchiveTasks}
-                                description={!isPremium ? undefined : "Premium feature"}
-                            >
-                                {isArchiveMode ? "Hide Archived" : "Show Archived"}
-                            </DropdownItem>
+                        <DropdownItem key="copy" startContent={<Clipboard size={16} />} onClick={copyToClipboard}>
+                            Copy Tasks to Clipboard
+                        </DropdownItem>
 
-                            <DropdownItem
-                                key="copy"
-                                startContent={<Clipboard size={16} />}
-                                onClick={copyToClipboard}
-                                description={!isPremium ? undefined : "Premium feature"}
-                            >
-                                Copy Tasks to Clipboard
-                            </DropdownItem>
-
-                            <DropdownItem
-                                key="save"
-                                startContent={<FileDown size={16} />}
-                                onClick={saveAsPDF}
-                                description={!isPremium ? undefined : "Premium feature"}
-                            >
-                                Save as PDF
-                            </DropdownItem>
-                        </DropdownMenu>
-                    </Dropdown>
+                        <DropdownItem key="save" startContent={<FileDown size={16} />} onClick={saveAsPDF}>
+                            Save as PDF
+                        </DropdownItem>
+                    </DropdownMenu>
+                </Dropdown>
             </ButtonGroup>
+
+            {/* Modal for showing task history */}
+            <Modal isOpen={isTaskHistoryOpen} onClose={() => setTaskHistoryOpen(false)}>
+                <ModalContent>
+                    <ModalHeader>Task History</ModalHeader>
+                    <ModalBody>
+                        <Table aria-label="Task History">
+                            <TableHeader>
+                                <TableColumn key="task">Task</TableColumn>
+                                <TableColumn key="created">Created On</TableColumn>
+                                <TableColumn key="updated">Last Updated</TableColumn>
+                            </TableHeader>
+                            <TableBody>
+                                {taskHistory.map((task) => (
+                                    <TableRow key={task.id}>
+                                        <TableCell>{task.text}</TableCell>
+                                        <TableCell>{formatDistanceToNow(new Date(task.created_at), { addSuffix: true })}</TableCell>
+                                        <TableCell>{formatDistanceToNow(new Date(task.updated_at), { addSuffix: true })}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </ModalBody>
+                </ModalContent>
+                <ModalFooter>
+                    <Button onClick={() => setTaskHistoryOpen(false)}>Close</Button>
+                </ModalFooter>
+            </Modal>
         </>
     );
 };

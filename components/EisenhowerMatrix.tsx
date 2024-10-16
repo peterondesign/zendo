@@ -961,7 +961,7 @@ const EisenhowerMatrix: React.FC = () => {
             )}
 
 
-            <Modal isOpen={isAddTaskModalOpen} onClose={onAddTaskModalClose}>
+            <Modal isOpen={isAddTaskModalOpen} onClose={onAddTaskModalClose} >
                 <ModalContent>
                     <ModalHeader>Add Task</ModalHeader>
                     <ModalBody>

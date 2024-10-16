@@ -228,15 +228,15 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
             </ButtonGroup>
 
             {/* Modal for showing task history */}
-            <Modal isOpen={isTaskHistoryOpen} onClose={() => setTaskHistoryOpen(false)}>
+            <Modal isOpen={isTaskHistoryOpen} onClose={() => setTaskHistoryOpen(false)} size="full">
                 <ModalContent>
                     <ModalHeader>Task History</ModalHeader>
                     <ModalBody>
                         <Table aria-label="Task History">
                             <TableHeader>
-                                <TableColumn key="task">Task</TableColumn>
-                                <TableColumn key="created">Created On</TableColumn>
-                                <TableColumn key="updated">Last Updated</TableColumn>
+                                <TableColumn key="task" minWidth={400}>Task</TableColumn>
+                                <TableColumn key="created" align='end'>Created On</TableColumn>
+                                <TableColumn key="updated" align='end'>Last Updated</TableColumn>
                             </TableHeader>
                             <TableBody>
                                 {taskHistory.map((task) => (

@@ -76,7 +76,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
                 >
                     <div className="flex items-start justify-between w-full">
                         <div className="flex items-start flex-grow">
-                            <div className="flex items-center m-auto flex-grow">
+                            <div className="flex items-center mt-2 flex-grow">
                                 <span {...provided.dragHandleProps} className="mr-2 cursor-move">
                                     <GripVertical size={16} />
                                 </span>

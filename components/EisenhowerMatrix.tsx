@@ -70,6 +70,7 @@ const EisenhowerMatrix: React.FC = () => {
     const [firstUrgentTask, setFirstUrgentTask] = useState<string | null>(null);
     const [pipVisible, setPipVisible] = useState(false);
 
+
     useEffect(() => {
         const nonArchivedTasks = tasks.do.filter(task => !task.archived); // Only consider non-archived tasks
         if (nonArchivedTasks.length > 0) {
@@ -171,6 +172,9 @@ const EisenhowerMatrix: React.FC = () => {
 
                     // Separate tasks into active and archived categories
                     supabaseTasks.forEach((supTask) => {
+                        const isValidDate = (date: string | number | Date) => !isNaN(new Date(date).getTime());
+                        const validCreatedAt = isValidDate(supTask.created_at) ? new Date(supTask.created_at) : new Date();
+                        
                         const task: Task = {
                             id: supTask.id,
                             text: supTask.text,
@@ -179,9 +183,13 @@ const EisenhowerMatrix: React.FC = () => {
                             archived: supTask.archived,
                             user_id: supTask.user_id,
                             quadrant: supTask.quadrant,
-                            created_at: new Date(), // Assign a new Date object
-                            updated_at: new Date(), //
+                            ...supTask,
+                            created_at: isValidDate(supTask.created_at) ? new Date(supTask.created_at) : new Date(),
+                            updated_at: isValidDate(supTask.updated_at) ? new Date(supTask.updated_at) : new Date(),
+
                         };
+                        
+
 
                         if (supTask.archived) {
                             archivedTasksContainer[supTask.quadrant as QuadrantType].push(task);
@@ -207,6 +215,7 @@ const EisenhowerMatrix: React.FC = () => {
 
         fetchAndMergeTasks();
     }, [user]);
+    
 
     // Update localStorage whenever tasks change (only when not logged in)
     useEffect(() => {

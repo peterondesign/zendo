@@ -18,6 +18,7 @@ export interface Task {
     quadrant: QuadrantType;
     created_at: Date;
     updated_at: Date;
+    completed_at: Date | null;
     deleted?: boolean; // Add deleted property here
 }
 

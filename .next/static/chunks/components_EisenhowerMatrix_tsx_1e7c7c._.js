@@ -4,15 +4,14 @@
 
 __turbopack_export_value__((__turbopack_import__) => {
     return Promise.all([
-  "static/chunks/components_c4075f._.js",
+  "static/chunks/components_842f7d._.js",
   "static/chunks/node_modules_@hello-pangea_dnd_dist_dnd_esm_f3930d.js",
-  "static/chunks/node_modules_@react-aria_118b4e._.js",
-  "static/chunks/node_modules_@react-aria_grid_dist_10db14._.js",
-  "static/chunks/node_modules_@react-aria_11010e._.js",
   "static/chunks/node_modules_jspdf_dist_jspdf_es_min_c277e7.js",
-  "static/chunks/node_modules_4a9884._.js",
-  "static/chunks/node_modules_20b70c._.js",
-  "static/chunks/components_EisenhowerMatrix_tsx_fa3cf5._.js"
+  "static/chunks/node_modules_chart_js_dist_10c9ba._.js",
+  "static/chunks/node_modules_date-fns_4928c4._.js",
+  "static/chunks/node_modules_3af874._.js",
+  "static/chunks/node_modules_7a8535._.js",
+  "static/chunks/components_EisenhowerMatrix_tsx_76c3f5._.js"
 ].map((chunk) => __turbopack_load__(chunk))).then(() => {
         return __turbopack_import__("[project]/components/EisenhowerMatrix.tsx [app-client] (ecmascript)");
     });

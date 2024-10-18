@@ -1,11 +1,11 @@
 (globalThis.TURBOPACK = globalThis.TURBOPACK || []).push([
-    "static/chunks/components_EisenhowerMatrix_tsx_83d7f2._.js",
+    "static/chunks/components_EisenhowerMatrix_tsx_438643._.js",
     {},
 ]);
 (globalThis.TURBOPACK_CHUNK_LISTS = globalThis.TURBOPACK_CHUNK_LISTS || []).push({
-  "path": "static/chunks/components_EisenhowerMatrix_tsx_83d7f2._.js",
+  "path": "static/chunks/components_EisenhowerMatrix_tsx_438643._.js",
   "chunks": [
-    "static/chunks/components_c4075f._.js",
+    "static/chunks/components_842f7d._.js",
     "static/chunks/node_modules_next_dist_compiled_react_0bfca7._.js",
     "static/chunks/node_modules_next_dist_compiled_react-dom_cjs_react-dom_development_c9a189.js",
     "static/chunks/node_modules_next_dist_compiled_react-dom_index_99aff8.js",
@@ -28,7 +28,7 @@
     "static/chunks/node_modules_@react-stately_114a28._.js",
     "static/chunks/node_modules_@supabase_068ff5._.js",
     "static/chunks/node_modules_a218c6._.js",
-    "static/chunks/node_modules_ba540a._.js"
+    "static/chunks/node_modules_3300f1._.js"
   ],
   "source": "dynamic"
 });

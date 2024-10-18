@@ -8,6 +8,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useUser } from '@auth0/nextjs-auth0/client'
 import { Flame } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns'; // Import from date-fns
+import TaskChart from './taskchart';
 
 
 type QuadrantType = 'do' | 'decide' | 'delegate' | 'delete' | 'unsorted';
@@ -212,8 +213,8 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
             <div><Toaster /></div>
 
             <ButtonGroup className='z-10 fixed bottom-10 right-10' variant="flat">
-                <Button isIconOnly onClick={() => setTaskHistoryOpen(true)}>
-                    <Flame color="orange" size={16} />
+                <Button isIconOnly onClick={() => setTaskHistoryOpen(true)} fullWidth={true} >
+                    <Flame color="orange" size={16}/>
                     <span>{streak}D</span>
                 </Button>
 
@@ -245,11 +246,12 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
             </ButtonGroup>
 
             {/* Modal for showing task history */}
-            <Modal isOpen={isTaskHistoryOpen} onClose={() => setTaskHistoryOpen(false)} size="full">
+            <Modal isOpen={isTaskHistoryOpen} onClose={() => setTaskHistoryOpen(false)} size="4xl">
                 <ModalContent>
                     <ModalHeader>Task History</ModalHeader>
-                    <ModalBody>
-                        <Table aria-label="Task History">
+                    <ModalBody className='h-48 overflow-auto'>
+                        <TaskChart/>
+                        {/* <Table aria-label="Task History">
                             <TableHeader>
                                 <TableColumn key="task" minWidth={400}>Task</TableColumn>
                                 <TableColumn key="created" align='end'>Created On</TableColumn>
@@ -269,7 +271,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                                 ))}
                             </TableBody>
 
-                        </Table>
+                        </Table> */}
                     </ModalBody>
                 </ModalContent>
                 <ModalFooter>

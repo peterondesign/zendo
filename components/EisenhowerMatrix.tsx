@@ -201,7 +201,8 @@ const EisenhowerMatrix: React.FC = () => {
                             quadrant: supTask.quadrant,
                             created_at: validCreatedAt,
                             updated_at: validUpdatedAt,
-                            deleted: supTask.deleted, // Ensure deleted is accounted for
+                            deleted: supTask.deleted,
+                            completed_at: null
                         };
 
                         if (supTask.archived) {
@@ -957,7 +958,8 @@ const EisenhowerMatrix: React.FC = () => {
                 const localTask: Task = {
                     ...newTaskObject, id: localId, subtasks: [],
                     created_at: new Date(),
-                    updated_at: new Date()
+                    updated_at: new Date(),
+                    completed_at: null
                 }; // Initialize subtasks if necessary
 
                 setTasks((prev) => ({

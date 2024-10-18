@@ -13,8 +13,10 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_import__("[project]/node_modules/date-fns/format.js [app-ssr] (ecmascript) <locals>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_import__("[project]/node_modules/chart.js/dist/chart.js [app-ssr] (ecmascript) <locals>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$supabase$2d$js$2f$dist$2f$module$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_import__("[project]/node_modules/@supabase/supabase-js/dist/module/index.js [app-ssr] (ecmascript) <locals>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$auth0$2f$nextjs$2d$auth0$2f$dist$2f$client$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_import__("[project]/node_modules/@auth0/nextjs-auth0/dist/client/index.js [app-ssr] (ecmascript)");
 "__TURBOPACK__ecmascript__hoisting__location__";
 "use client";
+;
 ;
 ;
 ;
@@ -26,61 +28,104 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2
 const supabaseUrl = ("TURBOPACK compile-time value", "https://cbfwjsdefulacpmkrwdi.supabase.co");
 const supabaseKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiZndqc2RlZnVsYWNwbWtyd2RpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg0MjA5NjIsImV4cCI6MjA0Mzk5Njk2Mn0.pBKqb8qtiBbDs5_vkHTfoWNA8rmDnttbhN3DrvvNNUM");
 const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$supabase$2d$js$2f$dist$2f$module$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["createClient"])(supabaseUrl, supabaseKey);
-// Register Chart.js components
-__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Chart"].register(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["CategoryScale"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["LinearScale"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["BarElement"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Title"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Tooltip"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Legend"]);
+// Register Chart.js components for scatter/line charts
+__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Chart"].register(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["CategoryScale"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["LinearScale"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["PointElement"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["LineElement"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Title"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Tooltip"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Legend"]);
 const HourlyTaskChart = ()=>{
+    const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$auth0$2f$nextjs$2d$auth0$2f$dist$2f$client$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useUser"])(); // Get user details
     const [selectedDate, setSelectedDate] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(new Date());
-    const [chartData, setChartData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(Array(24).fill(0)); // Array for each hour
-    const [chartLabels, setChartLabels] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(Array(24).fill("")); // Array to store task names
+    // const [scatterData, setScatterData] = useState<any[]>([]); // Array for task points
     const [tasks, setTasks] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]); // Store fetched tasks here
-    // Function to fetch tasks from the database
+    const [scatterData, setScatterData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
+    // Function to fetch tasks from the database or local storage
     const fetchTasks = async ()=>{
-        console.log("Fetching tasks..."); // Log fetching
-        const { data, error } = await supabase.from("tasks") // Replace "tasks" with your table name
-        .select("created_at, completed_at, user_id, id, text, completed, archived, subtasks, quadrant");
-        if (error) {
-            console.error("Error fetching tasks from the database", error);
-        } else if (data) {
-            // Map the database data to your Task type
-            const fetchedTasks = data.map((task)=>({
-                    created_at: new Date(task.created_at),
-                    completed_at: task.completed_at ? new Date(task.completed_at) : null,
-                    user_id: task.user_id,
-                    id: task.id,
-                    text: task.text,
-                    completed: task.completed,
-                    archived: task.archived,
-                    subtasks: task.subtasks,
-                    quadrant: task.quadrant,
-                    updated_at: new Date(task.updated_at)
-                }));
-            console.log("Fetched tasks:", fetchedTasks); // Log fetched tasks
-            setTasks(fetchedTasks);
+        let fetchedTasks = [];
+        if (user) {
+            // Fetch tasks for logged-in user from Supabase
+            const { data, error } = await supabase.from("tasks").select("created_at, completed_at, user_id, id, text, completed, archived, subtasks, quadrant").eq("user_id", user.sub);
+            if (error) {
+                console.error("Error fetching tasks from the database", error);
+            } else if (data) {
+                fetchedTasks = data.map((task)=>({
+                        created_at: new Date(task.created_at),
+                        completed_at: task.completed_at ? new Date(task.completed_at) : null,
+                        user_id: task.user_id,
+                        id: task.id,
+                        text: task.text,
+                        completed: task.completed,
+                        archived: task.archived,
+                        subtasks: task.subtasks,
+                        quadrant: task.quadrant,
+                        updated_at: new Date(task.updated_at)
+                    }));
+            }
+        } else {
+            // No user is logged in, fetch from 'eisenhowerMatrixTasks' in local storage
+            const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
+            if (storedTasks) {
+                try {
+                    const parsedTasks = JSON.parse(storedTasks);
+                    // Check if parsedTasks is an object and flatten task arrays from each quadrant
+                    if (parsedTasks && typeof parsedTasks === 'object') {
+                        // Flatten all tasks from each quadrant into a single array
+                        fetchedTasks = Object.keys(parsedTasks).reduce((acc, quadrant)=>{
+                            return acc.concat(parsedTasks[quadrant]);
+                        }, []);
+                        // Transform fetched tasks' date fields into Date objects
+                        fetchedTasks = fetchedTasks.map((task)=>({
+                                ...task,
+                                created_at: new Date(task.created_at),
+                                completed_at: task.completed_at ? new Date(task.completed_at) : null
+                            }));
+                    }
+                } catch (error) {
+                    console.error("Error parsing tasks from localStorage:", error);
+                }
+            }
+        }
+        setTasks(fetchedTasks); // Update the tasks state
+    };
+    // Save tasks to local storage if the user is not logged in
+    const saveTasksToLocal = ()=>{
+        if (!user) {
+            localStorage.setItem("localTasks", JSON.stringify(tasks));
         }
     };
     // Call fetchTasks when the component mounts
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         fetchTasks();
-    }, []);
+    }, [
+        user
+    ]);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        saveTasksToLocal(); // Save tasks to local storage if there's no user
+    }, [
+        tasks
+    ]);
     // Function to update chart data based on the selected day
     const updateChartData = (tasks, date)=>{
-        const newChartData = Array(24).fill(0); // Reset hourly data
-        const newChartLabels = Array(24).fill(""); // Reset hourly task names
+        const newScatterData = []; // Reset task data
         tasks.forEach((task)=>{
-            const createdHour = task.created_at.getHours();
             if ((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(task.created_at, "yyyy-MM-dd") === (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(date, "yyyy-MM-dd")) {
-                newChartData[createdHour] = 1; // Mark the hour when the task was created
-                newChartLabels[createdHour] = task.text; // Store the task name
+                // Add creation time point
+                newScatterData.push({
+                    x: task.created_at.getHours() + task.created_at.getMinutes() / 60,
+                    y: 1,
+                    label: `Created: ${task.text}`,
+                    time: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(task.created_at, "HH:mm")
+                });
             }
             if (task.completed_at && (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(task.completed_at, "yyyy-MM-dd") === (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(date, "yyyy-MM-dd")) {
-                const completedHour = task.completed_at.getHours();
-                newChartData[completedHour] = 2; // Mark the hour when the task was completed
-                newChartLabels[completedHour] = task.text; // Store the task name
+                // Add completion time point
+                newScatterData.push({
+                    x: task.completed_at.getHours() + task.completed_at.getMinutes() / 60,
+                    y: 2,
+                    label: `Completed: ${task.text}`,
+                    time: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(task.completed_at, "HH:mm")
+                });
             }
         });
-        console.log("Updated chart data:", newChartData); // Log chart data
-        setChartData(newChartData);
-        setChartLabels(newChartLabels);
+        console.log("Updated scatter data:", newScatterData); // Log chart data
+        setScatterData(newScatterData); // Update the scatter data state
     };
     // Handle previous day navigation
     const handlePreviousDay = ()=>setSelectedDate((prevDate)=>new Date(prevDate.setDate(prevDate.getDate() - 1)));
@@ -102,17 +147,18 @@ const HourlyTaskChart = ()=>{
         selectedDate,
         tasks
     ]);
-    // Chart data configuration for Chart.js
+    // Chart data configuration for Chart.js (Scatter)
     const data = {
-        labels: Array.from({
-            length: 24
-        }, (_, i)=>`${i}:00`),
         datasets: [
             {
                 label: "Task Activity",
-                data: chartData,
-                backgroundColor: chartData.map((value)=>value === 1 ? "blue" : value === 2 ? "green" : "grey"),
-                borderWidth: 1
+                data: scatterData,
+                backgroundColor: scatterData.map((d)=>d.y === 1 ? "blue" : "green"),
+                borderColor: "rgba(0, 0, 0, 0.1)",
+                borderWidth: 2,
+                showLine: true,
+                pointRadius: 12,
+                pointHoverRadius: 8
             }
         ]
     };
@@ -120,39 +166,39 @@ const HourlyTaskChart = ()=>{
     const options = {
         scales: {
             x: {
+                type: "linear",
+                position: "bottom",
                 title: {
                     display: true,
-                    text: "Hour of the Day"
-                }
+                    text: "Time of Day (hours)"
+                },
+                min: 0,
+                max: 24
             },
             y: {
-                beginAtZero: true,
-                max: 2,
+                type: "linear",
                 ticks: {
-                    callback: (tickValue, index, ticks)=>{
-                        const value = Number(tickValue);
-                        if (value === 1) return "Created";
-                        if (value === 2) return "Completed";
-                        return "";
+                    callback: (tickValue)=>{
+                        if (typeof tickValue === 'number') {
+                            return tickValue === 1 ? "Created" : tickValue === 2 ? "Completed" : "";
+                        }
+                        return ""; // Default for non-number tickValues
                     }
                 },
                 title: {
                     display: true,
                     text: "Task State"
-                }
+                },
+                min: 0,
+                max: 3
             }
         },
         plugins: {
             tooltip: {
                 callbacks: {
-                    label: function(context) {
-                        const hour = context.dataIndex;
-                        const taskName = chartLabels[hour]; // Use the task name for the tooltip
-                        const activityType = context.raw === 1 ? "Created" : "Completed";
-                        const task = tasks.find((t)=>t.text === taskName); // Find the task for exact time
-                        // Show exact time in HH:mm format
-                        const time = activityType === "Created" ? (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(task?.created_at ?? new Date(), "HH:mm") : (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(task?.completed_at ?? new Date(), "HH:mm");
-                        return `${activityType}: ${taskName || "No task"} at ${time || "No time"}`;
+                    label: function(tooltipItem) {
+                        const { label, time } = tooltipItem.raw;
+                        return `${label} at ${time}`;
                     }
                 }
             },
@@ -161,6 +207,35 @@ const HourlyTaskChart = ()=>{
             }
         }
     };
+    // const options = {
+    //     scales: {
+    //         x: {
+    //             type: "linear",
+    //             position: "bottom",
+    //             title: { display: true, text: "Time of Day (hours)" },
+    //             min: 0,
+    //             max: 24,
+    //         },
+    //         y: {
+    //             ticks: {
+    //                 callback: (tickValue: number) => (tickValue === 1 ? "Created" : tickValue === 2 ? "Completed" : ""),
+    //             },
+    //             title: { display: true, text: "Task State" },
+    //             min: 0,
+    //             max: 3,
+    //         },
+    //     },
+    //     plugins: {
+    //         tooltip: {
+    //             callbacks: {
+    //                 label: function (context: { raw: { label: any; time: any; }; }) {
+    //                     return `${context.raw.label} at ${context.raw.time}`;
+    //                 },
+    //             },
+    //         },
+    //         legend: { display: false },
+    //     },
+    // };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "p-4",
         children: [
@@ -173,7 +248,7 @@ const HourlyTaskChart = ()=>{
                         children: "Previous Day"
                     }, void 0, false, {
                         fileName: "[project]/components/taskchart.tsx",
-                        lineNumber: 169,
+                        lineNumber: 262,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -184,7 +259,7 @@ const HourlyTaskChart = ()=>{
                                 children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(selectedDate, "yyyy-MM-dd")
                             }, void 0, false, {
                                 fileName: "[project]/components/taskchart.tsx",
-                                lineNumber: 171,
+                                lineNumber: 264,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$button$2f$dist$2f$chunk$2d$DBLREEYE$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__button_default__as__Button$3e$__["Button"], {
@@ -193,13 +268,13 @@ const HourlyTaskChart = ()=>{
                                 children: "Today"
                             }, void 0, false, {
                                 fileName: "[project]/components/taskchart.tsx",
-                                lineNumber: 172,
+                                lineNumber: 265,
                                 columnNumber: 21
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/taskchart.tsx",
-                        lineNumber: 170,
+                        lineNumber: 263,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$button$2f$dist$2f$chunk$2d$DBLREEYE$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__button_default__as__Button$3e$__["Button"], {
@@ -208,31 +283,31 @@ const HourlyTaskChart = ()=>{
                         children: "Next Day"
                     }, void 0, false, {
                         fileName: "[project]/components/taskchart.tsx",
-                        lineNumber: 174,
+                        lineNumber: 267,
                         columnNumber: 17
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/taskchart.tsx",
-                lineNumber: 168,
+                lineNumber: 261,
                 columnNumber: 13
             }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$chartjs$2d$2$2f$dist$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Bar"], {
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$chartjs$2d$2$2f$dist$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Scatter"], {
                 data: data,
                 options: options,
                 style: {
-                    height: "100px",
+                    height: "400px",
                     width: '100%'
                 }
             }, void 0, false, {
                 fileName: "[project]/components/taskchart.tsx",
-                lineNumber: 176,
+                lineNumber: 269,
                 columnNumber: 13
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/taskchart.tsx",
-        lineNumber: 167,
+        lineNumber: 260,
         columnNumber: 9
     }, this);
 };

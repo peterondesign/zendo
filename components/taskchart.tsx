@@ -1,91 +1,150 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Bar } from "react-chartjs-2";
+import { useState, useEffect, SetStateAction } from "react";
+import { Scatter } from "react-chartjs-2";
 import { Button } from "@nextui-org/button";
 import { format } from "date-fns";
 import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
-    BarElement,
+    PointElement,
+    LineElement,
     Title,
     Tooltip,
     Legend,
-    Tick,
 } from "chart.js";
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Task } from "../customtypes";
+import { useUser } from '@auth0/nextjs-auth0/client'; // Assuming you use Auth0 for user management
+import { ChartOptions, ScatterDataPoint } from 'chart.js';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
 
-// Register Chart.js components
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+interface TooltipContext {
+    raw: {
+        label: string;
+        time: string;
+    };
+}
+
+// Register Chart.js components for scatter/line charts
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const HourlyTaskChart = () => {
+    const { user } = useUser(); // Get user details
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const [chartData, setChartData] = useState<number[]>(Array(24).fill(0)); // Array for each hour
-    const [chartLabels, setChartLabels] = useState<string[]>(Array(24).fill("")); // Array to store task names
+    // const [scatterData, setScatterData] = useState<any[]>([]); // Array for task points
     const [tasks, setTasks] = useState<Task[]>([]); // Store fetched tasks here
+    const [scatterData, setScatterData] = useState<Array<ScatterDataPoint & { label: string; time: string }>>([]);
 
-    // Function to fetch tasks from the database
+
+    // Function to fetch tasks from the database or local storage
     const fetchTasks = async () => {
-        console.log("Fetching tasks..."); // Log fetching
-        const { data, error } = await supabase
-            .from("tasks") // Replace "tasks" with your table name
-            .select("created_at, completed_at, user_id, id, text, completed, archived, subtasks, quadrant");
+        let fetchedTasks: Task[] = [];
 
-        if (error) {
-            console.error("Error fetching tasks from the database", error);
-        } else if (data) {
-            // Map the database data to your Task type
-            const fetchedTasks: Task[] = data.map((task: any) => ({
-                created_at: new Date(task.created_at),
-                completed_at: task.completed_at ? new Date(task.completed_at) : null,
-                user_id: task.user_id,
-                id: task.id,
-                text: task.text,
-                completed: task.completed,
-                archived: task.archived,
-                subtasks: task.subtasks,
-                quadrant: task.quadrant,
-                updated_at: new Date(task.updated_at)
-            }));
-            console.log("Fetched tasks:", fetchedTasks); // Log fetched tasks
-            setTasks(fetchedTasks);
+        if (user) {
+            // Fetch tasks for logged-in user from Supabase
+            const { data, error } = await supabase
+                .from("tasks")
+                .select("created_at, completed_at, user_id, id, text, completed, archived, subtasks, quadrant")
+                .eq("user_id", user.sub);
+
+            if (error) {
+                console.error("Error fetching tasks from the database", error);
+            } else if (data) {
+                fetchedTasks = data.map((task: any) => ({
+                    created_at: new Date(task.created_at),
+                    completed_at: task.completed_at ? new Date(task.completed_at) : null,
+                    user_id: task.user_id,
+                    id: task.id,
+                    text: task.text,
+                    completed: task.completed,
+                    archived: task.archived,
+                    subtasks: task.subtasks,
+                    quadrant: task.quadrant,
+                    updated_at: new Date(task.updated_at),
+                }));
+            }
+        } else {
+            // No user is logged in, fetch from 'eisenhowerMatrixTasks' in local storage
+            const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
+
+            if (storedTasks) {
+                try {
+                    const parsedTasks = JSON.parse(storedTasks);
+
+                    // Check if parsedTasks is an object and flatten task arrays from each quadrant
+                    if (parsedTasks && typeof parsedTasks === 'object') {
+                        // Flatten all tasks from each quadrant into a single array
+                        fetchedTasks = Object.keys(parsedTasks).reduce((acc: Task[], quadrant: string) => {
+                            return acc.concat(parsedTasks[quadrant]);
+                        }, []);
+
+                        // Transform fetched tasks' date fields into Date objects
+                        fetchedTasks = fetchedTasks.map((task: any) => ({
+                            ...task,
+                            created_at: new Date(task.created_at),
+                            completed_at: task.completed_at ? new Date(task.completed_at) : null,
+                        }));
+                    }
+                } catch (error) {
+                    console.error("Error parsing tasks from localStorage:", error);
+                }
+            }
+        }
+
+        setTasks(fetchedTasks); // Update the tasks state
+    };
+
+
+    // Save tasks to local storage if the user is not logged in
+    const saveTasksToLocal = () => {
+        if (!user) {
+            localStorage.setItem("localTasks", JSON.stringify(tasks));
         }
     };
 
     // Call fetchTasks when the component mounts
     useEffect(() => {
         fetchTasks();
-    }, []);
+    }, [user]);
+
+    useEffect(() => {
+        saveTasksToLocal(); // Save tasks to local storage if there's no user
+    }, [tasks]);
 
     // Function to update chart data based on the selected day
     const updateChartData = (tasks: Task[], date: Date) => {
-        const newChartData = Array(24).fill(0); // Reset hourly data
-        const newChartLabels = Array(24).fill(""); // Reset hourly task names
+        const newScatterData: SetStateAction<any[]> = []; // Reset task data
 
         tasks.forEach((task) => {
-            const createdHour = task.created_at.getHours();
             if (format(task.created_at, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")) {
-                newChartData[createdHour] = 1; // Mark the hour when the task was created
-                newChartLabels[createdHour] = task.text; // Store the task name
+                // Add creation time point
+                newScatterData.push({
+                    x: task.created_at.getHours() + task.created_at.getMinutes() / 60, // Exact time in decimal hours
+                    y: 1, // "Created"
+                    label: `Created: ${task.text}`,
+                    time: format(task.created_at, "HH:mm"),
+                });
             }
 
             if (task.completed_at && format(task.completed_at, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")) {
-                const completedHour = task.completed_at.getHours();
-                newChartData[completedHour] = 2; // Mark the hour when the task was completed
-                newChartLabels[completedHour] = task.text; // Store the task name
+                // Add completion time point
+                newScatterData.push({
+                    x: task.completed_at.getHours() + task.completed_at.getMinutes() / 60, // Exact time in decimal hours
+                    y: 2, // "Completed"
+                    label: `Completed: ${task.text}`,
+                    time: format(task.completed_at, "HH:mm"),
+                });
             }
         });
 
-        console.log("Updated chart data:", newChartData); // Log chart data
-        setChartData(newChartData);
-        setChartLabels(newChartLabels);
+        console.log("Updated scatter data:", newScatterData); // Log chart data
+        setScatterData(newScatterData); // Update the scatter data state
     };
 
     // Handle previous day navigation
@@ -111,57 +170,91 @@ const HourlyTaskChart = () => {
         updateChartData(tasks, selectedDate);
     }, [selectedDate, tasks]);
 
-    // Chart data configuration for Chart.js
+    // Chart data configuration for Chart.js (Scatter)
     const data = {
-        labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), // Hour labels (0:00 to 23:00)
         datasets: [
             {
                 label: "Task Activity",
-                data: chartData,
-                backgroundColor: chartData.map((value) => (value === 1 ? "blue" : value === 2 ? "green" : "grey")),
-                borderWidth: 1,
+                data: scatterData,
+                backgroundColor: scatterData.map((d) => (d.y === 1 ? "blue" : "green")),
+                borderColor: "rgba(0, 0, 0, 0.1)",
+                borderWidth: 2,
+                showLine: true,
+                pointRadius: 12,
+                pointHoverRadius: 8
             },
         ],
     };
 
     // Update chart options to display task names in the tooltip
-    const options = {
+
+    const options: ChartOptions<'scatter'> = {
         scales: {
-            x: { title: { display: true, text: "Hour of the Day" } },
+            x: {
+                type: "linear", // Specify the type as "linear" for scatter chart
+                position: "bottom",
+                title: { display: true, text: "Time of Day (hours)" },
+                min: 0,
+                max: 24,
+            },
             y: {
-                beginAtZero: true, max: 2,
+                type: "linear", // Specify the type as "linear"
                 ticks: {
-                    callback: (tickValue: string | number, index: number, ticks: Tick[]) => {
-                        const value = Number(tickValue);
-                        if (value === 1) return "Created";
-                        if (value === 2) return "Completed";
-                        return "";
+                    callback: (tickValue: string | number) => {
+                        if (typeof tickValue === 'number') {
+                            return tickValue === 1 ? "Created" : tickValue === 2 ? "Completed" : "";
+                        }
+                        return ""; // Default for non-number tickValues
                     },
                 },
-                title: { display: true, text: "Task State" }
+                title: { display: true, text: "Task State" },
+                min: 0,
+                max: 3,
             },
         },
         plugins: {
             tooltip: {
                 callbacks: {
-                    label: function (context: any) {
-                        const hour = context.dataIndex;
-                        const taskName = chartLabels[hour]; // Use the task name for the tooltip
-                        const activityType = context.raw === 1 ? "Created" : "Completed";
-                        const task = tasks.find(t => t.text === taskName); // Find the task for exact time
-
-                        // Show exact time in HH:mm format
-                        const time = activityType === "Created"
-                            ? format(task?.created_at ?? new Date(), "HH:mm")
-                            : format(task?.completed_at ?? new Date(), "HH:mm");
-
-                        return `${activityType}: ${taskName || "No task"} at ${time || "No time"}`;
+                    label: function (tooltipItem) {
+                        const { label, time } = tooltipItem.raw as { label: string; time: string };
+                        return `${label} at ${time}`;
                     },
                 },
             },
             legend: { display: false },
         },
     };
+
+
+    // const options = {
+    //     scales: {
+    //         x: {
+    //             type: "linear",
+    //             position: "bottom",
+    //             title: { display: true, text: "Time of Day (hours)" },
+    //             min: 0,
+    //             max: 24,
+    //         },
+    //         y: {
+    //             ticks: {
+    //                 callback: (tickValue: number) => (tickValue === 1 ? "Created" : tickValue === 2 ? "Completed" : ""),
+    //             },
+    //             title: { display: true, text: "Task State" },
+    //             min: 0,
+    //             max: 3,
+    //         },
+    //     },
+    //     plugins: {
+    //         tooltip: {
+    //             callbacks: {
+    //                 label: function (context: { raw: { label: any; time: any; }; }) {
+    //                     return `${context.raw.label} at ${context.raw.time}`;
+    //                 },
+    //             },
+    //         },
+    //         legend: { display: false },
+    //     },
+    // };
 
     return (
         <div className="p-4">
@@ -173,7 +266,7 @@ const HourlyTaskChart = () => {
                 </div>
                 <Button onClick={handleNextDay} variant="flat">Next Day</Button>
             </div>
-            <Bar data={data} options={options} style={{ height: "100px", width: '100%' }} />
+            <Scatter data={data} options={options} style={{ height: "400px", width: '100%' }} />
         </div>
     );
 };

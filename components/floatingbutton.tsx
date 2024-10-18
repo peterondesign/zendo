@@ -194,8 +194,8 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
         toast.success(isArchiveMode ? 'Hiding archived tasks' : 'Showing archived tasks');
     };
 
-     // Function to validate and parse dates
-     const isValidDate = (date: string | number | Date) => {
+    // Function to validate and parse dates
+    const isValidDate = (date: string | number | Date) => {
         const parsedDate = new Date(date);
         // Check if date is valid
         return !isNaN(parsedDate.getTime());
@@ -216,27 +216,32 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                     <Flame color="orange" size={16} />
                     <span>{streak}D</span>
                 </Button>
-                <Dropdown placement="top-end">
-                    <DropdownTrigger>
-                        <Button isIconOnly>
-                            <CircleEllipsis />
-                        </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu aria-label="Task options"
-                        disabledKeys={isPremium ? ["copy", "archive", "save"] : []}>
-                        <DropdownItem key="archive" startContent={<Archive size={16} />} onClick={handleArchiveTasks}>
-                            {isArchiveMode ? "Hide Archived" : "Show Archived"}
-                        </DropdownItem>
 
-                        <DropdownItem key="copy" startContent={<Clipboard size={16} />} onClick={copyToClipboard}>
-                            Copy Tasks to Clipboard
-                        </DropdownItem>
+                {/* Only show the CircleEllipsis button if the user is logged in */}
+                {user && (
+                    <Dropdown placement="top-end">
+                        <DropdownTrigger>
+                            <Button isIconOnly>
+                                <CircleEllipsis />
+                            </Button>
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label="Task options"
+                            disabledKeys={isPremium ? ["copy", "archive", "save"] : []}>
+                            <DropdownItem key="archive" startContent={<Archive size={16} />} onClick={handleArchiveTasks}>
+                                {isArchiveMode ? "Hide Archived" : "Show Archived"}
+                            </DropdownItem>
 
-                        <DropdownItem key="save" startContent={<FileDown size={16} />} onClick={saveAsPDF}>
-                            Save as PDF
-                        </DropdownItem>
-                    </DropdownMenu>
-                </Dropdown>
+                            <DropdownItem key="copy" startContent={<Clipboard size={16} />} onClick={copyToClipboard}>
+                                Copy Tasks to Clipboard
+                            </DropdownItem>
+
+                            <DropdownItem key="save" startContent={<FileDown size={16} />} onClick={saveAsPDF}>
+                                Save as PDF
+                            </DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
+                )}
+
             </ButtonGroup>
 
             {/* Modal for showing task history */}

@@ -149,13 +149,16 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
 
-    // Fetch and Merge Tasks from Supabase and LocalStorage
     useEffect(() => {
         const fetchAndMergeTasks = async () => {
             if (user) {
                 try {
-                    // Fetch both archived and non-archived tasks when archive mode is enabled
-                    let query = supabase.from('tasks').select('*').eq('user_id', user.sub);
+                    // Fetch both archived and non-deleted tasks when archive mode is enabled
+                    let query = supabase
+                        .from('tasks')
+                        .select('*')
+                        .eq('user_id', user.sub)
+                        .eq('deleted', false);  // Ensure we only fetch tasks that are not deleted
 
                     if (!isArchiveMode) {
                         query = query.eq('archived', false); // Only fetch non-archived tasks if archive mode is off
@@ -185,7 +188,6 @@ const EisenhowerMatrix: React.FC = () => {
                     };
 
                     supabaseTasks.forEach((supTask) => {
-                        const taskId = supTask.id;
                         const validCreatedAt = isValidDate(supTask.created_at) ? new Date(supTask.created_at) : new Date();
                         const validUpdatedAt = isValidDate(supTask.updated_at) ? new Date(supTask.updated_at) : new Date();
 
@@ -199,6 +201,7 @@ const EisenhowerMatrix: React.FC = () => {
                             quadrant: supTask.quadrant,
                             created_at: validCreatedAt,
                             updated_at: validUpdatedAt,
+                            deleted: supTask.deleted, // Ensure deleted is accounted for
                         };
 
                         if (supTask.archived) {
@@ -216,13 +219,23 @@ const EisenhowerMatrix: React.FC = () => {
             } else {
                 const storedTasks = window.localStorage.getItem('eisenhowerMatrixTasks');
                 if (storedTasks) {
-                    setTasks(JSON.parse(storedTasks));
+                    const parsedTasks = JSON.parse(storedTasks);
+                    // Filter out deleted tasks
+                    const nonDeletedTasks = (Object.fromEntries(
+                        Object.entries(parsedTasks).map(([quadrant, tasks]) => [
+                            quadrant,
+                            (tasks as Task[]).filter((task: Task) => !task.deleted),
+                        ])
+                    ) as Record<QuadrantType, Task[]>);
+
+                    setTasks(nonDeletedTasks);  // Set state with correctly typed tasks
                 }
             }
         };
 
         fetchAndMergeTasks();
-    }, [user, isArchiveMode]);  // Add `isArchiveMode` as a dependency
+    }, [user, isArchiveMode]);
+
 
 
 
@@ -611,6 +624,7 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
     // Render Archived Tasks
+    // Function to render archived tasks
     const renderArchivedTasks = (quadrant: QuadrantType) => (
         <ul className="mt-4">
             {archivedTasks[quadrant].length > 0 ? (
@@ -620,7 +634,7 @@ const EisenhowerMatrix: React.FC = () => {
                         <Button
                             size="sm"
                             variant="light"
-                            onClick={() => unarchiveTask(quadrant, task.id)}
+                            onClick={() => unarchiveTask(quadrant, task.id)} // Implement a function to unarchive the task
                         >
                             Unarchive
                         </Button>
@@ -632,21 +646,39 @@ const EisenhowerMatrix: React.FC = () => {
         </ul>
     );
 
+
     // Unarchive Task
-    const unarchiveTask = (quadrant: QuadrantType, taskId: number) => {
-        setArchivedTasks((prevArchived) => {
-            const updatedArchived = { ...prevArchived };
-            const taskToUnarchive = updatedArchived[quadrant].find((task) => task.id === taskId);
-            if (taskToUnarchive) {
-                setTasks((prevTasks) => ({
-                    ...prevTasks,
-                    [quadrant]: [...prevTasks[quadrant], taskToUnarchive],
-                }));
-                updatedArchived[quadrant] = updatedArchived[quadrant].filter((task) => task.id !== taskId);
+    const unarchiveTask = async (quadrant: QuadrantType, taskId: number) => {
+        if (user) {
+            try {
+                const { error } = await supabase
+                    .from('tasks')
+                    .update({ archived: false })  // Mark task as unarchived
+                    .eq('id', taskId);
+
+                if (error) {
+                    console.error('Error unarchiving task in Supabase:', error);
+                } else {
+                    // Update local state
+                    setArchivedTasks((prevArchived) => {
+                        const updatedArchived = { ...prevArchived };
+                        const taskToUnarchive = updatedArchived[quadrant].find((task) => task.id === taskId);
+                        if (taskToUnarchive) {
+                            setTasks((prevTasks) => ({
+                                ...prevTasks,
+                                [quadrant]: [...prevTasks[quadrant], taskToUnarchive],
+                            }));
+                            updatedArchived[quadrant] = updatedArchived[quadrant].filter((task) => task.id !== taskId);
+                        }
+                        return updatedArchived;
+                    });
+                }
+            } catch (err) {
+                console.error('Error during Supabase unarchive:', err);
             }
-            return updatedArchived;
-        });
+        }
     };
+
 
     // Toggle Archive Mode
     const showArchivedTasks = () => {
@@ -704,6 +736,7 @@ const EisenhowerMatrix: React.FC = () => {
 
         return (
             <TaskItem
+                user={user}
                 key={task.id}
                 task={task}
                 quadrant={quadrant}
@@ -839,24 +872,30 @@ const EisenhowerMatrix: React.FC = () => {
                             <Plus size={16} />
                         </Button>
                     </CardHeader>
-                    
+
                     {tasks[quadrant].length === 0 && archivedTasks[quadrant].length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-10 text-center text-default-500">
                             <img src="/emptystate.png" className="w-10 h-10 mt-2 mx-auto" alt="No tasks" />
                             <p className='mt-2 text-default-400 text-sm'>No tasks added yet</p>
                         </div>
                     ) : (
-                        <ul className='text-default-90 text-lg'>
-                            {(isArchiveMode ? archivedTasks[quadrant] : tasks[quadrant])
-                                .map((task, index) => renderTask(quadrant, task, index))}
-                        </ul>
+                        <>
+                            {/* Render active tasks */}
+                            <ul className='text-default-90 text-lg'>
+                                {tasks[quadrant].map((task, index) => renderTask(quadrant, task, index))}
+                            </ul>
+
+                            {/* Render archived tasks if in archive mode */}
+                            {isArchiveMode && renderArchivedTasks(quadrant)}
+                        </>
                     )}
                     {provided.placeholder}
                 </Card>
             )}
         </Droppable>
     );
-    
+
+
 
     // Add Task to Quadrant
     const addTaskToQuadrant = async () => {

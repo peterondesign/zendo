@@ -1,10 +1,11 @@
-import React, {  useState } from 'react';
+import React, { useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import { ChevronDown, ChevronUp, GripVertical, MoreVertical } from 'lucide-react';
 import { Button, ButtonGroup, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Spinner } from '@nextui-org/react';
 import { Task, QuadrantType } from '../customtypes';
 
 interface TaskItemProps {
+    user: any;
     task: Task;
     quadrant: QuadrantType;
     index: number;
@@ -22,6 +23,7 @@ interface TaskItemProps {
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({
+    user,
     task,
     quadrant,
     index,
@@ -160,9 +162,11 @@ const TaskItem: React.FC<TaskItemProps> = ({
                                                 </DropdownItem>
                                             ))}
                                         </DropdownSection>
-                                        <DropdownSection title="Archive">
-                                            <DropdownItem onClick={archiveTask}>Archive Task</DropdownItem>
-                                        </DropdownSection>
+                                        {user && (
+                                            <DropdownSection title="Archive">
+                                                <DropdownItem onClick={archiveTask}>Archive Task</DropdownItem>
+                                            </DropdownSection>
+                                        )}
                                         <DropdownSection title="Danger zone">
                                             <DropdownItem onClick={() => deleteTask(quadrant, task.id)} className="text-red-500">
                                                 Delete Task

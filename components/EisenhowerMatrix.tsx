@@ -736,11 +736,6 @@ const EisenhowerMatrix: React.FC = () => {
     // Render Individual Task
     const renderTask = (quadrant: QuadrantType, task: Task, index: number) => {
         const isArchived = task.archived;
-        // In normal mode, only show non-archived tasks
-        // In archive mode, show both archived and non-archived tasks
-        if (!isArchiveMode && isArchived) {
-            return null;
-        }
 
         // Apply strikethrough and italic class if the task is archived
         const taskClassName = isArchived ? 'line-through italic text-default-400' : '';
@@ -769,6 +764,7 @@ const EisenhowerMatrix: React.FC = () => {
             />
         );
     };
+
 
     // Update the streak when tasks are completed
     useEffect(() => {
@@ -885,6 +881,7 @@ const EisenhowerMatrix: React.FC = () => {
                         </Button>
                     </CardHeader>
 
+                    {/* Check if there are any tasks or archived tasks to show */}
                     {tasks[quadrant].length === 0 && archivedTasks[quadrant].length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-10 text-center text-default-500">
                             <img src="/emptystate.png" className="w-10 h-10 mt-2 mx-auto" alt="No tasks" />
@@ -892,9 +889,12 @@ const EisenhowerMatrix: React.FC = () => {
                         </div>
                     ) : (
                         <>
-                            {/* Render both non-archived and archived tasks if archive mode is on */}
                             <ul className='text-default-90 text-lg'>
+                                {/* Render non-archived tasks */}
                                 {tasks[quadrant].map((task, index) => renderTask(quadrant, task, index))}
+
+                                {/* Render archived tasks if in archive mode */}
+                                {isArchiveMode && archivedTasks[quadrant].map((task, index) => renderTask(quadrant, task, index))}
                             </ul>
                         </>
                     )}
@@ -903,9 +903,6 @@ const EisenhowerMatrix: React.FC = () => {
             )}
         </Droppable>
     );
-
-
-
 
     // Add Task to Quadrant
     const addTaskToQuadrant = async () => {

@@ -983,7 +983,7 @@ const EisenhowerMatrix: React.FC = () => {
                         user.premium ? (
                             // If user is not premium, show both h1 and p
                             <>
-                                <h1 className="tracking-tight inline font-semibold text-base mb-8">
+                                <h1 className="tracking-tight inline font-semibold text-base mb-16">
                                     {(() => {
                                         const hour = new Date().getHours();
                                         if (hour >= 5 && hour < 12) {

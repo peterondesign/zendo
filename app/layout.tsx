@@ -13,14 +13,30 @@ import { UserProvider } from '@auth0/nextjs-auth0/client';
 import AuthLoader from '@/components/authloader';
 
 import * as Cronitor from '@cronitorio/cronitor-rum';
-
+type CustomTitle = {
+  [key: string]: string;
+};
 
 export const metadata: Metadata = {
   title: {
-    default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`,
-  },
+    "og:title": siteConfig.name,
+    "og:description": siteConfig.description,
+    "og:url": "https://zendo.cc",
+    "twitter:title": siteConfig.name,
+    "twitter:description": siteConfig.description,
+    "twitter:url": "https://zendo.cc",
+  } as unknown as string,
   description: siteConfig.description,
+  keywords: [
+    "Eisenhower Matrix",
+    "template",
+    "online",
+    "eisenhower matrix template",
+    "eisenhower matrix app",
+    "productivity",
+    "task management",
+    "priority matrix",
+  ],
   icons: {
     icon: "/favicon.ico",
   },

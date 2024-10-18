@@ -1,5 +1,112 @@
 module.exports = {
 
+"[project]/components/taskchart.tsx [app-ssr] (ecmascript)": (function({ r: __turbopack_require__, f: __turbopack_module_context__, i: __turbopack_import__, s: __turbopack_esm__, v: __turbopack_export_value__, n: __turbopack_export_namespace__, c: __turbopack_cache__, M: __turbopack_modules__, l: __turbopack_load__, j: __turbopack_dynamic__, P: __turbopack_resolve_absolute_path__, U: __turbopack_relative_url__, R: __turbopack_resolve_module_id_path__, g: global, __dirname, x: __turbopack_external_require__, y: __turbopack_external_import__, m: module, e: exports, t: require }) { !function() {
+
+// import React, { useEffect, useRef, useState } from 'react';
+// import { createChart, ISeriesApi, ColorType } from 'lightweight-charts';
+// import { useTheme } from "next-themes";
+// // Define the data for each interval
+// const dayData = [
+//     { time: '2018-10-19', value: 26.19 },
+//     { time: '2018-10-22', value: 25.87 },
+//     { time: '2018-10-23', value: 25.83 },
+//     // More data points...
+// ];
+// const weekData = [
+//     { time: '2016-07-18', value: 26.1 },
+//     { time: '2016-07-25', value: 26.19 },
+//     // More data points...
+// ];
+// const monthData = [
+//     { time: '2006-12-01', value: 25.4 },
+//     { time: '2007-01-01', value: 25.5 },
+//     // More data points...
+// ];
+// const yearData = [
+//     { time: '2006-01-02', value: 24.89 },
+//     { time: '2007-01-01', value: 25.5 },
+//     // More data points...
+// ];
+// // Store the data in a Map for easier switching
+// const seriesesData = new Map([
+//     ['1D', dayData],
+//     ['1W', weekData],
+//     ['1M', monthData],
+//     ['1Y', yearData],
+// ]);
+// // Define the color for each interval
+// const intervalColors = {
+//     '1D': '#2962FF',
+//     '1W': 'rgb(225, 87, 90)',
+//     '1M': 'rgb(242, 142, 44)',
+//     '1Y': 'rgb(164, 89, 209)',
+// };
+// const TaskChart: React.FC = () => {
+//     const chartContainerRef = useRef<HTMLDivElement | null>(null);
+//     const chartRef = useRef<ISeriesApi<'Line'> | null>(null);  // For managing the line series
+//     const chartInstanceRef = useRef<any>(null);  // To store the chart instance
+//     const [currentInterval, setCurrentInterval] = useState('1D');  // Current interval state
+//     const { theme } = useTheme();
+//     useEffect(() => {
+//         if (chartContainerRef.current) {
+//             // Create the chart and store the instance
+//             chartInstanceRef.current = createChart(chartContainerRef.current, {
+//                 layout: {
+//                     textColor: 'black',
+//                     background: { type: 'solid' as ColorType, color: theme === 'white' ? 'white' : '#000' },
+//                 },
+//                 height: 300,
+//             });
+//             // Add a line series to the chart with type assertion for color
+//             chartRef.current = chartInstanceRef.current.addLineSeries({
+//                 color: intervalColors[currentInterval as keyof typeof intervalColors],
+//             });
+//             // Set initial data
+//             chartRef.current?.setData(seriesesData.get(currentInterval)!);
+//         }
+//         // Clean up the chart on unmount
+//         return () => {
+//             if (chartInstanceRef.current) {
+//                 chartInstanceRef.current.remove();
+//             }
+//         };
+//     }, []);
+//     // Handle chart interval change
+//     const setChartInterval = (interval: keyof typeof intervalColors) => {
+//         if (chartRef.current) {
+//             chartRef.current.setData(seriesesData.get(interval)!);  // Set new data
+//             chartRef.current.applyOptions({ color: intervalColors[interval] });  // Update color
+//             chartInstanceRef.current.timeScale().fitContent();  // Fit data to chart
+//         }
+//         setCurrentInterval(interval);  // Update the state
+//     };
+//     return (
+//         <div>
+//             <div ref={chartContainerRef} style={{ width: '100%', height: '300px' }}></div>
+//             {/* Interval buttons */}
+//             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+//                 {['1D', '1W', '1M', '1Y'].map((interval) => (
+//                     <button
+//                         key={interval}
+//                         onClick={() => setChartInterval(interval)}
+//                         style={{
+//                             padding: '10px',
+//                             backgroundColor: interval === currentInterval ? 'lightgray' : 'black',
+//                             borderRadius: '5px',
+//                             border: '1px solid black',
+//                             cursor: 'pointer',
+//                         }}
+//                     >
+//                         {interval}
+//                     </button>
+//                 ))}
+//             </div>
+//         </div>
+//     );
+// };
+// export default TaskChart;
+
+}.call(this) }),
 "[project]/components/floatingbutton.tsx [app-ssr] (ecmascript)": (({ r: __turbopack_require__, f: __turbopack_module_context__, i: __turbopack_import__, s: __turbopack_esm__, v: __turbopack_export_value__, n: __turbopack_export_namespace__, c: __turbopack_cache__, M: __turbopack_modules__, l: __turbopack_load__, j: __turbopack_dynamic__, P: __turbopack_resolve_absolute_path__, U: __turbopack_relative_url__, R: __turbopack_resolve_module_id_path__, g: global, __dirname, x: __turbopack_external_require__, y: __turbopack_external_import__ }) => (() => {
 "use strict";
 
@@ -2546,4 +2653,4 @@ const __TURBOPACK__default__export__ = EisenhowerMatrix;
 
 };
 
-//# sourceMappingURL=components_8027d2._.js.map
+//# sourceMappingURL=components_d55556._.js.map

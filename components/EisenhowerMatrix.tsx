@@ -765,25 +765,35 @@ const EisenhowerMatrix: React.FC = () => {
         );
     };
 
+    const [lastStreakUpdate, setLastStreakUpdate] = useState<Date | null>(null);
 
-    // Update the streak when tasks are completed
     useEffect(() => {
         const calculateStreak = () => {
-            // Get all completed tasks in the "Do" quadrant
-            const completedUrgentTasks = tasks.do.filter(task => task.completed);
+            const today = new Date();
+            const isToday = (date: Date) => {
+                return (
+                    date.getFullYear() === today.getFullYear() &&
+                    date.getMonth() === today.getMonth() &&
+                    date.getDate() === today.getDate()
+                );
+            };
 
-            // Calculate streak based on the number of completed tasks
-            if (completedUrgentTasks.length > 0) {
-                // Set the streak based on the number of days the user has completed at least one urgent task
-                // You can customize the logic to increment streak based on specific conditions, like task creation dates
+            // Get all tasks completed today in the "Do" quadrant
+            const completedTodayTasks = tasks.do.filter(task => task.completed && isToday(new Date(task.updated_at)));
+
+            // Check if there are tasks completed today and whether the streak has already been updated today
+            if (completedTodayTasks.length > 0 && (!lastStreakUpdate || !isToday(lastStreakUpdate))) {
                 setStreak(streak + 1);
-            } else {
-                setStreak(0); // Reset streak if no urgent task is completed
+                setLastStreakUpdate(today);  // Update the last streak update to today
+            } else if (completedTodayTasks.length === 0) {
+                setStreak(0); // Reset streak if no task was completed today
+                setLastStreakUpdate(null);  // Reset the last streak update
             }
         };
 
         calculateStreak();
-    }, [tasks]);
+    }, [tasks, lastStreakUpdate, streak]);
+
 
     // Function to handle task breakdown with AI and update the task with subtasks
     const handleBreakdownTaskWithAI = async (quadrant: QuadrantType, taskId: number, taskText: string) => {
@@ -971,7 +981,7 @@ const EisenhowerMatrix: React.FC = () => {
                         user.premium ? (
                             // If user is not premium, show both h1 and p
                             <>
-                                <h1 className="tracking-tight inline font-semibold text-base mb-4 leading-9">
+                                <h1 className="tracking-tight inline font-semibold text-base mb-8">
                                     {(() => {
                                         const hour = new Date().getHours();
                                         if (hour >= 5 && hour < 12) {
@@ -992,7 +1002,7 @@ const EisenhowerMatrix: React.FC = () => {
                             </>
 
                         ) : (
-                            <h1 className="tracking-tight inline font-semibold text-base mb-4	 leading-9">
+                            <h1 className="tracking-tight inline font-semibold text-base mb-8">
                                 {(() => {
                                     const hour = new Date().getHours();
                                     // Morning: 5am to 12pm
@@ -1017,10 +1027,10 @@ const EisenhowerMatrix: React.FC = () => {
                     ) : (
                         <>
                             {/* If user is not logged in, show this default h1 and p */}
-                            <h1 className="tracking-tight inline font-semibold text-base leading-9 mb-4">
+                            <h1 className="tracking-tight inline font-semibold text-base">
                                 Prioritize your tasks with the Eisenhower Matrix, and break them down
                             </h1>
-                            <p className='text-default-500 text-sm'>
+                            <p className='text-default-500 text-sm mt-4 mb-8'>
                                 No account needed, free forever (more features included with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>)
                             </p>
                         </>

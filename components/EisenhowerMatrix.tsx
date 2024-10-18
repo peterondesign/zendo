@@ -847,9 +847,8 @@ const EisenhowerMatrix: React.FC = () => {
                         </div>
                     ) : (
                         <ul className='text-default-90 text-lg'>
-                            {(isArchiveMode ? archivedTasks[quadrant] : tasks[quadrant]).map((task, index) =>
-                                renderTask(quadrant, task, index)
-                            )}
+                            {(isArchiveMode ? archivedTasks[quadrant] : tasks[quadrant])
+                                .map((task, index) => renderTask(quadrant, task, index))}
                         </ul>
                     )}
                     {provided.placeholder}

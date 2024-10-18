@@ -154,11 +154,13 @@ const EisenhowerMatrix: React.FC = () => {
         const fetchAndMergeTasks = async () => {
             if (user) {
                 try {
-                    // Fetch tasks from Supabase
+                    // Fetch tasks from Supabase that are not deleted and not archived
                     const { data: supabaseTasks, error } = await supabase
                         .from('tasks')
                         .select('*')
-                        .eq('user_id', user.sub);
+                        .eq('user_id', user.sub)
+                        .eq('deleted', false)   // Ensure tasks are not deleted
+                        .eq('archived', false); // Ensure tasks are not archived
 
                     if (error) {
                         console.error('Error fetching tasks from Supabase:', error);
@@ -174,15 +176,7 @@ const EisenhowerMatrix: React.FC = () => {
                         unsorted: [],
                     };
 
-                    const archivedTasksContainer: Record<QuadrantType, Task[]> = {
-                        do: [],
-                        decide: [],
-                        delegate: [],
-                        delete: [],
-                        unsorted: [],
-                    };
-
-                    // Separate tasks into active and archived categories
+                    // Populate active tasks
                     supabaseTasks.forEach((supTask) => {
                         const taskId = supTask.id;
 
@@ -213,16 +207,11 @@ const EisenhowerMatrix: React.FC = () => {
                             updated_at: validUpdatedAt,
                         };
 
-                        if (supTask.archived) {
-                            archivedTasksContainer[supTask.quadrant as QuadrantType].push(task);
-                        } else {
-                            activeTasks[supTask.quadrant as QuadrantType].push(task);
-                        }
+                        activeTasks[supTask.quadrant as QuadrantType].push(task);
                     });
 
-                    // Set the state for active and archived tasks
+                    // Set the state for active tasks
                     setTasks(activeTasks);
-                    setArchivedTasks(archivedTasksContainer);
                 } catch (err) {
                     console.error('Error fetching and merging tasks:', err);
                 }
@@ -234,6 +223,7 @@ const EisenhowerMatrix: React.FC = () => {
                 }
             }
         };
+
         fetchAndMergeTasks();
     }, [user]);
 
@@ -361,12 +351,42 @@ const EisenhowerMatrix: React.FC = () => {
     };
 
     // Delete Task
-    const deleteTask = (quadrant: QuadrantType, taskId: number) => {
-        setTasks((prev) => ({
-            ...prev,
-            [quadrant]: prev[quadrant].filter((task) => task.id !== taskId),
-        }));
+    const deleteTask = async (quadrant: QuadrantType, taskId: number) => {
+        // Check if the user is authenticated (assuming user object is available)
+        if (user) {
+            try {
+                // If user is authenticated, update the task in Supabase
+                const { error } = await supabase
+                    .from('tasks')
+                    .update({ deleted: true }) // Update 'deleted' flag or similar
+                    .eq('id', taskId);
+
+                if (error) {
+                    console.error('Error deleting task in Supabase:', error);
+                    return; // Exit if there’s an error
+                }
+
+                // After successful deletion in the database, update the local state
+                setTasks((prev) => ({
+                    ...prev,
+                    [quadrant]: prev[quadrant].filter((task) => task.id !== taskId),
+                }));
+
+                console.log('Task successfully deleted from Supabase and local state updated');
+            } catch (err) {
+                console.error('Unexpected error while deleting task:', err);
+            }
+        } else {
+            // If the user is not logged in, just update the local state
+            setTasks((prev) => ({
+                ...prev,
+                [quadrant]: prev[quadrant].filter((task) => task.id !== taskId),
+            }));
+
+            console.log('Task deleted locally since user is not logged in');
+        }
     };
+
 
     // Archive Task
     const archiveTask = async (quadrant: QuadrantType, taskId: number) => {

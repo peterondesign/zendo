@@ -543,7 +543,7 @@ const Navbar = ()=>{
                 if (error) {
                     console.error("Error inserting user into Supabase:", error.message);
                 } else {
-                    console.log("User successfully inserted/updated in Supabase:", data);
+                // console.log("User successfully inserted/updated in Supabase:", data);
                 }
             }
         };

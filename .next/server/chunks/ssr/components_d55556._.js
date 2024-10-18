@@ -14,6 +14,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_import__("[project]/node_modules/chart.js/dist/chart.js [app-ssr] (ecmascript) <locals>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$supabase$2d$js$2f$dist$2f$module$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_import__("[project]/node_modules/@supabase/supabase-js/dist/module/index.js [app-ssr] (ecmascript) <locals>");
 "__TURBOPACK__ecmascript__hoisting__location__";
+"use client";
 ;
 ;
 ;
@@ -29,84 +30,79 @@ const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_module
 __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Chart"].register(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["CategoryScale"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["LinearScale"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["BarElement"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Title"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Tooltip"], __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Legend"]);
 const HourlyTaskChart = ()=>{
     const [selectedDate, setSelectedDate] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(new Date());
-    const [chartData, setChartData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(Array(24).fill(0));
-    const [chartLabels, setChartLabels] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(Array(24).fill(""));
-    const [tasks, setTasks] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
-    const [user, setUser] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [chartData, setChartData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(Array(24).fill(0)); // Array for each hour
+    const [chartLabels, setChartLabels] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(Array(24).fill("")); // Array to store task names
+    const [tasks, setTasks] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]); // Store fetched tasks here
+    // Function to fetch tasks from the database
     const fetchTasks = async ()=>{
-        if (user) {
-            const { data, error } = await supabase.from("tasks").select("created_at, completed_at, user_id, id, text, completed, archived, subtasks, quadrant");
-            if (error) {
-                console.error("Error fetching tasks from the database", error);
-            } else if (data) {
-                const fetchedTasks = data.map((task)=>({
-                        ...task,
-                        created_at: new Date(task.created_at),
-                        completed_at: task.completed_at ? new Date(task.completed_at) : null,
-                        updated_at: new Date(task.updated_at)
-                    }));
-                setTasks(fetchedTasks);
-            }
-        } else {
-            const storedTasks = localStorage.getItem("localTasks");
-            if (storedTasks) {
-                const parsedTasks = JSON.parse(storedTasks);
-                const tasksWithDates = parsedTasks.map((task)=>({
-                        ...task,
-                        created_at: new Date(task.created_at),
-                        completed_at: task.completed_at ? new Date(task.completed_at) : null,
-                        updated_at: new Date(task.updated_at)
-                    }));
-                setTasks(tasksWithDates);
-            }
+        console.log("Fetching tasks..."); // Log fetching
+        const { data, error } = await supabase.from("tasks") // Replace "tasks" with your table name
+        .select("created_at, completed_at, user_id, id, text, completed, archived, subtasks, quadrant");
+        if (error) {
+            console.error("Error fetching tasks from the database", error);
+        } else if (data) {
+            // Map the database data to your Task type
+            const fetchedTasks = data.map((task)=>({
+                    created_at: new Date(task.created_at),
+                    completed_at: task.completed_at ? new Date(task.completed_at) : null,
+                    user_id: task.user_id,
+                    id: task.id,
+                    text: task.text,
+                    completed: task.completed,
+                    archived: task.archived,
+                    subtasks: task.subtasks,
+                    quadrant: task.quadrant,
+                    updated_at: new Date(task.updated_at)
+                }));
+            console.log("Fetched tasks:", fetchedTasks); // Log fetched tasks
+            setTasks(fetchedTasks);
         }
     };
-    const saveTasksToLocal = ()=>{
-        if (!user) {
-            localStorage.setItem("localTasks", JSON.stringify(tasks));
-        }
-    };
+    // Call fetchTasks when the component mounts
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         fetchTasks();
     }, []);
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        saveTasksToLocal();
-    }, [
-        tasks
-    ]);
+    // Function to update chart data based on the selected day
     const updateChartData = (tasks, date)=>{
-        const newChartData = Array(24).fill(0);
-        const newChartLabels = Array(24).fill("");
+        const newChartData = Array(24).fill(0); // Reset hourly data
+        const newChartLabels = Array(24).fill(""); // Reset hourly task names
         tasks.forEach((task)=>{
             const createdHour = task.created_at.getHours();
             if ((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(task.created_at, "yyyy-MM-dd") === (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(date, "yyyy-MM-dd")) {
-                newChartData[createdHour] = 1;
-                newChartLabels[createdHour] = task.text;
+                newChartData[createdHour] = 1; // Mark the hour when the task was created
+                newChartLabels[createdHour] = task.text; // Store the task name
             }
             if (task.completed_at && (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(task.completed_at, "yyyy-MM-dd") === (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(date, "yyyy-MM-dd")) {
                 const completedHour = task.completed_at.getHours();
-                newChartData[completedHour] = 2;
-                newChartLabels[completedHour] = task.text;
+                newChartData[completedHour] = 2; // Mark the hour when the task was completed
+                newChartLabels[completedHour] = task.text; // Store the task name
             }
         });
+        console.log("Updated chart data:", newChartData); // Log chart data
         setChartData(newChartData);
         setChartLabels(newChartLabels);
     };
+    // Handle previous day navigation
     const handlePreviousDay = ()=>setSelectedDate((prevDate)=>new Date(prevDate.setDate(prevDate.getDate() - 1)));
+    // Handle next day navigation (prevent future dates)
     const handleNextDay = ()=>{
         const nextDate = new Date(selectedDate);
         nextDate.setDate(nextDate.getDate() + 1);
+        // Do not allow selecting a future date
         if (nextDate <= new Date()) {
             setSelectedDate(nextDate);
         }
     };
+    // Handle resetting to today
     const handleToday = ()=>setSelectedDate(new Date());
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        // Update chart data when the selected day changes
         updateChartData(tasks, selectedDate);
     }, [
         selectedDate,
         tasks
     ]);
+    // Chart data configuration for Chart.js
     const data = {
         labels: Array.from({
             length: 24
@@ -120,6 +116,7 @@ const HourlyTaskChart = ()=>{
             }
         ]
     };
+    // Update chart options to display task names in the tooltip
     const options = {
         scales: {
             x: {
@@ -138,6 +135,10 @@ const HourlyTaskChart = ()=>{
                         if (value === 2) return "Completed";
                         return "";
                     }
+                },
+                title: {
+                    display: true,
+                    text: "Task State"
                 }
             }
         },
@@ -146,9 +147,12 @@ const HourlyTaskChart = ()=>{
                 callbacks: {
                     label: function(context) {
                         const hour = context.dataIndex;
-                        const taskName = chartLabels[hour];
+                        const taskName = chartLabels[hour]; // Use the task name for the tooltip
                         const activityType = context.raw === 1 ? "Created" : "Completed";
-                        return `${activityType}: ${taskName || "No task"}`;
+                        const task = tasks.find((t)=>t.text === taskName); // Find the task for exact time
+                        // Show exact time in HH:mm format
+                        const time = activityType === "Created" ? (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(task?.created_at ?? new Date(), "HH:mm") : (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(task?.completed_at ?? new Date(), "HH:mm");
+                        return `${activityType}: ${taskName || "No task"} at ${time || "No time"}`;
                     }
                 }
             },
@@ -161,15 +165,15 @@ const HourlyTaskChart = ()=>{
         className: "p-4",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "flex justify-between items-start mb-4 sticky",
+                className: "flex justify-between items-top mb-4 sticky",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$button$2f$dist$2f$chunk$2d$DBLREEYE$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__button_default__as__Button$3e$__["Button"], {
-                        variant: "flat",
                         onClick: handlePreviousDay,
+                        variant: "flat",
                         children: "Previous Day"
                     }, void 0, false, {
                         fileName: "[project]/components/taskchart.tsx",
-                        lineNumber: 165,
+                        lineNumber: 169,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -180,37 +184,37 @@ const HourlyTaskChart = ()=>{
                                 children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(selectedDate, "yyyy-MM-dd")
                             }, void 0, false, {
                                 fileName: "[project]/components/taskchart.tsx",
-                                lineNumber: 167,
+                                lineNumber: 171,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$button$2f$dist$2f$chunk$2d$DBLREEYE$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__button_default__as__Button$3e$__["Button"], {
-                                variant: "light",
                                 onClick: handleToday,
+                                variant: "light",
                                 children: "Today"
                             }, void 0, false, {
                                 fileName: "[project]/components/taskchart.tsx",
-                                lineNumber: 168,
+                                lineNumber: 172,
                                 columnNumber: 21
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/taskchart.tsx",
-                        lineNumber: 166,
+                        lineNumber: 170,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$nextui$2d$org$2f$button$2f$dist$2f$chunk$2d$DBLREEYE$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__button_default__as__Button$3e$__["Button"], {
-                        variant: "flat",
                         onClick: handleNextDay,
+                        variant: "flat",
                         children: "Next Day"
                     }, void 0, false, {
                         fileName: "[project]/components/taskchart.tsx",
-                        lineNumber: 170,
+                        lineNumber: 174,
                         columnNumber: 17
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/taskchart.tsx",
-                lineNumber: 164,
+                lineNumber: 168,
                 columnNumber: 13
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$chartjs$2d$2$2f$dist$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Bar"], {
@@ -222,13 +226,13 @@ const HourlyTaskChart = ()=>{
                 }
             }, void 0, false, {
                 fileName: "[project]/components/taskchart.tsx",
-                lineNumber: 172,
+                lineNumber: 176,
                 columnNumber: 13
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/taskchart.tsx",
-        lineNumber: 163,
+        lineNumber: 167,
         columnNumber: 9
     }, this);
 };

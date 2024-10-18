@@ -194,6 +194,18 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
         toast.success(isArchiveMode ? 'Hiding archived tasks' : 'Showing archived tasks');
     };
 
+     // Function to validate and parse dates
+     const isValidDate = (date: string | number | Date) => {
+        const parsedDate = new Date(date);
+        // Check if date is valid
+        return !isNaN(parsedDate.getTime());
+    };
+
+    // Function to log invalid dates for debugging
+    const handleInvalidDate = (taskId: number, fieldName: string, invalidValue: any) => {
+        console.warn(`Invalid date value for task ID ${taskId}, field ${fieldName}:`, invalidValue);
+    };
+
 
     return (
         <>
@@ -242,11 +254,16 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                                 {taskHistory.map((task) => (
                                     <TableRow key={task.id}>
                                         <TableCell>{task.text}</TableCell>
-                                        <TableCell>{formatDistanceToNow(new Date(task.created_at), { addSuffix: true })}</TableCell>
-                                        <TableCell>{formatDistanceToNow(new Date(task.updated_at), { addSuffix: true })}</TableCell>
+                                        <TableCell>
+                                            {isValidDate(task.created_at) ? formatDistanceToNow(new Date(task.created_at), { addSuffix: true }) : 'Invalid date'}
+                                        </TableCell>
+                                        <TableCell>
+                                            {isValidDate(task.updated_at) ? formatDistanceToNow(new Date(task.updated_at), { addSuffix: true }) : 'Invalid date'}
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
+
                         </Table>
                     </ModalBody>
                 </ModalContent>

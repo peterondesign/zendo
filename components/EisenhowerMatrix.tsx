@@ -136,6 +136,18 @@ const EisenhowerMatrix: React.FC = () => {
         }
     };
 
+    // Function to validate and parse dates
+    const isValidDate = (date: string | number | Date) => {
+        const parsedDate = new Date(date);
+        // Check if date is valid
+        return !isNaN(parsedDate.getTime());
+    };
+
+    // Function to log invalid dates for debugging
+    const handleInvalidDate = (taskId: number, fieldName: string, invalidValue: any) => {
+        console.warn(`Invalid date value for task ID ${taskId}, field ${fieldName}:`, invalidValue);
+    };
+
 
     // Fetch and Merge Tasks from Supabase and LocalStorage
     useEffect(() => {
@@ -172,9 +184,23 @@ const EisenhowerMatrix: React.FC = () => {
 
                     // Separate tasks into active and archived categories
                     supabaseTasks.forEach((supTask) => {
-                        const isValidDate = (date: string | number | Date) => !isNaN(new Date(date).getTime());
-                        const validCreatedAt = isValidDate(supTask.created_at) ? new Date(supTask.created_at) : new Date();
-                        
+                        const taskId = supTask.id;
+
+                        // Validate created_at and updated_at dates
+                        const validCreatedAt = isValidDate(supTask.created_at)
+                            ? new Date(supTask.created_at)
+                            : (() => {
+                                handleInvalidDate(taskId, 'created_at', supTask.created_at);
+                                return new Date(); // Use current date as fallback
+                            })();
+
+                        const validUpdatedAt = isValidDate(supTask.updated_at)
+                            ? new Date(supTask.updated_at)
+                            : (() => {
+                                handleInvalidDate(taskId, 'updated_at', supTask.updated_at);
+                                return new Date(); // Use current date as fallback
+                            })();
+
                         const task: Task = {
                             id: supTask.id,
                             text: supTask.text,
@@ -183,13 +209,9 @@ const EisenhowerMatrix: React.FC = () => {
                             archived: supTask.archived,
                             user_id: supTask.user_id,
                             quadrant: supTask.quadrant,
-                            ...supTask,
-                            created_at: isValidDate(supTask.created_at) ? new Date(supTask.created_at) : new Date(),
-                            updated_at: isValidDate(supTask.updated_at) ? new Date(supTask.updated_at) : new Date(),
-
+                            created_at: validCreatedAt,
+                            updated_at: validUpdatedAt,
                         };
-                        
-
 
                         if (supTask.archived) {
                             archivedTasksContainer[supTask.quadrant as QuadrantType].push(task);
@@ -212,10 +234,9 @@ const EisenhowerMatrix: React.FC = () => {
                 }
             }
         };
-
         fetchAndMergeTasks();
     }, [user]);
-    
+
 
     // Update localStorage whenever tasks change (only when not logged in)
     useEffect(() => {

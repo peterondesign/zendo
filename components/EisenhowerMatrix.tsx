@@ -411,18 +411,30 @@ const EisenhowerMatrix: React.FC = () => {
                 if (error) {
                     console.error('Error archiving task in Supabase:', error);
                 } else {
-                    setTasks((prevTasks) => ({
-                        ...prevTasks,
-                        [quadrant]: prevTasks[quadrant].map((task) =>
-                            task.id === taskId ? { ...task, archived: true } : task
-                        ),
-                    }));
+                    // Get the task to archive from the current tasks state
+                    const taskToArchive = tasks[quadrant].find(task => task.id === taskId);
+
+                    // Proceed only if the task exists
+                    if (taskToArchive) {
+                        // Update the local state to move the task to the archivedTasks list
+                        setTasks((prevTasks) => ({
+                            ...prevTasks,
+                            [quadrant]: prevTasks[quadrant].filter((task) => task.id !== taskId), // Remove from active tasks
+                        }));
+
+                        setArchivedTasks((prevArchived) => ({
+                            ...prevArchived,
+                            [quadrant]: [...prevArchived[quadrant], { ...taskToArchive, archived: true }], // Add to archived tasks
+                        }));
+                    }
                 }
             } catch (err) {
                 console.error('Error during Supabase archive:', err);
             }
         }
     };
+
+
 
     // Delete Subtask
     const deleteSubtask = async (quadrant: QuadrantType, taskId: number, subtaskId: number) => {
@@ -726,12 +738,9 @@ const EisenhowerMatrix: React.FC = () => {
 
     // Render Individual Task
     const renderTask = (quadrant: QuadrantType, task: Task, index: number) => {
+        // In normal mode, hide archived tasks
         if (!isArchiveMode && task.archived) {
-            return null;  // Skip rendering archived tasks if archive mode is off
-        }
-
-        if (isArchiveMode && !task.archived) {
-            return null;  // Skip rendering active tasks if archive mode is active
+            return null;
         }
 
         return (
@@ -755,7 +764,6 @@ const EisenhowerMatrix: React.FC = () => {
             />
         );
     };
-
 
 
     // Update the streak when tasks are completed
@@ -880,13 +888,10 @@ const EisenhowerMatrix: React.FC = () => {
                         </div>
                     ) : (
                         <>
-                            {/* Render active tasks */}
+                            {/* Render both non-archived and archived tasks if archive mode is on */}
                             <ul className='text-default-90 text-lg'>
                                 {tasks[quadrant].map((task, index) => renderTask(quadrant, task, index))}
                             </ul>
-
-                            {/* Render archived tasks if in archive mode */}
-                            {isArchiveMode && renderArchivedTasks(quadrant)}
                         </>
                     )}
                     {provided.placeholder}
@@ -894,6 +899,7 @@ const EisenhowerMatrix: React.FC = () => {
             )}
         </Droppable>
     );
+
 
 
 

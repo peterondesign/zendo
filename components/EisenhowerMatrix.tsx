@@ -236,9 +236,6 @@ const EisenhowerMatrix: React.FC = () => {
         fetchAndMergeTasks();
     }, [user, isArchiveMode]);
 
-
-
-
     // Update localStorage whenever tasks change (only when not logged in)
     useEffect(() => {
         if (!user) {
@@ -743,8 +740,12 @@ const EisenhowerMatrix: React.FC = () => {
             return null;
         }
 
+        // Apply strikethrough and italic class if the task is archived
+        const taskClassName = task.archived ? 'line-through italic' : '';
+
         return (
             <TaskItem
+                className={taskClassName} // Apply the conditional class
                 user={user}
                 key={task.id}
                 task={task}
@@ -764,6 +765,7 @@ const EisenhowerMatrix: React.FC = () => {
             />
         );
     };
+
 
 
     // Update the streak when tasks are completed
@@ -1026,8 +1028,6 @@ const EisenhowerMatrix: React.FC = () => {
                     )
                 }
                 <div className="flex justify-end items-center space-x-4">
-
-
                     {/* Existing floating button */}
                     <FloatingButton
                         tasks={tasks}

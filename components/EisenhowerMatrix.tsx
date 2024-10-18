@@ -735,17 +735,19 @@ const EisenhowerMatrix: React.FC = () => {
 
     // Render Individual Task
     const renderTask = (quadrant: QuadrantType, task: Task, index: number) => {
-        // In normal mode, hide archived tasks
-        if (!isArchiveMode && task.archived) {
+        const isArchived = task.archived;
+        // In normal mode, only show non-archived tasks
+        // In archive mode, show both archived and non-archived tasks
+        if (!isArchiveMode && isArchived) {
             return null;
         }
 
         // Apply strikethrough and italic class if the task is archived
-        const taskClassName = task.archived ? 'line-through italic' : '';
+        const taskClassName = isArchived ? 'line-through italic text-default-400' : '';
 
         return (
             <TaskItem
-                className={taskClassName} // Apply the conditional class
+                className={taskClassName}
                 user={user}
                 key={task.id}
                 task={task}
@@ -762,11 +764,11 @@ const EisenhowerMatrix: React.FC = () => {
                 renderSubtasks={(task: Task) => renderSubtasks(quadrant, task)}
                 onTaskModalOpen={onTaskModalOpen}
                 onTaskModalClose={onTaskModalClose}
+                isArchived={isArchived}
+                unarchiveTask={isArchived ? () => unarchiveTask(quadrant, task.id) : undefined}
             />
         );
     };
-
-
 
     // Update the streak when tasks are completed
     useEffect(() => {

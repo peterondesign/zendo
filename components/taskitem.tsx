@@ -5,7 +5,9 @@ import { Button, ButtonGroup, Dropdown, DropdownItem, DropdownMenu, DropdownSect
 import { Task, QuadrantType } from '../customtypes';
 
 interface TaskItemProps {
-    className?: string; // Add this line
+    className?: string; 
+    isArchived: boolean;
+    unarchiveTask?: () => void;
     user: any;
     task: Task;
     quadrant: QuadrantType;

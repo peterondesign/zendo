@@ -15,7 +15,7 @@ export default function PricingPage() {
             <ul className="list-none ml-0 mb-4 space-y-2">
               <li>Tasks stored only on a single device</li>
               <li>Delete tasks (no archive)</li>
-              <li>Limited tasks (24 max)</li>
+              {/* <li>Limited tasks (24 max)</li> */}
               <li>Break tasks into subtasks manually or automatically with AI.</li>
               <li>Access without creating an account</li>
             </ul>
@@ -39,21 +39,21 @@ export default function PricingPage() {
             <ul className="list-none ml-0 mb-4 space-y-2">
               <li>Sync on all your devices (mobile, desktop)</li>
               <li>Archive tasks</li>
-              <li>Unlimited tasks</li> 
-              <li>Break tasks into subtasks manually or automatically with AI.</li> 
+              {/* <li>Unlimited tasks</li> */}
+              <li>Break tasks into subtasks manually or automatically with AI.</li>
               <li>Export as PDF</li>
+              <li>
+                Daily streak for completing one task
+              </li>
+              <li>
+                Track when you start and complete tasks, with task analytics
+              </li>
               <li>
                 More device support (Mac app, iPhone app, Android app, Windows app, Chrome Extension){" "}
                 <Chip color="warning" variant="flat">Coming Soon</Chip>
               </li>
-              <li>
-                Daily streak for completing one urgent and important task{" "}
-                <Chip color="warning" variant="flat">Coming Soon</Chip>
-              </li>
-              <li>
-                Track when you start and complete tasks, with task analytics{" "}
-                <Chip color="warning" variant="flat">Coming Soon</Chip>
-              </li>
+
+
               <li>Access to all upcoming features forever</li>
             </ul>
             <div className="flex justify-center">

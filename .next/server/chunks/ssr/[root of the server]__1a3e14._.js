@@ -32,7 +32,8 @@ __turbopack_esm__({
 });
 const siteConfig = {
     name: "Zendo Eisenhower Matrix app",
-    description: "Prioritise your to-do list with the free online Eisenhower Matrix app, and break urgent and important tasks down. Focus on one task with templates for task management. No login required.",
+    description: "Prioritise your to-do list with the free online Eisenhower Matrix  app, and break urgent and important tasks down. Get templates for task management.",
+    canonical: "https://zendo.cc",
     navItems: [
         {
             label: "Home",

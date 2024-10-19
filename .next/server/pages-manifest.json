@@ -1,1 +1,6 @@
-{}
+{
+  "/api/auth/logout": "pages/api/auth/logout.js",
+  "/api/auth/[...auth0]": "pages/api/auth/[...auth0].js",
+  "/api/auth/login": "pages/api/auth/login.js",
+  "/api/auth/callback": "pages/api/auth/callback.js"
+}

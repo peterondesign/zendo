@@ -38,12 +38,16 @@ export const Navbar = () => {
   const { user } = useUser();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
-  // Assume we have some way to check if the user is premium, such as a property from the user object.
-  const isPremium = user?.premium || false;
 
-  // Filter out "Pricing" if the user is premium
-  const filteredNavItems = siteConfig.navItems.filter(item => item.label !== "Pricing" || !isPremium);
-  const filteredNavMenuItems = siteConfig.navMenuItems.filter(item => item.label !== "Pricing" || !isPremium);
+  interface NavItem {
+    label: string;
+    href: string;
+  }
+
+  const [filteredNavItems, setFilteredNavItems] = React.useState<NavItem[]>([]);
+  const [filteredNavMenuItems, setFilteredNavMenuItems] = React.useState<NavItem[]>([]);
+
+  const [premiumStatus, setPremiumStatus] = React.useState(false);
 
 
   useEffect(() => {
@@ -65,7 +69,42 @@ export const Navbar = () => {
     if (user) {
       insertUserToSupabase();
     }
-  }, [user]);
+
+    const fetchPremiumStatus = async () => {
+      if (user) {
+        try {
+          const { data, error } = await supabase
+            .from('users')
+            .select('premium')
+            .eq('id', user.sub)
+            .single();
+  
+          if (error) {
+            console.error("Error fetching premium status:", error.message);
+          } else if (data) {
+            setPremiumStatus(data.premium); // Store premium status in state
+          }
+        } catch (error) {
+          if (error instanceof Error) {
+            console.error("Error during Supabase query:", error.message);
+          } else {
+            console.error("Unknown error:", error);
+          }
+        }
+      }
+    };if (user) {
+      insertUserToSupabase(); // Insert or update user
+      fetchPremiumStatus();    // Fetch premium status from Supabase
+    }
+    
+    // Filter nav items based on user's premium status
+    const filterNavItems = (items: NavItem[]) =>
+      items.filter(item => !(premiumStatus && item.label === "Pricing")); // Use premiumStatus from state
+  
+    setFilteredNavItems(filterNavItems(siteConfig.navItems));
+    setFilteredNavMenuItems(filterNavItems(siteConfig.navMenuItems));
+  
+  }, [user, premiumStatus]); // Run when user or premiumStatus changes
 
   const UserHeader = user ? (
     <Dropdown>

@@ -339,20 +339,31 @@ const EisenhowerMatrix: React.FC = () => {
 
     // Toggle Task Completion
     const toggleTaskCompletion = async (quadrant: QuadrantType, taskId: number) => {
+        // Find the task in the current state
+        const task = tasks[quadrant].find((task) => task.id === taskId);
+        
+        if (!task) return;
+    
+        // Determine if the task is being completed or uncompleted
+        const isCompleted = !task.completed;
+        const completedAt = isCompleted ? new Date().toISOString() : null; // Set completed_at to current time or null
+    
+        // Update local state immediately
         setTasks((prev) => ({
             ...prev,
-            [quadrant]: prev[quadrant].map((task) =>
-                task.id === taskId ? { ...task, completed: !task.completed } : task
+            [quadrant]: prev[quadrant].map((t) =>
+                t.id === taskId ? { ...t, completed: isCompleted, completed_at: completedAt } : t
             ),
         }));
-
+    
+        // If user is authenticated, update the task in the database
         if (user) {
             try {
                 const { error } = await supabase
                     .from('tasks')
-                    .update({ completed: !tasks[quadrant].find((task) => task.id === taskId)?.completed })
+                    .update({ completed: isCompleted, completed_at: completedAt }) // Update both fields
                     .eq('id', taskId);
-
+    
                 if (error) {
                     console.error('Error toggling task completion in Supabase:', error);
                 }
@@ -361,6 +372,7 @@ const EisenhowerMatrix: React.FC = () => {
             }
         }
     };
+    
 
     // Delete Task
     const deleteTask = async (quadrant: QuadrantType, taskId: number) => {

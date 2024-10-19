@@ -9,6 +9,7 @@ import { useUser } from '@auth0/nextjs-auth0/client'
 import { Flame } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns'; // Import from date-fns
 import TaskChart from './taskchart';
+import { usePremium } from './premiumcontext'; // Import the premium context
 
 
 type QuadrantType = 'do' | 'decide' | 'delegate' | 'delete' | 'unsorted';
@@ -47,10 +48,10 @@ interface FloatingButtonProps {
 
 const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTasks, isArchiveMode, user, streak }) => {
 
-    const [isPremium, setIsPremium] = useState(false);
     const [isTaskHistoryOpen, setTaskHistoryOpen] = useState(false);
 
     const [taskHistory, setTaskHistory] = useState<Task[]>([]);
+    const { isPremium } = usePremium(); // Get premium status from the context
 
     useEffect(() => {
         // Fetch task history (both created and completed will be shown as one table)
@@ -58,56 +59,6 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
         setTaskHistory(allTasks);
     }, [tasks]);
 
-    useEffect(() => {
-        if (user && user.premium) {
-            setIsPremium(true);
-        }
-    }, [user]);
-
-    if (isPremium) {
-        return (
-            <Dropdown>
-                <DropdownTrigger>
-                    <Button
-                        className='z-10 fixed bottom-10 right-10'
-                        variant="flat"
-                    >
-                        Features
-                    </Button>
-                </DropdownTrigger>
-                <DropdownMenu variant="faded" aria-label="Dropdown menu with description">
-                    <DropdownItem
-                        key="new"
-                        shortcut="⌘A"
-                        description="Lifetime plan only"
-                        startContent={<Archive />}
-                        isDisabled={true}
-                    >
-                        Show Archived tasks
-                    </DropdownItem>
-                    <DropdownItem
-                        key="copy"
-                        shortcut="⌘C"
-                        description="Lifetime plan only"
-                        startContent={<Clipboard />}
-                        isDisabled={true}
-                    >
-                        Copy to clipboard
-                    </DropdownItem>
-                    <DropdownItem
-                        key="edit"
-                        shortcut="⌘E"
-                        showDivider
-                        description="Lifetime plan only"
-                        startContent={<FileDown />}
-                        isDisabled={true}
-                    >
-                        Export to PDF
-                    </DropdownItem>
-                </DropdownMenu>
-            </Dropdown>
-        );
-    }
 
     const formatTasksToMarkdown = () => {
         let markdown = '';
@@ -207,6 +158,9 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
         console.warn(`Invalid date value for task ID ${taskId}, field ${fieldName}:`, invalidValue);
     };
 
+    // Define which keys should be disabled if the user is not premium
+    const disabledKeys = !isPremium ? ['archive', 'copy', 'save'] : [];
+
 
     return (
         <>
@@ -214,7 +168,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
 
             <ButtonGroup className='z-10 fixed bottom-10 right-10' variant="flat">
                 <Button isIconOnly onClick={() => setTaskHistoryOpen(true)} fullWidth={true} >
-                    <Flame color="orange" size={16}/>
+                    <Flame color="orange" size={16} />
                     <span>{streak}D</span>
                 </Button>
 
@@ -227,16 +181,20 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                             </Button>
                         </DropdownTrigger>
                         <DropdownMenu aria-label="Task options"
-                            disabledKeys={isPremium ? ["copy", "archive", "save"] : []}>
-                            <DropdownItem key="archive" startContent={<Archive size={16} />} onClick={handleArchiveTasks}>
+                            disabledKeys={disabledKeys}>
+                            <DropdownItem
+                                key="archive"
+                                startContent={<Archive size={16} />}
+                                onClick={handleArchiveTasks}
+                                description={!isPremium ? "Requires premium to unlock" : undefined}
+                            >
                                 {isArchiveMode ? "Hide Archived" : "Show Archived"}
                             </DropdownItem>
-
-                            <DropdownItem key="copy" startContent={<Clipboard size={16} />} onClick={copyToClipboard}>
+                            <DropdownItem key="copy" startContent={<Clipboard size={16} />} onClick={copyToClipboard} description={!isPremium ? "Requires premium to unlock" : undefined}>
                                 Copy Tasks to Clipboard
                             </DropdownItem>
 
-                            <DropdownItem key="save" startContent={<FileDown size={16} />} onClick={saveAsPDF}>
+                            <DropdownItem key="save" startContent={<FileDown size={16} />} onClick={saveAsPDF} description={!isPremium ? "Requires premium to unlock" : undefined}>
                                 Save as PDF
                             </DropdownItem>
                         </DropdownMenu>
@@ -250,7 +208,13 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                 <ModalContent>
                     <ModalHeader>Task History</ModalHeader>
                     <ModalBody className='h-48 overflow-auto'>
-                        <TaskChart/>
+                        {/* Display overlay message if not premium */}
+                        {!isPremium && (
+                            <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                                <p className="text-white font-bold text-lg">🔐 Requires Premium to Unlock</p>
+                            </div>
+                        )}
+                        <TaskChart />
                         {/* <Table aria-label="Task History">
                             <TableHeader>
                                 <TableColumn key="task" minWidth={400}>Task</TableColumn>

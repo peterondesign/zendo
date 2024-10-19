@@ -12,6 +12,7 @@ import { Link, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter
 import { useTheme } from "next-themes";
 import FloatingButton from './floatingbutton';
 import { useUser } from '@auth0/nextjs-auth0/client'
+import { usePremium } from './premiumcontext'; // Import usePremium hook
 import { createClient, SupabaseClient, PostgrestError } from '@supabase/supabase-js'
 import SubtaskItem from './subtaskitem';
 import TaskItem from './taskitem';
@@ -44,6 +45,7 @@ const quadrantExplanations: Record<QuadrantType, string> = {
 };
 const EisenhowerMatrix: React.FC = () => {
     const { user } = useUser();
+    const { isPremium } = usePremium(); // Use the hook to access premium status
     const { isOpen: isTaskModalOpen, onOpen: onTaskModalOpen, onClose: onTaskModalClose } = useDisclosure();
     const { isOpen: isSubtaskModalOpen, onOpen: onSubtaskModalOpen, onClose: onSubtaskModalClose } = useDisclosure();
     const { isOpen: isAddTaskModalOpen, onOpen: onAddTaskModalOpen, onClose: onAddTaskModalClose } = useDisclosure();
@@ -235,6 +237,7 @@ const EisenhowerMatrix: React.FC = () => {
         };
 
         fetchAndMergeTasks();
+        
     }, [user, isArchiveMode]);
 
     // Update localStorage whenever tasks change (only when not logged in)
@@ -736,6 +739,8 @@ const EisenhowerMatrix: React.FC = () => {
 
     // Render Individual Task
     const renderTask = (quadrant: QuadrantType, task: Task, index: number) => {
+        const isBlurred = !isPremium && user; // Blur the task if user is not premium
+
         const isArchived = task.archived;
 
         // Apply strikethrough and italic class if the task is archived
@@ -761,8 +766,8 @@ const EisenhowerMatrix: React.FC = () => {
                 onTaskModalOpen={onTaskModalOpen}
                 onTaskModalClose={onTaskModalClose}
                 isArchived={isArchived}
-                unarchiveTask={isArchived ? () => unarchiveTask(quadrant, task.id) : undefined}
-            />
+                unarchiveTask={isArchived ? () => unarchiveTask(quadrant, task.id) : undefined} 
+                />
         );
     };
 
@@ -976,59 +981,55 @@ const EisenhowerMatrix: React.FC = () => {
     return (
         <div className="flex flex-col">
             <div className="text-center p-4">
-                {
-                    // Check if user is logged in
+            {
                     user ? (
-                        // If user is premium, only show the h1
-                        user.premium ? (
-                            // If user is not premium, show both h1 and p
-                            <>
-                                <h1 className="tracking-tight inline font-semibold text-base mb-16">
-                                    {(() => {
-                                        const hour = new Date().getHours();
-                                        if (hour >= 5 && hour < 12) {
-                                            return `Good morning, ${user.name}. Grab your coffee, and let's do this!`;
-                                        } else if (hour >= 12 && hour < 17) {
-                                            return `Good afternoon, ${user.name}. Ready to power through?`;
-                                        } else if (hour >= 17 && hour < 22) {
-                                            return `Good evening, ${user.name}! Ready to close out the day on a high note?`;
-                                        } else {
-                                            return `Let's get some late-night magic going, ${user.name}!`;
-                                        }
-                                    })()}
-                                </h1>
-                                {/* Display sync message only for non-premium users */}
-                                <p className='text-default-500 text-sm'>
-                                    Sync across all devices with this account and unlock more features with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>
-                                </p>
-                            </>
-
+                        isPremium !== null ? (
+                            isPremium ? (
+                                // For premium users
+                                <>
+                                    <h1 className="tracking-tight inline font-semibold text-base mb-16">
+                                        {(() => {
+                                            const hour = new Date().getHours();
+                                            if (hour >= 5 && hour < 12) {
+                                                return `Good morning, ${user.name}. Grab your coffee, and let's do this!`;
+                                            } else if (hour >= 12 && hour < 17) {
+                                                return `Good afternoon, ${user.name}. Ready to power through?`;
+                                            } else if (hour >= 17 && hour < 22) {
+                                                return `Good evening, ${user.name}! Ready to close out the day on a high note?`;
+                                            } else {
+                                                return `Let's get some late-night magic going, ${user.name}!`;
+                                            }
+                                        })()}
+                                    </h1>
+                                </>
+                            ) : (
+                                // For non-premium users
+                                <>
+                                    <h1 className="tracking-tight inline font-semibold text-base mb-16">
+                                        {(() => {
+                                            const hour = new Date().getHours();
+                                            if (hour >= 5 && hour < 12) {
+                                                return `Good morning, ${user.name}. Grab your coffee, and let's do this!`;
+                                            } else if (hour >= 12 && hour < 17) {
+                                                return `Good afternoon, ${user.name}. Ready to power through?`;
+                                            } else if (hour >= 17 && hour < 22) {
+                                                return `Good evening, ${user.name}! Ready to close out the day on a high note?`;
+                                            } else {
+                                                return `Let's get some late-night magic going, ${user.name}!`;
+                                            }
+                                        })()}
+                                    </h1>
+                                    <p className='text-default-500 text-sm'>
+                                        Sync across all devices with this account and unlock more features with <Link href="/pricing" className="text-cyan-600 underline">lifetime deal</Link>
+                                    </p>
+                                </>
+                            )
                         ) : (
-                            <h1 className="tracking-tight inline font-semibold text-base mb-8">
-                                {(() => {
-                                    const hour = new Date().getHours();
-                                    // Morning: 5am to 12pm
-                                    if (hour >= 5 && hour < 12) {
-                                        return `Good morning, ${user.name}. Grab your coffee, and let's do this!`;
-                                    }
-                                    // Afternoon: 12pm to 5pm
-                                    else if (hour >= 12 && hour < 17) {
-                                        return `Good afternoon, ${user.name}. Ready to power through?`;
-                                    }
-                                    // Evening: 5pm to 10pm
-                                    else if (hour >= 17 && hour < 22) {
-                                        return `Good evening, ${user.name}! Ready to close out the day on a high note?`;
-                                    }
-                                    // Late night: 10pm to 5am
-                                    else {
-                                        return `Let's get some late-night magic going, ${user.name}!`;
-                                    }
-                                })()}
-                            </h1>
+                            <Spinner /> // Loading state while premium status is being fetched
                         )
                     ) : (
+                        // For non-logged-in users
                         <>
-                            {/* If user is not logged in, show this default h1 and p */}
                             <h1 className="tracking-tight inline font-semibold text-base">
                                 Prioritize your tasks with the Eisenhower Matrix, and break them down
                             </h1>

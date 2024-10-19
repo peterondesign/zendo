@@ -19,7 +19,7 @@
     "static/chunks/node_modules_@supabase_068ff5._.js",
     "static/chunks/node_modules_cbb049._.js",
     "static/chunks/_986855._.js",
-    "static/chunks/node_modules_168e5b._.js"
+    "static/chunks/node_modules_d05162._.js"
   ],
   "source": "dynamic"
 });

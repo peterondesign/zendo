@@ -179,7 +179,7 @@ const HourlyTaskChart = () => {
                 backgroundColor: scatterData.map((d) => (d.y === 1 ? "blue" : "green")),
                 borderColor: "rgba(0, 0, 0, 0.1)",
                 borderWidth: 2,
-                showLine: true,
+                showLine: false,
                 pointRadius: 12,
                 pointHoverRadius: 8
             },

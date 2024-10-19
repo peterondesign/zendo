@@ -31,7 +31,7 @@ import {
 
 import supabase from "@/utils/supabase/supabaseConfig";
 
-import { Avatar } from "@nextui-org/react";
+import { Avatar, Chip } from "@nextui-org/react";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/dropdown";
 
 export const Navbar = () => {
@@ -78,7 +78,7 @@ export const Navbar = () => {
             .select('premium')
             .eq('id', user.sub)
             .single();
-  
+
           if (error) {
             console.error("Error fetching premium status:", error.message);
           } else if (data) {
@@ -92,22 +92,22 @@ export const Navbar = () => {
           }
         }
       }
-    };if (user) {
+    }; if (user) {
       insertUserToSupabase(); // Insert or update user
       fetchPremiumStatus();    // Fetch premium status from Supabase
     }
-    
+
     // Filter nav items based on user's premium status
     const filterNavItems = (items: NavItem[]) =>
       items.filter(item => !(premiumStatus && item.label === "Pricing")); // Use premiumStatus from state
-  
+
     setFilteredNavItems(filterNavItems(siteConfig.navItems));
     setFilteredNavMenuItems(filterNavItems(siteConfig.navMenuItems));
-  
+
   }, [user, premiumStatus]); // Run when user or premiumStatus changes
 
   const UserHeader = user ? (
-    <Dropdown>
+    <Dropdown className='w-fit'>
       <DropdownTrigger>
         <Avatar
           className="cursor-pointer"
@@ -117,7 +117,17 @@ export const Navbar = () => {
           {user.name?.[0]?.toUpperCase()}
         </Avatar>
       </DropdownTrigger>
-      <DropdownMenu className="bg-default-100 text-default-900" aria-label="User menu">
+
+      <DropdownMenu aria-label="User menu">
+        <DropdownItem isDisabled={true} className="opacity-50">
+          {premiumStatus ? (
+            <Chip variant="dot" color="success" size="md" className="mr-2">
+              Premium
+            </Chip>
+          ) : (
+            <></>
+          )}
+        </DropdownItem>
         <DropdownItem key="logout" href="/api/auth/logout">
           Logout
         </DropdownItem>

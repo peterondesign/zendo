@@ -3,6 +3,7 @@ import { Draggable } from '@hello-pangea/dnd';
 import { ChevronDown, ChevronUp, GripVertical, MoreVertical } from 'lucide-react';
 import { Button, ButtonGroup, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Spinner } from '@nextui-org/react';
 import { Task, QuadrantType } from '../customtypes';
+import { usePremium } from './premiumcontext';
 
 interface TaskItemProps {
     className?: string; 
@@ -44,6 +45,8 @@ const TaskItem: React.FC<TaskItemProps> = ({
 }) => {
     const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
     const [loadingAI, setLoadingAI] = useState(false);
+    const { isPremium } = usePremium(); // Access premium status
+    const isBlurred = !isPremium && user; // Use premium status in logic
 
     const quadrants: Record<QuadrantType, string> = {
         do: 'Do (Urgent & Important)',
@@ -77,7 +80,9 @@ const TaskItem: React.FC<TaskItemProps> = ({
                     {...provided.draggableProps}
                     data-task-id={task.id}
                     data-quadrant={quadrant}
-                    className={`flex flex-col items-start justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-gray-700' : 'hover:bg-default-100'}`}
+                    className={`flex flex-col items-start justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-gray-700' : 'hover:bg-default-100'} ${
+                        isBlurred ? 'blur-sm' : ''
+                    }`} // Apply blur class if not premium
                 >
                     <div className="flex items-start justify-between w-full">
                         <div className="flex items-start flex-grow">

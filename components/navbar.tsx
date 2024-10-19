@@ -39,7 +39,7 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   // Assume we have some way to check if the user is premium, such as a property from the user object.
-  const isPremium = user?.['isPremium'] || false;
+  const isPremium = user?.premium || false;
 
   // Filter out "Pricing" if the user is premium
   const filteredNavItems = siteConfig.navItems.filter(item => item.label !== "Pricing" || !isPremium);

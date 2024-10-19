@@ -1,37 +1,3 @@
 {
-  "pages": {
-    "/page": [
-      "static/chunks/[root of the server]__e2ab11._.css",
-      "static/chunks/node_modules_@nextui-org_theme_dist_f1e098._.js",
-      "static/chunks/node_modules_tailwind-merge_dist_lib_40ffc2._.js",
-      "static/chunks/node_modules_@react-aria_bdbd41._.js",
-      "static/chunks/node_modules_@react-aria_36637f._.js",
-      "static/chunks/node_modules_next_d60f0e._.js",
-      "static/chunks/node_modules_@react-aria_overlays_dist_abd53b._.js",
-      "static/chunks/node_modules_framer-motion_dist_es_c1c3ff._.js",
-      "static/chunks/node_modules_@supabase_auth-js_dist_module_9daae1._.js",
-      "static/chunks/node_modules_@nextui-org_121c1e._.js",
-      "static/chunks/node_modules_@react-aria_ac7f1d._.js",
-      "static/chunks/node_modules_@supabase_068ff5._.js",
-      "static/chunks/node_modules_cbb049._.js",
-      "static/chunks/_986855._.js",
-      "static/chunks/node_modules_168e5b._.js",
-      "static/chunks/app_layout_tsx_ab8ff5._.js",
-      "static/chunks/app_error_tsx_6c72c3._.js",
-      "static/chunks/app_error_tsx_e5220d._.js",
-      "static/chunks/_9b9600._.js",
-      "static/chunks/components_EisenhowerMatrix_tsx_1e7c7c._.js",
-      "static/chunks/app_page_tsx_519d48._.js",
-      "static/chunks/node_modules_next_dist_compiled_react_a1d82d._.js",
-      "static/chunks/node_modules_next_dist_compiled_react-dom_cjs_react-dom_development_c9a189.js",
-      "static/chunks/node_modules_next_dist_compiled_react-dom_87a050._.js",
-      "static/chunks/node_modules_next_dist_compiled_e13b54._.js",
-      "static/chunks/node_modules_next_dist_client_8bb71d._.js",
-      "static/chunks/node_modules_next_dist_091837._.js",
-      "static/chunks/ed0b0_@swc_helpers_cjs_d9e50e._.js",
-      "static/chunks/[turbopack]_dev_client_hmr-client_ts_aba4f1._.js",
-      "static/chunks/node_modules_next_dist_esm_build_templates_app-page_bf47c6.js",
-      "static/chunks/node_modules_next_dist_esm_build_templates_app-page_a19ee7.js"
-    ]
-  }
+  "pages": {}
 }

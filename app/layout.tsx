@@ -13,19 +13,9 @@ import { UserProvider } from '@auth0/nextjs-auth0/client';
 import AuthLoader from '@/components/authloader';
 
 import * as Cronitor from '@cronitorio/cronitor-rum';
-type CustomTitle = {
-  [key: string]: string;
-};
 
 export const metadata: Metadata = {
-  title: {
-    "og:title": siteConfig.name,
-    "og:description": siteConfig.description,
-    "og:url": "https://zendo.cc",
-    "twitter:title": siteConfig.name,
-    "twitter:description": siteConfig.description,
-    "twitter:url": "https://zendo.cc",
-  } as unknown as string,
+  title: siteConfig.name,
   description: siteConfig.description,
   keywords: [
     "Eisenhower Matrix",
@@ -39,6 +29,20 @@ export const metadata: Metadata = {
   ],
   icons: {
     icon: "/favicon.ico",
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://zendo.cc',
+    title: siteConfig.name,
+    description: siteConfig.description,
+    siteName: siteConfig.name,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteConfig.name,
+    description: siteConfig.description,
+    site: '@ptndesign',
   },
 };
 
@@ -77,7 +81,6 @@ export default function RootLayout({
           fontSans.variable,
         )}
       >
-
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(v,i,s,a,t){v[t]=v[t]||function(){(v[t].v=v[t].v||[]).push(arguments)};if(!v._visaSettings){v._visaSettings={}}v._visaSettings[a]={v:'1.0',s:a,a:'1',t:t};var b=i.getElementsByTagName('body')[0];var p=i.createElement('script');p.defer=1;p.async=1;p.src=s+'?s='+a;b.appendChild(p)})(window,document,'//app-worker.visitor-analytics.io/main.js','f0c6be6b-7f02-11ef-9280-bee4895ac99e','va')`,
@@ -106,7 +109,6 @@ export default function RootLayout({
             </Providers>
           </AuthLoader>
         </UserProvider>
-
       </body>
     </html>
   );

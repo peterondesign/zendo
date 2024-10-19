@@ -38,6 +38,13 @@ export const Navbar = () => {
   const { user } = useUser();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
+  // Assume we have some way to check if the user is premium, such as a property from the user object.
+  const isPremium = user?.['isPremium'] || false;
+
+  // Filter out "Pricing" if the user is premium
+  const filteredNavItems = siteConfig.navItems.filter(item => item.label !== "Pricing" || !isPremium);
+  const filteredNavMenuItems = siteConfig.navMenuItems.filter(item => item.label !== "Pricing" || !isPremium);
+
 
   useEffect(() => {
     const insertUserToSupabase = async () => {
@@ -114,7 +121,7 @@ export const Navbar = () => {
           </NextLink>
         </NavbarBrand>
         <ul className="hidden sm:flex gap-4 justify-start ml-2">
-          {siteConfig.navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             <NavbarItem key={item.href}>
               <NextLink
                 className={clsx(
@@ -155,7 +162,7 @@ export const Navbar = () => {
 
       <NavbarMenu>
         <div className="mx-4 mt-2 flex flex-col gap-2">
-          {siteConfig.navMenuItems.map((item, index) => (
+          {filteredNavMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
               <Link
                 color="foreground"

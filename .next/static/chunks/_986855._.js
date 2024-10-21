@@ -149,7 +149,7 @@ const Logo = ({ size = 36, width, height, ...props })=>// <svg
         xmlns: "http://www.w3.org/2000/svg",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("g", {
-                "clip-path": "url(#clip0_302_12)",
+                clipPath: "url(#clip0_302_12)",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
                         d: "M26.0669 14.7461L23.6672 12.5865C23.5882 12.5155 23.543 12.4142 23.543 12.3078V9.85231C23.543 9.52776 23.9275 9.35629 24.1689 9.5736L26.5686 11.7331C26.6476 11.8042 26.6929 11.9055 26.6929 12.0118V14.4673C26.6929 14.7919 26.3083 14.9634 26.0669 14.7461Z",
@@ -224,7 +224,7 @@ const Logo = ({ size = 36, width, height, ...props })=>// <svg
                         gradientUnits: "userSpaceOnUse",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("stop", {
-                                "stop-color": "#7D7A77"
+                                stopColor: "#7D7A77"
                             }, void 0, false, {
                                 fileName: "[project]/components/icons.tsx",
                                 lineNumber: 37,
@@ -232,7 +232,7 @@ const Logo = ({ size = 36, width, height, ...props })=>// <svg
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("stop", {
                                 offset: "1",
-                                "stop-color": "#D9D8D9"
+                                stopColor: "#D9D8D9"
                             }, void 0, false, {
                                 fileName: "[project]/components/icons.tsx",
                                 lineNumber: 38,
@@ -253,7 +253,7 @@ const Logo = ({ size = 36, width, height, ...props })=>// <svg
                         gradientUnits: "userSpaceOnUse",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("stop", {
-                                "stop-color": "#F9F8FA"
+                                stopColor: "#F9F8FA"
                             }, void 0, false, {
                                 fileName: "[project]/components/icons.tsx",
                                 lineNumber: 41,
@@ -261,7 +261,7 @@ const Logo = ({ size = 36, width, height, ...props })=>// <svg
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("stop", {
                                 offset: "1",
-                                "stop-color": "#7D7A77"
+                                stopColor: "#7D7A77"
                             }, void 0, false, {
                                 fileName: "[project]/components/icons.tsx",
                                 lineNumber: 42,

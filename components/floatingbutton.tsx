@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Button, ButtonGroup, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tooltip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Table, TableHeader, TableColumn, TableBody, TableCell, TableRow } from "@nextui-org/react";
-import { Clipboard, Archive, FileDown, CircleEllipsis } from 'lucide-react';
+import { Button, ButtonGroup, Chip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tooltip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Table, TableHeader, TableColumn, TableBody, TableCell, TableRow, Spinner } from "@nextui-org/react";
+import { Clipboard, Archive, FileDown, CircleEllipsis, Sparkles } from 'lucide-react';
 import jsPDF from 'jspdf';
 import toast, { Toaster } from 'react-hot-toast';
 import { useUser } from '@auth0/nextjs-auth0/client'
@@ -52,6 +52,10 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
 
     const [taskHistory, setTaskHistory] = useState<Task[]>([]);
     const { isPremium } = usePremium(); // Get premium status from the context
+
+    const [suggestions, setSuggestions] = useState('');
+    const [isSuggestionModalOpen, setSuggestionModalOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         // Fetch task history (both created and completed will be shown as one table)
@@ -161,6 +165,63 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
     // Define which keys should be disabled if the user is not premium
     const disabledKeys = !isPremium ? ['archive', 'copy', 'save'] : [];
 
+    const handleAIDialogOpen = async () => {
+        setLoading(true); // Show spinner while loading
+    
+        // Collect only the main tasks (excluding subtasks)
+        const allTasks = Object.keys(tasks).reduce((acc, quadrantKey) => {
+            const quadrantTasks = tasks[quadrantKey as QuadrantType];
+            quadrantTasks.forEach((task: Task) => {
+                acc.push({
+                    task: task.text  // Only push the main task
+                });
+            });
+            return acc;
+        }, [] as { task: string }[]);  // Adjust the type to exclude subtasks
+    
+        setSuggestionModalOpen(true);
+        const suggestions = await getSuggestionsForAllTasks(allTasks);  // Pass only the tasks
+        setSuggestions(suggestions);
+        setLoading(false); // Hide spinner after loading
+    };
+    
+    // Modify the function to accept only tasks without subtasks
+    const getSuggestionsForAllTasks = async (tasks: { task: string }[]) => {
+        const apiUrl = "https://api-inference.huggingface.co/models/mistralai/Mistral-Small-Instruct-2409";
+    
+        const prompt = `Categorize tasks based on urgency and importance. Provide a brief reason for each categorization. Include all tasks (not subtasks) in your response. Do (urgent and important), Decide (important but not urgent), Delegate (urgent but not important), or Delete (neither urgent nor important).
+        
+        Tasks: ${JSON.stringify(tasks.map(t => t.task))}  // Only include the main tasks
+        
+        Ensure that every task and every category (Do, Decide, Delegate, Delete) is included in your response, and maintain a concise explanation for each categorization.`;
+    
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer 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`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    inputs: prompt,
+                }),
+            });
+    
+            if (!response.ok) {
+                throw new Error("Failed to fetch AI suggestions.");
+            }
+    
+            const data = await response.json();
+            const responseText = data[0]?.generated_text || "";
+            return responseText.substring(prompt.length).trim();
+    
+        } catch (error) {
+            console.error(error);
+            return "Sorry, there was an error generating suggestions.";
+        }
+    };
+    
+
 
     return (
         <>
@@ -196,6 +257,15 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
 
                             <DropdownItem key="save" startContent={<FileDown size={16} />} onClick={saveAsPDF} description={!isPremium ? "Requires premium to unlock" : undefined}>
                                 Save as PDF
+                            </DropdownItem>
+
+                            <DropdownItem
+                                key="export"
+                                startContent={<Sparkles size={16} />}
+                                onClick={handleAIDialogOpen}
+                                description={!isPremium ? "Requires premium to unlock" : undefined}>
+                                Get AI Suggestions
+                                <Chip variant="dot" color="warning" size="sm" className="ml-2">Beta</Chip>
                             </DropdownItem>
                         </DropdownMenu>
                     </Dropdown>
@@ -242,6 +312,26 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                     <Button onClick={() => setTaskHistoryOpen(false)}>Close</Button>
                 </ModalFooter>
             </Modal>
+
+            <Modal isOpen={isSuggestionModalOpen} onClose={() => setSuggestionModalOpen(false)}>
+                <ModalContent>
+                    <ModalHeader>AI Suggestions for All Tasks</ModalHeader>
+                    <ModalBody style={{ maxHeight: "480px", overflowY: "auto" }}>
+                        {loading ? (
+                            <div className="flex justify-center items-center">
+                                <Spinner size="lg" /> {/* Show spinner when loading */}
+                            </div>
+                        ) : (
+                            <p>{suggestions}</p>
+                        )}
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button onClick={() => setSuggestionModalOpen(false)}>Close</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+
         </>
     );
 };

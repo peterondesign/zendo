@@ -237,7 +237,7 @@ const EisenhowerMatrix: React.FC = () => {
         };
 
         fetchAndMergeTasks();
-        
+
     }, [user, isArchiveMode]);
 
     // Update localStorage whenever tasks change (only when not logged in)
@@ -341,13 +341,13 @@ const EisenhowerMatrix: React.FC = () => {
     const toggleTaskCompletion = async (quadrant: QuadrantType, taskId: number) => {
         // Find the task in the current state
         const task = tasks[quadrant].find((task) => task.id === taskId);
-        
+
         if (!task) return;
-    
+
         // Determine if the task is being completed or uncompleted
         const isCompleted = !task.completed;
         const completedAt = isCompleted ? new Date().toISOString() : null; // Set completed_at to current time or null
-    
+
         // Update local state immediately
         setTasks((prev) => ({
             ...prev,
@@ -355,7 +355,7 @@ const EisenhowerMatrix: React.FC = () => {
                 t.id === taskId ? { ...t, completed: isCompleted, completed_at: completedAt } : t
             ),
         }));
-    
+
         // If user is authenticated, update the task in the database
         if (user) {
             try {
@@ -363,7 +363,7 @@ const EisenhowerMatrix: React.FC = () => {
                     .from('tasks')
                     .update({ completed: isCompleted, completed_at: completedAt }) // Update both fields
                     .eq('id', taskId);
-    
+
                 if (error) {
                     console.error('Error toggling task completion in Supabase:', error);
                 }
@@ -372,7 +372,7 @@ const EisenhowerMatrix: React.FC = () => {
             }
         }
     };
-    
+
 
     // Delete Task
     const deleteTask = async (quadrant: QuadrantType, taskId: number) => {
@@ -778,8 +778,8 @@ const EisenhowerMatrix: React.FC = () => {
                 onTaskModalOpen={onTaskModalOpen}
                 onTaskModalClose={onTaskModalClose}
                 isArchived={isArchived}
-                unarchiveTask={isArchived ? () => unarchiveTask(quadrant, task.id) : undefined} 
-                />
+                unarchiveTask={isArchived ? () => unarchiveTask(quadrant, task.id) : undefined}
+            />
         );
     };
 
@@ -789,24 +789,24 @@ const EisenhowerMatrix: React.FC = () => {
         const calculateStreak = () => {
             const today = new Date();
             today.setHours(0, 0, 0, 0); // Set today's time to midnight for comparison
-            
+
             const oneDayMs = 24 * 60 * 60 * 1000; // Milliseconds in a day
-            
+
             // Find all completed tasks in any quadrant with a valid completed_at date
             const completedTasks = Object.values(tasks)
                 .flat()
                 .filter(task => task.completed_at) // Filter tasks with completed_at
                 .map(task => new Date(task.completed_at!)) // Convert to Date object
                 .sort((a, b) => b.getTime() - a.getTime()); // Sort by most recent completion
-            
+
             if (completedTasks.length > 0) {
                 let streakCount = 0;
                 let currentStreakDate = today;
-                
+
                 // Loop over the completed tasks and check if they fall on consecutive days
                 for (const completedDate of completedTasks) {
                     const diffDays = Math.floor((currentStreakDate.getTime() - completedDate.getTime()) / oneDayMs);
-                    
+
                     if (diffDays === 0) {
                         streakCount += 1; // Task completed today
                         currentStreakDate.setDate(currentStreakDate.getDate() - 1); // Move streak to the previous day
@@ -817,16 +817,16 @@ const EisenhowerMatrix: React.FC = () => {
                         break; // Streak is broken if it's not consecutive
                     }
                 }
-                
+
                 setStreak(streakCount); // Update the streak count
                 setLastStreakUpdate(today); // Update the last streak update to today
             } else {
                 setStreak(0); // Reset streak if no tasks are completed
             }
         };
-    
+
         calculateStreak();
-    }, [tasks]);    
+    }, [tasks]);
 
 
     // Function to handle task breakdown with AI and update the task with subtasks
@@ -891,6 +891,39 @@ const EisenhowerMatrix: React.FC = () => {
             setLoadingAI(false); // Hide spinner
         }
     };
+
+    const getSuggestionsForAllTasks = async (tasks: { task: string; subtasks: string[] }[]) => {
+        const apiUrl = "https://api.openai.com/v1/completions"; // Example: using OpenAI
+
+        const prompt = `Analyze the following tasks and their subtasks, then suggest improvements or breakdowns into smaller, actionable steps. Tasks: ${JSON.stringify(tasks)}`;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer YOUR_API_KEY`, // Add your API key
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    model: "text-davinci-003",
+                    prompt,
+                    max_tokens: 1500,  // Adjust as needed
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch AI suggestions.");
+            }
+
+            const data = await response.json();
+            return data.choices[0].text.trim(); // Get the generated suggestions
+        } catch (error) {
+            console.error(error);
+            return "Sorry, there was an error generating suggestions.";
+        }
+    };
+
+
 
     // Render Quadrant
     const renderQuadrant = (quadrant: QuadrantType) => (
@@ -1009,7 +1042,7 @@ const EisenhowerMatrix: React.FC = () => {
     return (
         <div className="flex flex-col">
             <div className="text-center p-4">
-            {
+                {
                     user ? (
                         isPremium !== null ? (
                             isPremium ? (

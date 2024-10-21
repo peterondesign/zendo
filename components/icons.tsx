@@ -23,7 +23,7 @@ export const Logo: React.FC<IconSvgProps> = ({
   //   />
   // </svg>
   <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <g clip-path="url(#clip0_302_12)">
+    <g clipPath="url(#clip0_302_12)">
       <path d="M26.0669 14.7461L23.6672 12.5865C23.5882 12.5155 23.543 12.4142 23.543 12.3078V9.85231C23.543 9.52776 23.9275 9.35629 24.1689 9.5736L26.5686 11.7331C26.6476 11.8042 26.6929 11.9055 26.6929 12.0118V14.4673C26.6929 14.7919 26.3083 14.9634 26.0669 14.7461Z" fill="#BAB8B7" />
       <path d="M26.0669 24.457L23.6672 22.2975C23.5882 22.2264 23.543 22.1251 23.543 22.0188V19.5633C23.543 19.2387 23.9275 19.0672 24.1689 19.2845L26.5686 21.4441C26.6476 21.5151 26.6929 21.6164 26.6929 21.7228V24.1783C26.6929 24.5028 26.3083 24.6743 26.0669 24.457Z" fill="#ADABAC" />
       <path d="M25.1737 26.3347L13.7422 27.9959C13.6208 28.0135 13.4986 27.9707 13.4145 27.8813L11.2199 25.5387C11.0139 25.3189 11.1381 24.9581 11.4358 24.9117L22.6709 23.1607C22.7903 23.1421 22.9114 23.1823 22.996 23.2683L25.387 25.7006C25.6024 25.9196 25.4776 26.2905 25.1734 26.3347H25.1737Z" fill="url(#paint0_linear_302_12)" />
@@ -34,12 +34,12 @@ export const Logo: React.FC<IconSvgProps> = ({
     </g>
     <defs>
       <linearGradient id="paint0_linear_302_12" x1="11.1183" y1="25.5781" x2="25.4951" y2="25.5781" gradientUnits="userSpaceOnUse">
-        <stop stop-color="#7D7A77" />
-        <stop offset="1" stop-color="#D9D8D9" />
+        <stop stopColor="#7D7A77" />
+        <stop offset="1" stopColor="#D9D8D9" />
       </linearGradient>
       <linearGradient id="paint1_linear_302_12" x1="4.15523" y1="28.2655" x2="23.3952" y2="0.838484" gradientUnits="userSpaceOnUse">
-        <stop stop-color="#F9F8FA" />
-        <stop offset="1" stop-color="#7D7A77" />
+        <stop stopColor="#F9F8FA" />
+        <stop offset="1" stopColor="#7D7A77" />
       </linearGradient>
       <clipPath id="clip0_302_12">
         <rect width="16.6931" height="20" fill="white" transform="translate(10 8)" />

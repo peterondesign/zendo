@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     "priority matrix",
   ],
   icons: {
-    icon: "/favicon.ico",
+    icon: "/zendologo.png",
   },
   openGraph: {
     type: 'website',

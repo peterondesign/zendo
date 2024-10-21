@@ -42,11 +42,11 @@ interface FloatingButtonProps {
     showArchivedTasks: () => void;
     isArchiveMode: boolean;
     user: any;
-    streak: number; // Add streak as a prop
+    streakCount: number; // Add streak as a prop
 }
 
 
-const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTasks, isArchiveMode, user, streak }) => {
+const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTasks, isArchiveMode, user, streakCount }) => {
 
     const [isTaskHistoryOpen, setTaskHistoryOpen] = useState(false);
 
@@ -169,7 +169,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
             <ButtonGroup className='z-10 fixed bottom-10 right-10' variant="flat">
                 <Button isIconOnly onClick={() => setTaskHistoryOpen(true)} fullWidth={true} >
                     <Flame color="orange" size={16} />
-                    <span>{streak}D</span>
+                    <span>{streakCount}D</span>
                 </Button>
 
                 {/* Only show the CircleEllipsis button if the user is logged in */}

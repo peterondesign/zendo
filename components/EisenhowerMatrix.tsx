@@ -52,7 +52,7 @@ const EisenhowerMatrix: React.FC = () => {
 
     const { theme } = useTheme();
 
-    const [streak, setStreak] = useState(0);
+    const [streakCount, setStreak] = useState(0);
 
     const [tasks, setTasks] = useState<Record<QuadrantType, Task[]>>({
         do: [],
@@ -788,29 +788,45 @@ const EisenhowerMatrix: React.FC = () => {
     useEffect(() => {
         const calculateStreak = () => {
             const today = new Date();
-            const isToday = (date: Date) => {
-                return (
-                    date.getFullYear() === today.getFullYear() &&
-                    date.getMonth() === today.getMonth() &&
-                    date.getDate() === today.getDate()
-                );
-            };
-
-            // Get all tasks completed today in the "Do" quadrant
-            const completedTodayTasks = tasks.do.filter(task => task.completed && isToday(new Date(task.updated_at)));
-
-            // Check if there are tasks completed today and whether the streak has already been updated today
-            if (completedTodayTasks.length > 0 && (!lastStreakUpdate || !isToday(lastStreakUpdate))) {
-                setStreak(streak + 1);
-                setLastStreakUpdate(today);  // Update the last streak update to today
-            } else if (completedTodayTasks.length === 0) {
-                setStreak(0); // Reset streak if no task was completed today
-                setLastStreakUpdate(null);  // Reset the last streak update
+            today.setHours(0, 0, 0, 0); // Set today's time to midnight for comparison
+            
+            const oneDayMs = 24 * 60 * 60 * 1000; // Milliseconds in a day
+            
+            // Find all completed tasks in any quadrant with a valid completed_at date
+            const completedTasks = Object.values(tasks)
+                .flat()
+                .filter(task => task.completed_at) // Filter tasks with completed_at
+                .map(task => new Date(task.completed_at!)) // Convert to Date object
+                .sort((a, b) => b.getTime() - a.getTime()); // Sort by most recent completion
+            
+            if (completedTasks.length > 0) {
+                let streakCount = 0;
+                let currentStreakDate = today;
+                
+                // Loop over the completed tasks and check if they fall on consecutive days
+                for (const completedDate of completedTasks) {
+                    const diffDays = Math.floor((currentStreakDate.getTime() - completedDate.getTime()) / oneDayMs);
+                    
+                    if (diffDays === 0) {
+                        streakCount += 1; // Task completed today
+                        currentStreakDate.setDate(currentStreakDate.getDate() - 1); // Move streak to the previous day
+                    } else if (diffDays === 1) {
+                        streakCount += 1; // Task completed on the previous day
+                        currentStreakDate.setDate(currentStreakDate.getDate() - 1); // Move streak to the previous day
+                    } else {
+                        break; // Streak is broken if it's not consecutive
+                    }
+                }
+                
+                setStreak(streakCount); // Update the streak count
+                setLastStreakUpdate(today); // Update the last streak update to today
+            } else {
+                setStreak(0); // Reset streak if no tasks are completed
             }
         };
-
+    
         calculateStreak();
-    }, [tasks, lastStreakUpdate, streak]);
+    }, [tasks]);    
 
 
     // Function to handle task breakdown with AI and update the task with subtasks
@@ -1058,7 +1074,7 @@ const EisenhowerMatrix: React.FC = () => {
                         showArchivedTasks={showArchivedTasks}
                         isArchiveMode={isArchiveMode}
                         user={user}
-                        streak={streak}
+                        streakCount={streakCount}
                     />
                 </div>
             </div>

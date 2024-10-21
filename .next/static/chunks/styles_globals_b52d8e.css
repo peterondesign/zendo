@@ -512,6 +512,10 @@ img, video {
   top: var(--navbar-height);
 }
 
+.bottom-20 {
+  bottom: 5rem;
+}
+
 .-z-30 {
   z-index: -30;
 }
@@ -1651,6 +1655,12 @@ img, video {
   --tw-space-y-reverse: 0;
   margin-top: calc(.5rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(.5rem * var(--tw-space-y-reverse));
+}
+
+.space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(.5rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
 .self-center {

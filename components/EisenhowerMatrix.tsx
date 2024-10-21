@@ -6,7 +6,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Button } from '@nextui-org/button';
 import { Input } from '@nextui-org/input';
 import { Card, CardHeader } from '@nextui-org/card';
-import { Flame, Plus } from 'lucide-react';
+import { Youtube, Flame, Plus } from 'lucide-react';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
 import { Link, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { useTheme } from "next-themes";
@@ -53,6 +53,9 @@ const EisenhowerMatrix: React.FC = () => {
     const { theme } = useTheme();
 
     const [streakCount, setStreak] = useState(0);
+
+    const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+
 
     const [tasks, setTasks] = useState<Record<QuadrantType, Task[]>>({
         do: [],
@@ -1140,6 +1143,38 @@ const EisenhowerMatrix: React.FC = () => {
                     onClose={() => setPipVisible(false)}  // Handle PiP close event
                 />
             )}
+
+            <Button
+                className="z-10 fixed bottom-20 mb-4 right-10"
+                onClick={() => setIsTutorialOpen(true)}
+                size='sm'
+            >
+                <Youtube size={20} />
+                Watch Tutorial
+            </Button>
+
+            <Modal isOpen={isTutorialOpen} onClose={() => setIsTutorialOpen(false)} size="lg">
+                <ModalContent>
+                    <ModalHeader>Video Tutorial: Eisenhower Matrix</ModalHeader>
+                    <ModalBody>
+                        <div style={{ textAlign: 'center' }}>
+                            <iframe
+                                width="100%"
+                                height="315"
+                                src="https://www.youtube.com/embed/mKN_viAld7I"
+                                title="YouTube video player"
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            />
+                        </div>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button onClick={() => setIsTutorialOpen(false)}>Close</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
 
 
             <Modal isOpen={isAddTaskModalOpen} onClose={onAddTaskModalClose} >

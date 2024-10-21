@@ -117,25 +117,179 @@ __turbopack_esm__({
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_import__("[project]/node_modules/next/dist/server/future/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
 "__TURBOPACK__ecmascript__hoisting__location__";
 ;
-const Logo = ({ size = 36, width, height, ...props })=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+const Logo = ({ size = 36, width, height, ...props })=>// <svg
+    //   fill="none"
+    //   height={size || height}
+    //   viewBox="0 0 32 32"
+    //   width={size || width}
+    //   {...props}
+    // >
+    //   <path
+    //     clipRule="evenodd"
+    //     d="M17.6482 10.1305L15.8785 7.02583L7.02979 22.5499H10.5278L17.6482 10.1305ZM19.8798 14.0457L18.11 17.1983L19.394 19.4511H16.8453L15.1056 22.5499H24.7272L19.8798 14.0457Z"
+    //     fill="currentColor"
+    //     fillRule="evenodd"
+    //   />
+    // </svg>
+    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+        width: "36",
+        height: "36",
+        viewBox: "0 0 36 36",
         fill: "none",
-        height: size || height,
-        viewBox: "0 0 32 32",
-        width: size || width,
-        ...props,
-        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
-            clipRule: "evenodd",
-            d: "M17.6482 10.1305L15.8785 7.02583L7.02979 22.5499H10.5278L17.6482 10.1305ZM19.8798 14.0457L18.11 17.1983L19.394 19.4511H16.8453L15.1056 22.5499H24.7272L19.8798 14.0457Z",
-            fill: "currentColor",
-            fillRule: "evenodd"
-        }, void 0, false, {
-            fileName: "[project]/components/icons.tsx",
-            lineNumber: 18,
-            columnNumber: 5
-        }, this)
-    }, void 0, false, {
+        xmlns: "http://www.w3.org/2000/svg",
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("g", {
+                "clip-path": "url(#clip0_302_12)",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                        d: "M26.0669 14.7461L23.6672 12.5865C23.5882 12.5155 23.543 12.4142 23.543 12.3078V9.85231C23.543 9.52776 23.9275 9.35629 24.1689 9.5736L26.5686 11.7331C26.6476 11.8042 26.6929 11.9055 26.6929 12.0118V14.4673C26.6929 14.7919 26.3083 14.9634 26.0669 14.7461Z",
+                        fill: "#BAB8B7"
+                    }, void 0, false, {
+                        fileName: "[project]/components/icons.tsx",
+                        lineNumber: 27,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                        d: "M26.0669 24.457L23.6672 22.2975C23.5882 22.2264 23.543 22.1251 23.543 22.0188V19.5633C23.543 19.2387 23.9275 19.0672 24.1689 19.2845L26.5686 21.4441C26.6476 21.5151 26.6929 21.6164 26.6929 21.7228V24.1783C26.6929 24.5028 26.3083 24.6743 26.0669 24.457Z",
+                        fill: "#ADABAC"
+                    }, void 0, false, {
+                        fileName: "[project]/components/icons.tsx",
+                        lineNumber: 28,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                        d: "M25.1737 26.3347L13.7422 27.9959C13.6208 28.0135 13.4986 27.9707 13.4145 27.8813L11.2199 25.5387C11.0139 25.3189 11.1381 24.9581 11.4358 24.9117L22.6709 23.1607C22.7903 23.1421 22.9114 23.1823 22.996 23.2683L25.387 25.7006C25.6024 25.9196 25.4776 26.2905 25.1734 26.3347H25.1737Z",
+                        fill: "url(#paint0_linear_302_12)"
+                    }, void 0, false, {
+                        fileName: "[project]/components/icons.tsx",
+                        lineNumber: 29,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                        d: "M20.3892 17.3872L22.9602 17.0131C23.064 16.9981 23.1693 17.027 23.2505 17.0932L24.5192 18.124C24.6771 18.2522 24.908 18.2313 25.0405 18.0771L26.146 16.7871C26.2758 16.6357 26.2642 16.4093 26.1199 16.2715L23.3297 13.6114C23.1752 13.464 22.929 13.4753 22.7884 13.6363L20.0525 16.7695C19.9087 16.9342 19.9356 17.1866 20.1113 17.317C20.1908 17.3762 20.2907 17.4014 20.3889 17.3872H20.3892Z",
+                        fill: "#BAB8B7"
+                    }, void 0, false, {
+                        fileName: "[project]/components/icons.tsx",
+                        lineNumber: 30,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                        d: "M22.1261 22.2111L10.4352 24.1103C10.2071 24.1473 10 23.9713 10 23.7402V20.139L22.0059 18.1885C22.2339 18.1515 22.4411 18.3275 22.4411 18.5586V21.841C22.4411 22.0249 22.3078 22.1816 22.1261 22.2111Z",
+                        fill: "#969696"
+                    }, void 0, false, {
+                        fileName: "[project]/components/icons.tsx",
+                        lineNumber: 31,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                        d: "M22.4411 12.3871C22.4411 12.478 22.4082 12.5654 22.3485 12.6339L17.8512 17.7843C17.6631 17.9999 17.5592 18.2763 17.5592 18.5624V18.9116L10 20.1396L16.128 12.6339C16.1877 12.5657 16.2205 12.478 16.2205 12.3871V11.9766H22.4411V12.3871Z",
+                        fill: "#B5B5B6"
+                    }, void 0, false, {
+                        fileName: "[project]/components/icons.tsx",
+                        lineNumber: 32,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                        d: "M22.4411 11.9765L10.4352 13.9267C10.2071 13.9637 10 13.7877 10 13.5566V10.2743C10 10.0903 10.1333 9.93358 10.3149 9.90416L22.0059 8.00495C22.2339 7.96788 22.4411 8.14388 22.4411 8.37505V11.9763V11.9765Z",
+                        fill: "url(#paint1_linear_302_12)"
+                    }, void 0, false, {
+                        fileName: "[project]/components/icons.tsx",
+                        lineNumber: 33,
+                        columnNumber: 7
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/components/icons.tsx",
+                lineNumber: 26,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("defs", {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("linearGradient", {
+                        id: "paint0_linear_302_12",
+                        x1: "11.1183",
+                        y1: "25.5781",
+                        x2: "25.4951",
+                        y2: "25.5781",
+                        gradientUnits: "userSpaceOnUse",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("stop", {
+                                "stop-color": "#7D7A77"
+                            }, void 0, false, {
+                                fileName: "[project]/components/icons.tsx",
+                                lineNumber: 37,
+                                columnNumber: 9
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("stop", {
+                                offset: "1",
+                                "stop-color": "#D9D8D9"
+                            }, void 0, false, {
+                                fileName: "[project]/components/icons.tsx",
+                                lineNumber: 38,
+                                columnNumber: 9
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/components/icons.tsx",
+                        lineNumber: 36,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("linearGradient", {
+                        id: "paint1_linear_302_12",
+                        x1: "4.15523",
+                        y1: "28.2655",
+                        x2: "23.3952",
+                        y2: "0.838484",
+                        gradientUnits: "userSpaceOnUse",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("stop", {
+                                "stop-color": "#F9F8FA"
+                            }, void 0, false, {
+                                fileName: "[project]/components/icons.tsx",
+                                lineNumber: 41,
+                                columnNumber: 9
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("stop", {
+                                offset: "1",
+                                "stop-color": "#7D7A77"
+                            }, void 0, false, {
+                                fileName: "[project]/components/icons.tsx",
+                                lineNumber: 42,
+                                columnNumber: 9
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/components/icons.tsx",
+                        lineNumber: 40,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("clipPath", {
+                        id: "clip0_302_12",
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("rect", {
+                            width: "16.6931",
+                            height: "20",
+                            fill: "white",
+                            transform: "translate(10 8)"
+                        }, void 0, false, {
+                            fileName: "[project]/components/icons.tsx",
+                            lineNumber: 45,
+                            columnNumber: 9
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "[project]/components/icons.tsx",
+                        lineNumber: 44,
+                        columnNumber: 7
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/components/icons.tsx",
+                lineNumber: 35,
+                columnNumber: 5
+            }, this)
+        ]
+    }, void 0, true, {
         fileName: "[project]/components/icons.tsx",
-        lineNumber: 11,
+        lineNumber: 25,
         columnNumber: 3
     }, this);
 const DiscordIcon = ({ size = 24, width, height, ...props })=>{
@@ -149,12 +303,12 @@ const DiscordIcon = ({ size = 24, width, height, ...props })=>{
             fill: "currentColor"
         }, void 0, false, {
             fileName: "[project]/components/icons.tsx",
-            lineNumber: 40,
+            lineNumber: 66,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/components/icons.tsx",
-        lineNumber: 34,
+        lineNumber: 60,
         columnNumber: 5
     }, this);
 };
@@ -169,12 +323,12 @@ const TwitterIcon = ({ size = 24, width, height, ...props })=>{
             fill: "currentColor"
         }, void 0, false, {
             fileName: "[project]/components/icons.tsx",
-            lineNumber: 61,
+            lineNumber: 87,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/components/icons.tsx",
-        lineNumber: 55,
+        lineNumber: 81,
         columnNumber: 5
     }, this);
 };
@@ -191,12 +345,12 @@ const GithubIcon = ({ size = 24, width, height, ...props })=>{
             fillRule: "evenodd"
         }, void 0, false, {
             fileName: "[project]/components/icons.tsx",
-            lineNumber: 82,
+            lineNumber: 108,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/components/icons.tsx",
-        lineNumber: 76,
+        lineNumber: 102,
         columnNumber: 5
     }, this);
 };
@@ -213,12 +367,12 @@ const MoonFilledIcon = ({ size = 24, width, height, ...props })=>/*#__PURE__*/ (
             fill: "currentColor"
         }, void 0, false, {
             fileName: "[project]/components/icons.tsx",
-            lineNumber: 107,
+            lineNumber: 133,
             columnNumber: 5
         }, this)
     }, void 0, false, {
         fileName: "[project]/components/icons.tsx",
-        lineNumber: 98,
+        lineNumber: 124,
         columnNumber: 3
     }, this);
 const SunFilledIcon = ({ size = 24, width, height, ...props })=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
@@ -236,25 +390,25 @@ const SunFilledIcon = ({ size = 24, width, height, ...props })=>/*#__PURE__*/ (0
                     d: "M19 12a7 7 0 11-7-7 7 7 0 017 7z"
                 }, void 0, false, {
                     fileName: "[project]/components/icons.tsx",
-                    lineNumber: 130,
+                    lineNumber: 156,
                     columnNumber: 7
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
                     d: "M12 22.96a.969.969 0 01-1-.96v-.08a1 1 0 012 0 1.038 1.038 0 01-1 1.04zm7.14-2.82a1.024 1.024 0 01-.71-.29l-.13-.13a1 1 0 011.41-1.41l.13.13a1 1 0 010 1.41.984.984 0 01-.7.29zm-14.28 0a1.024 1.024 0 01-.71-.29 1 1 0 010-1.41l.13-.13a1 1 0 011.41 1.41l-.13.13a1 1 0 01-.7.29zM22 13h-.08a1 1 0 010-2 1.038 1.038 0 011.04 1 .969.969 0 01-.96 1zM2.08 13H2a1 1 0 010-2 1.038 1.038 0 011.04 1 .969.969 0 01-.96 1zm16.93-7.01a1.024 1.024 0 01-.71-.29 1 1 0 010-1.41l.13-.13a1 1 0 011.41 1.41l-.13.13a.984.984 0 01-.7.29zm-14.02 0a1.024 1.024 0 01-.71-.29l-.13-.14a1 1 0 011.41-1.41l.13.13a1 1 0 010 1.41.97.97 0 01-.7.3zM12 3.04a.969.969 0 01-1-.96V2a1 1 0 012 0 1.038 1.038 0 01-1 1.04z"
                 }, void 0, false, {
                     fileName: "[project]/components/icons.tsx",
-                    lineNumber: 131,
+                    lineNumber: 157,
                     columnNumber: 7
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/components/icons.tsx",
-            lineNumber: 129,
+            lineNumber: 155,
             columnNumber: 5
         }, this)
     }, void 0, false, {
         fileName: "[project]/components/icons.tsx",
-        lineNumber: 120,
+        lineNumber: 146,
         columnNumber: 3
     }, this);
 const HeartFilledIcon = ({ size = 24, width, height, ...props })=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
@@ -273,12 +427,12 @@ const HeartFilledIcon = ({ size = 24, width, height, ...props })=>/*#__PURE__*/ 
             strokeWidth: 1.5
         }, void 0, false, {
             fileName: "[project]/components/icons.tsx",
-            lineNumber: 151,
+            lineNumber: 177,
             columnNumber: 5
         }, this)
     }, void 0, false, {
         fileName: "[project]/components/icons.tsx",
-        lineNumber: 142,
+        lineNumber: 168,
         columnNumber: 3
     }, this);
 const SearchIcon = (props)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
@@ -299,7 +453,7 @@ const SearchIcon = (props)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b
                 strokeWidth: "2"
             }, void 0, false, {
                 fileName: "[project]/components/icons.tsx",
-                lineNumber: 172,
+                lineNumber: 198,
                 columnNumber: 5
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
@@ -310,13 +464,13 @@ const SearchIcon = (props)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b
                 strokeWidth: "2"
             }, void 0, false, {
                 fileName: "[project]/components/icons.tsx",
-                lineNumber: 179,
+                lineNumber: 205,
                 columnNumber: 5
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/icons.tsx",
-        lineNumber: 162,
+        lineNumber: 188,
         columnNumber: 3
     }, this);
 const NextUILogo = (props)=>{
@@ -334,7 +488,7 @@ const NextUILogo = (props)=>{
                 d: "M55.6827 5V26.6275H53.7794L41.1235 8.51665H40.9563V26.6275H39V5H40.89L53.5911 23.1323H53.7555V5H55.6827ZM67.4831 26.9663C66.1109 27.0019 64.7581 26.6329 63.5903 25.9044C62.4852 25.185 61.6054 24.1633 61.0537 22.9582C60.4354 21.5961 60.1298 20.1106 60.1598 18.6126C60.132 17.1113 60.4375 15.6228 61.0537 14.2563C61.5954 13.0511 62.4525 12.0179 63.5326 11.268C64.6166 10.5379 65.8958 10.16 67.1986 10.1852C68.0611 10.1837 68.9162 10.3468 69.7187 10.666C70.5398 10.9946 71.2829 11.4948 71.8992 12.1337C72.5764 12.8435 73.0985 13.6889 73.4318 14.6152C73.8311 15.7483 74.0226 16.9455 73.9968 18.1479V19.0773H63.2262V17.4194H72.0935C72.1083 16.4456 71.8952 15.4821 71.4714 14.6072C71.083 13.803 70.4874 13.1191 69.7472 12.6272C68.9887 12.1348 68.1022 11.8812 67.2006 11.8987C66.2411 11.8807 65.3005 12.1689 64.5128 12.7223C63.7332 13.2783 63.1083 14.0275 62.6984 14.8978C62.2582 15.8199 62.0314 16.831 62.0352 17.8546V18.8476C62.009 20.0078 62.2354 21.1595 62.6984 22.2217C63.1005 23.1349 63.7564 23.9108 64.5864 24.4554C65.4554 24.9973 66.4621 25.2717 67.4831 25.2448C68.1676 25.2588 68.848 25.1368 69.4859 24.8859C70.0301 24.6666 70.5242 24.3376 70.9382 23.919C71.3183 23.5345 71.6217 23.0799 71.8322 22.5799L73.5995 23.1604C73.3388 23.8697 72.9304 24.5143 72.4019 25.0506C71.8132 25.6529 71.1086 26.1269 70.3314 26.4434C69.4258 26.8068 68.4575 26.9846 67.4831 26.9663V26.9663ZM78.8233 10.4075L82.9655 17.325L87.1076 10.4075H89.2683L84.1008 18.5175L89.2683 26.6275H87.103L82.9608 19.9317L78.8193 26.6275H76.6647L81.7711 18.5169L76.6647 10.4062L78.8233 10.4075ZM99.5142 10.4075V12.0447H91.8413V10.4075H99.5142ZM94.2427 6.52397H96.1148V22.3931C96.086 22.9446 96.2051 23.4938 96.4597 23.9827C96.6652 24.344 96.9805 24.629 97.3589 24.7955C97.7328 24.9548 98.1349 25.0357 98.5407 25.0332C98.7508 25.0359 98.9607 25.02 99.168 24.9857C99.3422 24.954 99.4956 24.9205 99.6283 24.8853L100.026 26.5853C99.8062 26.6672 99.5805 26.7327 99.3511 26.7815C99.0274 26.847 98.6977 26.8771 98.3676 26.8712C97.6854 26.871 97.0119 26.7156 96.3973 26.4166C95.7683 26.1156 95.2317 25.6485 94.8442 25.0647C94.4214 24.4018 94.2097 23.6242 94.2374 22.8363L94.2427 6.52397ZM118.398 5H120.354V19.3204C120.376 20.7052 120.022 22.0697 119.328 23.2649C118.644 24.4235 117.658 25.3698 116.477 26.0001C115.168 26.6879 113.708 27.0311 112.232 26.9978C110.759 27.029 109.302 26.6835 107.996 25.9934C106.815 25.362 105.827 24.4161 105.141 23.2582C104.447 22.0651 104.092 20.7022 104.115 19.319V5H106.08V19.1831C106.061 20.2559 106.324 21.3147 106.843 22.2511C107.349 23.1459 108.094 23.8795 108.992 24.3683C109.993 24.9011 111.111 25.1664 112.242 25.139C113.373 25.1656 114.493 24.9003 115.495 24.3683C116.395 23.8815 117.14 23.1475 117.644 22.2511C118.16 21.3136 118.421 20.2553 118.402 19.1831L118.398 5ZM128 5V26.6275H126.041V5H128Z"
             }, void 0, false, {
                 fileName: "[project]/components/icons.tsx",
-                lineNumber: 201,
+                lineNumber: 227,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
@@ -342,7 +496,7 @@ const NextUILogo = (props)=>{
                 d: "M23.5294 0H8.47059C3.79241 0 0 3.79241 0 8.47059V23.5294C0 28.2076 3.79241 32 8.47059 32H23.5294C28.2076 32 32 28.2076 32 23.5294V8.47059C32 3.79241 28.2076 0 23.5294 0Z"
             }, void 0, false, {
                 fileName: "[project]/components/icons.tsx",
-                lineNumber: 205,
+                lineNumber: 231,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$future$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
@@ -350,13 +504,13 @@ const NextUILogo = (props)=>{
                 d: "M17.5667 9.21729H18.8111V18.2403C18.8255 19.1128 18.6 19.9726 18.159 20.7256C17.7241 21.4555 17.0968 22.0518 16.3458 22.4491C15.5717 22.8683 14.6722 23.0779 13.6473 23.0779C12.627 23.0779 11.7286 22.8672 10.9521 22.4457C10.2007 22.0478 9.5727 21.4518 9.13602 20.7223C8.6948 19.9705 8.4692 19.1118 8.48396 18.2403V9.21729H9.72854V18.1538C9.71656 18.8298 9.88417 19.4968 10.2143 20.0868C10.5362 20.6506 11.0099 21.1129 11.5814 21.421C12.1689 21.7448 12.8576 21.9067 13.6475 21.9067C14.4374 21.9067 15.1272 21.7448 15.7169 21.421C16.2895 21.1142 16.7635 20.6516 17.0844 20.0868C17.4124 19.4961 17.5788 18.8293 17.5667 18.1538V9.21729ZM23.6753 9.21729V22.845H22.4309V9.21729H23.6753Z"
             }, void 0, false, {
                 fileName: "[project]/components/icons.tsx",
-                lineNumber: 209,
+                lineNumber: 235,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/icons.tsx",
-        lineNumber: 193,
+        lineNumber: 219,
         columnNumber: 5
     }, this);
 };

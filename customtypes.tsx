@@ -13,13 +13,13 @@ export interface Task {
     id: number;
     text: string;
     completed: boolean;
-    archived: boolean;
+    archived: boolean; // This is already defined here
     subtasks: SubTask[];
     quadrant: QuadrantType;
     created_at: Date;
     updated_at: Date;
     completed_at: Date | null;
-    deleted?: boolean; // Add deleted property here
+    deleted?: boolean; // Optional deleted property
 }
 
 export interface TaskEditInfo {

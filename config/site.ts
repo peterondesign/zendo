@@ -2,7 +2,7 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "Zendo Eisenhower Matrix App",
-  description: "Prioritise your to-do list with the free online Eisenhower Matrix App, and break urgent and important tasks down. Get templates for task management.",
+description: "Prioritise your to-do list with the free online Eisenhower Matrix App, and break urgent and important tasks down. Get templates for task management.",
   canonical: "https://zendo.cc",
   navItems: [
     {

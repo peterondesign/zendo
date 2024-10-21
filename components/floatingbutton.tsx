@@ -10,18 +10,10 @@ import { Flame } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns'; // Import from date-fns
 import TaskChart from './taskchart';
 import { usePremium } from './premiumcontext'; // Import the premium context
+import { Task } from '../customtypes';
 
 
 type QuadrantType = 'do' | 'decide' | 'delegate' | 'delete' | 'unsorted';
-
-interface Task {
-    id: number;
-    text: string;
-    completed: boolean;
-    subtasks: SubTask[];
-    created_at: Date;
-    updated_at: Date;  // We will use updated_at to show when the task was last updated/completed
-}
 
 interface SubTask {
     id: number;
@@ -163,38 +155,40 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
     };
 
     // Define which keys should be disabled if the user is not premium
-    const disabledKeys = !isPremium ? ['archive', 'copy', 'save'] : [];
+    const disabledKeys = !isPremium ? ['archive', 'copy', 'save', 'suggestions'] : [];
 
     const handleAIDialogOpen = async () => {
         setLoading(true); // Show spinner while loading
-    
-        // Collect only the main tasks (excluding subtasks)
+
+        // Collect only the main tasks (excluding subtasks) and filter out archived, completed, or deleted tasks
         const allTasks = Object.keys(tasks).reduce((acc, quadrantKey) => {
             const quadrantTasks = tasks[quadrantKey as QuadrantType];
             quadrantTasks.forEach((task: Task) => {
-                acc.push({
-                    task: task.text  // Only push the main task
-                });
+                if (!task.archived && !task.completed && !task.deleted) {
+                    acc.push({
+                        task: task.text  // Only push the main task
+                    });
+                }
             });
             return acc;
         }, [] as { task: string }[]);  // Adjust the type to exclude subtasks
-    
+
         setSuggestionModalOpen(true);
         const suggestions = await getSuggestionsForAllTasks(allTasks);  // Pass only the tasks
         setSuggestions(suggestions);
         setLoading(false); // Hide spinner after loading
     };
-    
+
     // Modify the function to accept only tasks without subtasks
     const getSuggestionsForAllTasks = async (tasks: { task: string }[]) => {
         const apiUrl = "https://api-inference.huggingface.co/models/mistralai/Mistral-Small-Instruct-2409";
-    
+
         const prompt = `Categorize tasks based on urgency and importance. Provide a brief reason for each categorization. Include all tasks (not subtasks) in your response. Do (urgent and important), Decide (important but not urgent), Delegate (urgent but not important), or Delete (neither urgent nor important).
         
         Tasks: ${JSON.stringify(tasks.map(t => t.task))}  // Only include the main tasks
         
         Ensure that every task and every category (Do, Decide, Delegate, Delete) is included in your response, and maintain a concise explanation for each categorization.`;
-    
+
         try {
             const response = await fetch(apiUrl, {
                 method: "POST",
@@ -206,21 +200,21 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                     inputs: prompt,
                 }),
             });
-    
+
             if (!response.ok) {
                 throw new Error("Failed to fetch AI suggestions.");
             }
-    
+
             const data = await response.json();
             const responseText = data[0]?.generated_text || "";
             return responseText.substring(prompt.length).trim();
-    
+
         } catch (error) {
             console.error(error);
             return "Sorry, there was an error generating suggestions.";
         }
     };
-    
+
 
 
     return (
@@ -260,7 +254,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ tasks, showArchivedTask
                             </DropdownItem>
 
                             <DropdownItem
-                                key="export"
+                                key="suggestions"
                                 startContent={<Sparkles size={16} />}
                                 onClick={handleAIDialogOpen}
                                 description={!isPremium ? "Requires premium to unlock" : undefined}>

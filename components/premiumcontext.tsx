@@ -45,7 +45,7 @@ export const PremiumProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [user]);
 
   return (
-    <PremiumContext.Provider value={{ isPremium }}>
+    <PremiumContext.Provider value={{ isPremium  }}>
       {children}
     </PremiumContext.Provider>
   );

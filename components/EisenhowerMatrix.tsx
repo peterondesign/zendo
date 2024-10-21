@@ -339,16 +339,14 @@ const EisenhowerMatrix: React.FC = () => {
 
     // Toggle Task Completion
     const toggleTaskCompletion = async (quadrant: QuadrantType, taskId: number) => {
-        // Find the task in the current state
         const task = tasks[quadrant].find((task) => task.id === taskId);
 
         if (!task) return;
 
-        // Determine if the task is being completed or uncompleted
         const isCompleted = !task.completed;
         const completedAt = isCompleted ? new Date().toISOString() : null; // Set completed_at to current time or null
 
-        // Update local state immediately
+        // Update local state
         setTasks((prev) => ({
             ...prev,
             [quadrant]: prev[quadrant].map((t) =>
@@ -788,45 +786,61 @@ const EisenhowerMatrix: React.FC = () => {
     useEffect(() => {
         const calculateStreak = () => {
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Set today's time to midnight for comparison
+            today.setHours(0, 0, 0, 0); // Set time to midnight for comparison
 
             const oneDayMs = 24 * 60 * 60 * 1000; // Milliseconds in a day
 
-            // Find all completed tasks in any quadrant with a valid completed_at date
+            // Get all completed tasks, including those with completed_at timestamps
             const completedTasks = Object.values(tasks)
                 .flat()
-                .filter(task => task.completed_at) // Filter tasks with completed_at
-                .map(task => new Date(task.completed_at!)) // Convert to Date object
-                .sort((a, b) => b.getTime() - a.getTime()); // Sort by most recent completion
+                .filter(task => task.completed_at !== null) // Ensure completed_at is not null
+                .map(task => {
+                    // Ensure task.completed_at is of a valid type before converting it to a Date
+                    return task.completed_at instanceof Date
+                        ? task.completed_at
+                        : new Date(task.completed_at as unknown as string | number);
+                })
+                .sort((a, b) => b.getTime() - a.getTime()); // Sort by most recent first
 
             if (completedTasks.length > 0) {
                 let streakCount = 0;
                 let currentStreakDate = today;
 
-                // Loop over the completed tasks and check if they fall on consecutive days
+                // Loop through completed tasks to count consecutive streaks
                 for (const completedDate of completedTasks) {
-                    const diffDays = Math.floor((currentStreakDate.getTime() - completedDate.getTime()) / oneDayMs);
+                    if (completedDate instanceof Date && !isNaN(completedDate.getTime())) {
+                        // Ensure it's a valid date before processing
+                        const completedDay = new Date(completedDate);
+                        completedDay.setHours(0, 0, 0, 0); // Ensure only the date is compared
 
-                    if (diffDays === 0) {
-                        streakCount += 1; // Task completed today
-                        currentStreakDate.setDate(currentStreakDate.getDate() - 1); // Move streak to the previous day
-                    } else if (diffDays === 1) {
-                        streakCount += 1; // Task completed on the previous day
-                        currentStreakDate.setDate(currentStreakDate.getDate() - 1); // Move streak to the previous day
-                    } else {
-                        break; // Streak is broken if it's not consecutive
+                        const diffDays = Math.floor((currentStreakDate.getTime() - completedDay.getTime()) / oneDayMs);
+
+                        if (diffDays === 0) {
+                            // Task completed today, increase streak
+                            streakCount += 1;
+                            currentStreakDate.setDate(currentStreakDate.getDate() - 1); // Move streak date to the previous day
+                        } else if (diffDays === 1) {
+                            // Task completed yesterday, increase streak
+                            streakCount += 1;
+                            currentStreakDate.setDate(currentStreakDate.getDate() - 1); // Move streak date to the previous day
+                        } else {
+                            // Break the streak if there's a gap of more than 1 day
+                            break;
+                        }
                     }
                 }
 
-                setStreak(streakCount); // Update the streak count
+                // Update state with the calculated streak
+                setStreak(streakCount);
                 setLastStreakUpdate(today); // Update the last streak update to today
             } else {
                 setStreak(0); // Reset streak if no tasks are completed
             }
         };
 
-        calculateStreak();
-    }, [tasks]);
+        calculateStreak(); // Ensure this runs whenever tasks are updated, including previously completed tasks
+    }, [tasks]); // Depend on tasks, so it recalculates when they change
+
 
 
     // Function to handle task breakdown with AI and update the task with subtasks

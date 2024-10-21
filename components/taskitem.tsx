@@ -81,9 +81,16 @@ const TaskItem: React.FC<TaskItemProps> = ({
                     data-task-id={task.id}
                     data-quadrant={quadrant}
                     className={`flex flex-col items-start justify-between mb-2 p-2 rounded ${snapshot.isDragging ? 'bg-gray-700' : 'hover:bg-default-100'} ${
-                        isBlurred ? 'blur-sm' : ''
+                        isBlurred ? 'blur-none' : ''
                     }`} // Apply blur class if not premium
                 >
+                    {isBlurred && (
+                        <div className="absolute w-full inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                            <div className="text-white w-full  p-4 rounded bg-black bg-opacity-50">
+                                Requires Premium to unlock
+                            </div>
+                        </div>
+                    )}
                     <div className="flex items-start justify-between w-full">
                         <div className="flex items-start flex-grow">
                             <div className="flex items-center mt-2 flex-grow">
@@ -147,15 +154,17 @@ const TaskItem: React.FC<TaskItemProps> = ({
                                         <DropdownSection title="AI Tools">
                                             <DropdownItem
                                                 onClick={handleAIBreakdown}
-                                                isDisabled={loadingAI}
+                                                isDisabled={loadingAI || !isPremium}
                                             >
                                                 {loadingAI ? (
                                                     <>
                                                         <Spinner size="sm" />
                                                         Breaking down...
                                                     </>
-                                                ) : (
+                                                ) : isPremium ? (
                                                     <>Breakdown with AI</>
+                                                ) : (
+                                                    <>Breakdown with AI (Requires Premium to unlock)</>
                                                 )}
                                             </DropdownItem>
                                         </DropdownSection>
